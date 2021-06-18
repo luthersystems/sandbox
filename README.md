@@ -25,7 +25,7 @@ This repository contains an example backend app (oracle, API, and chaincode).
  |                   Phylum Business Logic              |
  |                    phylum/                           |
  +------------------------------------------------------+
- |               Substrate Chaincode                    |
+ |       Substrate Chaincode (Smart Contract Runtime)   |
  +------------------------------------------------------+
  |            Hyperledger Fabric Services               |
  +------------------------------------------------------+
@@ -38,11 +38,19 @@ Check out the [docs](https://docs.luthersystems.com).
 
 *IMPORTANT:* Place your license key in `~/.luther-license.yaml`.
 
-Ensure you have the build dependencies. On MacOS you can use the commands:
+Ensure you have the build dependencies. On MacOS you can use the commands,
+using [homebrew](https://brew.sh/):
 
 ```
 brew install make git go wget
 brew install --cask docker
+```
+
+*IMPORTANT:* Make sure your `docker --version` is  >= 20.10.6.
+
+If you are not using `brew`, make sure xcode tools are installed:
+```
+xcode-select --install
 ```
 
 Clone this repo:
@@ -55,7 +63,38 @@ Run `make` to build all the services:
 make
 ```
 
-See the [docs](https://docs.luthersystems.com/luther/application/start) for more details.
+### Env Setup Confirmation
+
+Let's run the smart contract unit tests, Go functional tests, and martin
+end-to-end (e2e) tests against the sandbox app to make sure your env
+is fully setup:
+
+Run `make phylumtest` to run the smart contract `elps` unit tests. These
+tests are defined in: `phylum/*_test.lisp`:
+```
+make phylumtest
+```
+
+Run `make oraclegotest` to run the Oracle Middleware Go tests. These
+tests are defined in `oracleserv/sandbox-oracle/**/*_test.go`:
+```
+make oraclegotest
+```
+
+Run `make mem-up` to bring up an in-memory mode of the fabric network,
+`make integration` to run the e2e martin tests against the application.
+These tests are defined in `tests/**/*.martin_collection.yaml`:
+```
+make mem-up integration
+```
+
+Run `make up` to bring up a local fabric network, and `make integration`
+to run e2e martin tests against the application:
+```
+make up integration
+```
+
+Run `make down` to bring down all of the services.
 
 ## Directory Structure
 
@@ -101,8 +140,8 @@ oracleserv/sandbox-oracle/:
 	The oracle service (Go) responsible for serving the REST/JSON APIs and
 	communicating with other microservices.
 phylum/:
-	Business logic (ELPS [0]) that is executed "on-chain" using the platform
-	(substrate).
+	Business logic [ELPS](https://github.com/luthersystems/elps) that is
+	executed "on-chain" using the platform (substrate).
 scripts/:
 	Helper scripts for the build process.
 tests/:
@@ -202,7 +241,7 @@ CURL commands to spot test locally.
 time curl -X GET -H "X-API-Key: $API_KEY"  --cookie "$COOKIE" -s http://localhost:8080/v1/health_check | jq ''
 ```
 
-#### Debugging E2E tests
+#### Debugging E2E Martin tests
 
 You can add additional console.logs in your tests to better see what's being
 returned however some people find it very useful to proxy all the requests
@@ -244,7 +283,3 @@ Make sure the env variables listed in the above step are set in your editor.
 ### Running Unit [ELPS] tests
 
 `make phylumtest`
-
-## References
-[0] [ELPS Language Guide](https://github.com/luthersystems/elps/blob/master/docs/lang.md)
-[1] [RFC7519](https://tools.ietf.org/html/rfc7519)
