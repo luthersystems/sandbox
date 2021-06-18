@@ -1,0 +1,17 @@
+version: '2.1'
+services:
+  sandbox_oracle:
+    extends:
+      file: common.yaml
+      service: sandbox_oracle
+    ports:
+    - "8080:8080" # expose this for testing purposes
+    - "9600:9600" # expose this for testing purposes
+    environment:
+    - SANDBOX_ORACLE_EMULATE_CC=false
+    - SANDBOX_ORACLE_GATEWAY_ENDPOINT=http://shiroclient_gw_phylum:8082
+    networks:
+    - fnb_byfn
+networks:
+  fnb_byfn:
+    external: true

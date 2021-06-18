@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package cdm;
+
+option csharp_namespace = "Cdm";
+option go_package = "cdmpb";
+option java_multiple_files = true;
+option java_outer_classname = "OracleProto";
+option java_package = "com.cdm";
+option objc_class_prefix = "CXX";
+option php_namespace = "Cdm";
+
+import "protos-main/common/exception.proto";
+
+//import "google/protobuf/wrappers.proto";
+
+// Get health status of services.
+message GetHealthCheckRequest {
+  // Skip the chaincode healthcheck
+  bool oracle_only = 1;
+}
+
+// Health status of services.
+message GetHealthCheckResponse {
+  // The status of the relevant sub services.
+  repeated HealthCheckReport reports = 1;
+  // An exception if an error occurred during processing request.
+  common.Exception exception = 2;
+}
+
+// Health check status of an individual service.
+message HealthCheckReport {
+  // Timestamp of when the report was generated (RFC3339).
+  string timestamp = 1;
+  // Status of the service.
+  string status = 2;
+  // Name of the service.
+  string service_name = 3;
+  // Version of the service.
+  string service_version = 4;
+}
+
+// Request structure for the create_request endponit
+message CreateAccountRequest {
+  Account account = 1;
+}
+
+message CreateAccountResponse {
+  common.Exception exception = 1;
+}
+
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+message GetAccountResponse {
+  common.Exception exception = 1;
+  Account account = 2;
+}
+
+message TransferRequest {
+  string payer_id = 1;
+  string payee_id = 2;
+  int64 transfer_amount = 3;
+}
+
+message TransferResponse {
+  common.Exception exception = 1;
+}
+
+message Account {
+  string account_id = 1;
+  int64 current_balance = 2;
+}

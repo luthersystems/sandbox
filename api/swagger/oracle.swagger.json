@@ -1,0 +1,453 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Sandbox API",
+    "version": "0.1.0-SNAPSHOT (Jun 17 17:23)"
+  },
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/accounts/{account.account_id}": {
+      "post": {
+        "operationId": "CreateAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/cdmCreateAccountResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account.account_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/cdmAccount"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
+    "/v1/accounts/{account_id}": {
+      "get": {
+        "operationId": "GetAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/cdmGetAccountResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
+    "/v1/health_check": {
+      "get": {
+        "summary": "Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.",
+        "operationId": "HealthCheck",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/cdmGetHealthCheckResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "oracle_only",
+            "description": "Skip the chaincode healthcheck.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
+    "/v1/transfer": {
+      "post": {
+        "operationId": "Transfer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/cdmTransferResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/cdmTransferRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "cdmAccount": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string"
+        },
+        "current_balance": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "cdmCreateAccountResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        }
+      }
+    },
+    "cdmGetAccountResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        },
+        "account": {
+          "$ref": "#/definitions/cdmAccount"
+        }
+      }
+    },
+    "cdmGetHealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cdmHealthCheckReport"
+          },
+          "description": "The status of the relevant sub services."
+        },
+        "exception": {
+          "$ref": "#/definitions/commonException",
+          "description": "An exception if an error occurred during processing request."
+        }
+      },
+      "description": "Health status of services."
+    },
+    "cdmHealthCheckReport": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the report was generated (RFC3339)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the service."
+        },
+        "service_name": {
+          "type": "string",
+          "description": "Name of the service."
+        },
+        "service_version": {
+          "type": "string",
+          "description": "Version of the service."
+        }
+      },
+      "description": "Health check status of an individual service."
+    },
+    "cdmTransferRequest": {
+      "type": "object",
+      "properties": {
+        "payer_id": {
+          "type": "string"
+        },
+        "payee_id": {
+          "type": "string"
+        },
+        "transfer_amount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "cdmTransferResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        }
+      }
+    },
+    "commonException": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID for exception."
+        },
+        "type": {
+          "$ref": "#/definitions/commonExceptionType",
+          "description": "Type of exception."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp for when the exception occurred (RFC3339)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human readable description of exception."
+        },
+        "exception_metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional metadata about the exception."
+        }
+      },
+      "description": "General message for exceptions."
+    },
+    "commonExceptionResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException",
+          "description": "An exception if an error occurred during processing request."
+        }
+      },
+      "description": "Exception messages."
+    },
+    "commonExceptionType": {
+      "type": "string",
+      "enum": [
+        "INVALID_TYPE",
+        "BUSINESS",
+        "SERVICE_NOT_AVAILABLE",
+        "INFRASTRUCTURE",
+        "UNEXPECTED",
+        "SECURITY_VIOLATION"
+      ],
+      "default": "INVALID_TYPE",
+      "description": "Type of exception.\n\n - INVALID_TYPE: Default for no exception.\n - BUSINESS: Business logic error.\n - SERVICE_NOT_AVAILABLE: A service was unavailable.\n - INFRASTRUCTURE: Infrastructure was down.\n - UNEXPECTED: Catch-all for all other types.\n - SECURITY_VIOLATION: Security related error."
+    }
+  },
+  "securityDefinitions": {
+    "X-API-KEY": {
+      "type": "apiKey",
+      "name": "X-API-KEY",
+      "in": "header"
+    }
+  }
+}

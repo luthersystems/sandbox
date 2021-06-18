@@ -1,0 +1,20 @@
+version: '2.1'
+services:
+  sandbox_oracle:
+    extends:
+      file: common.yaml
+      service: sandbox_oracle
+    ports:
+    - "8080:8080" # expose this for testing purposes
+    - "9600:9600" # expose this for testing purposes
+    environment:
+    - SANDBOX_ORACLE_EMULATE_CC=true
+    - TMPDIR=/tmp/oracle
+    - SUBSTRATEHCP_FILE=/tmp/plugin
+    volumes:
+    - ${PROJECT_TMPDIR:-../build/tmp/oracle}:/tmp/oracle
+    - ../${SUBSTRATE_PLUGIN_LINUX}:/tmp/plugin
+    networks:
+    - byfn
+networks:
+  byfn:

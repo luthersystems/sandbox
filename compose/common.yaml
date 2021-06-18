@@ -1,0 +1,19 @@
+version: '2.1'
+services:
+  sandbox_oracle:
+    image: sandbox/oracle
+    container_name: sandbox_oracle
+    expose:
+    - "8080"
+    environment:
+    # NOTE: uncomment to forward your AWS creds into the container:
+    #- AWS_ACCESS_KEY_ID
+    #- AWS_SECRET_ACCESS_KEY
+    #- AWS_SECURITY_TOKEN
+    #- AWS_SESSION_TOKEN
+    #- AWS_REGION
+    - SANDBOX_ORACLE_VERBOSE=true
+    - SANDBOX_ORACLE_PHYLUM_VERSION=${PHYLUM_VERSION}
+    volumes:
+    - ${PROJECT_DIR:-..}/phylum:/opt/phylum:ro
+    restart: always

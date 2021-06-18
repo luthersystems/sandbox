@@ -1,0 +1,11 @@
+{
+  "clojure": {
+    "do": 2,
+    "if": 2,
+    "lambda": 2,
+    "let": 2,
+    "let*": 2,
+    "test": 2,
+    "unless": 2
+  }
+}

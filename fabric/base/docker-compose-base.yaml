@@ -1,0 +1,65 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+services:
+
+  orderer0.luther.systems:
+    container_name: orderer0.luther.systems
+    image: $IMAGE_NS/fabric-orderer:$IMAGE_TAG
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true
+      # NOTE:  Raft TLS server & client for a node will use the same cert/key
+      # -- This matches the configtx.yaml Orderer.EtcdRaft.Concenters
+      # configuration.
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_SENDBUFFERSIZE=50
+      # NOTE General.Cluster.ListenPort, General.Cluster.ListenAddress,
+      # General.Cluster.ServerCertificate, and General.Cluster.ServerPrivateKey
+      # are inherited from the orderer's General.TLS configuration.  None
+      # should be set.
+      - ORDERER_CONSENSUS_WALDIR=/var/hyperledger/production/orderer/etcdraft/wal
+      - ORDERER_CONSENSUS_SNAPDIR=/var/hyperledger/production/orderer/etcdraft/snapshot
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../crypto-config/ordererOrganizations/luther.systems/orderers/orderer0.luther.systems/msp:/var/hyperledger/orderer/msp
+      - ../crypto-config/ordererOrganizations/luther.systems/orderers/orderer0.luther.systems/tls/:/var/hyperledger/orderer/tls
+      - orderer0.luther.systems:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+
+  peer0.org1.luther.systems:
+    container_name: peer0.org1.luther.systems
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org1.luther.systems
+      - CORE_PEER_ADDRESS=peer0.org1.luther.systems:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.luther.systems:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.luther.systems:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_CHAINCODE_EXECUTETIMEOUT=30s
+    volumes:
+      - ../crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/msp:/etc/hyperledger/fabric/msp
+      - ../crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls:/etc/hyperledger/fabric/tls
+      - peer0.org1.luther.systems:/var/hyperledger/production
+    ports:
+      - 7051:7051
+      - 7053:7053

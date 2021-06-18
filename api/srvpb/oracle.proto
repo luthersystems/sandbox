@@ -1,0 +1,153 @@
+// API Specification and Documentation.
+
+syntax = "proto3";
+
+package srv;
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+  info: {
+    title: "Sandbox API"
+    version: "1.0"
+    description: ""
+  }
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
+  security_definitions: {
+    security: {
+      key: "X-API-KEY"
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "X-API-KEY"
+      }
+    }
+  }
+  responses: {
+    key: "401"
+    value: {
+      description: "Authorization failed"
+      schema: {
+        json_schema: {
+          ref: ".common.ExceptionResponse"
+        }
+      }
+    }
+  }
+  responses: {
+    key: "400"
+    value: {
+      description: "Bad request determined by business logic"
+      schema: {
+        json_schema: {
+          ref: ".common.ExceptionResponse"
+        }
+      }
+    }
+  }
+  responses: {
+    key: "404"
+    value: {
+      description: "Missing resource"
+      schema: {
+        json_schema: {
+          ref: ".common.ExceptionResponse"
+        }
+      }
+    }
+  }
+  responses: {
+    key: "403"
+    value: {
+      description: "Permission denied"
+      schema: {
+        json_schema: {
+          ref: ".common.ExceptionResponse"
+        }
+      }
+    }
+  }
+  responses: {
+    key: "405"
+    value: {
+      description: "Method not allowed"
+      schema: {
+        json_schema: {
+          type: STRING
+        }
+      }
+    }
+  }
+  responses: {
+    key: "500"
+    value: {
+      description: "Unexpected internal server error"
+      schema: {
+        json_schema: {
+          ref: ".common.ExceptionResponse"
+        }
+      }
+    }
+  }
+  responses: {
+    key: "503"
+    value: {
+      description: "Service not available"
+      schema: {
+        json_schema: {
+          ref: ".common.ExceptionResponse"
+        }
+      }
+    }
+  }
+};
+option csharp_namespace = "Srv";
+option go_package = "srvpb";
+option java_multiple_files = true;
+option java_outer_classname = "OracleProto";
+option java_package = "com.srv";
+option objc_class_prefix = "SXX";
+option php_namespace = "Srv";
+
+import "github.com/luthersystems/sandbox/api/pb/oracle.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+// REST-JSON API Docs for the scaffold project.
+service SandboxProcessor {
+  // Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.
+  rpc HealthCheck(cdm.GetHealthCheckRequest) returns (cdm.GetHealthCheckResponse) {
+    option (google.api.http) = {
+      get: "/v1/health_check"
+    };
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
+  rpc CreateAccount(cdm.CreateAccountRequest) returns (cdm.CreateAccountResponse) {
+    option (google.api.http) = {
+      post: "/v1/accounts/{account.account_id}"
+      body: "account"
+    };
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
+  rpc GetAccount(cdm.GetAccountRequest) returns (cdm.GetAccountResponse) {
+    option (google.api.http) = {
+      get: "/v1/accounts/{account_id}"
+    };
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
+  rpc Transfer(cdm.TransferRequest) returns (cdm.TransferResponse) {
+    option (google.api.http) = {
+      post: "/v1/transfer"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
+}

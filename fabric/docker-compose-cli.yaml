@@ -1,0 +1,71 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+volumes:
+  orderer0.luther.systems:
+  peer0.org1.luther.systems:
+
+networks:
+  byfn:
+
+services:
+  ca.org1.luther.systems:
+    extends:
+      file:   docker-compose-e2e.yaml
+      service: ca.org1.luther.systems
+    container_name: ca_peerOrg1
+    networks:
+      - byfn
+
+  orderer0.luther.systems:
+    extends:
+      file:   docker-compose-e2e.yaml
+      service: orderer0.luther.systems
+    container_name: orderer0.luther.systems
+    networks:
+      - byfn
+
+  peer0.org1.luther.systems:
+    container_name: peer0.org1.luther.systems
+    extends:
+      file:   docker-compose-e2e.yaml
+      service: peer0.org1.luther.systems
+    networks:
+      - byfn
+
+  cli:
+    container_name: cli
+    image: $IMAGE_NS/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - FABRIC_LOGGING_SPEC
+      - GOPATH=/opt/gopath
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.luther.systems:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/crypto-config/peerOrganizations/org1.luther.systems/users/Admin@org1.luther.systems/msp
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+      - CORE_PEER_TLS_CLIENTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.crt
+      - CORE_PEER_TLS_CLIENTKEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - ./chaincodes:/chaincodes
+      - ./crypto-config:/crypto-config/
+      - ./scripts:/scripts
+      - ./channel-artifacts:/channel-artifacts
+      - ./collections.json:/collections.json
+    depends_on:
+      - orderer0.luther.systems
+      - peer0.org1.luther.systems
+    networks:
+      - byfn

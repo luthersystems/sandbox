@@ -1,0 +1,26 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+services:
+  peer-base:
+    image: $IMAGE_NS/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fnb_byfn
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_GOSSIP_USELEADERELECTION=false
+      - CORE_PEER_GOSSIP_ORGLEADER=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_CHAINCODE_BUILDER=$IMAGE_NS/fabric-ccenv:$IMAGE_TAG
+      - CORE_CHAINCODE_STARTUPTIMEOUT=500s
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

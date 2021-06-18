@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/luthersystems/protos/common;common";
+option java_multiple_files = true;
+option java_outer_classname = "ExceptionProto";
+option java_package = "com.luthersystems.common";
+
+// General message for exceptions.
+message Exception {
+  // Type of exception.
+  enum Type {
+    // Default for no exception.
+    INVALID_TYPE = 0;
+    // Business logic error.
+    BUSINESS = 1;
+    // A service was unavailable.
+    SERVICE_NOT_AVAILABLE = 2;
+    // Infrastructure was down.
+    INFRASTRUCTURE = 3;
+    // Catch-all for all other types.
+    UNEXPECTED = 4;
+    // Security related error.
+    SECURITY_VIOLATION = 5;
+  }
+  // UUID for exception.
+  string id = 1;
+  // Type of exception.
+  Type type = 2;
+  // Timestamp for when the exception occurred (RFC3339).
+  string timestamp = 3;
+  // Human readable description of exception.
+  string description = 4;
+  // Additional metadata about the exception.
+  map<string, string> exception_metadata = 5;
+}
+
+// Exception messages.
+message ExceptionResponse {
+  // An exception if an error occurred during processing request.
+  Exception exception = 1;
+}

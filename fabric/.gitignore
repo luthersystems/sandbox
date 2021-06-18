@@ -1,0 +1,5 @@
+/build/
+/chaincodes/metadata.json
+/chaincodes/*.tar.gz
+/crypto-config/
+/channel-artifacts/
