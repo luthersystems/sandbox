@@ -20,6 +20,7 @@ import (
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/grpclogging"
 	"github.com/luthersystems/svc/logmon"
+	"github.com/luthersystems/svc/midware"
 	"github.com/luthersystems/svc/svcerr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -167,11 +168,17 @@ func Run(config *Config) error {
 	if err != nil {
 		return fmt.Errorf("swagger definition error: %v", err)
 	}
-	middleware := middlewareChain{
-		middlewareFunc(gziphandler.GzipHandler),
-		middlewareFunc(addServerHeader),
-		middlewareFunc(addRequestID),
-		httpRouteOverrides{
+	middleware := midware.Chain{
+		// The gzip and trace header middlewares to appear early in the chain
+		// because of how important it is that they happen for essentially all
+		// requests.
+		midware.Func(gziphandler.GzipHandler),
+		midware.TraceHeaders(HeaderReqID, true),
+		addServerHeader(),
+		// PathOverrides and other middleware that may serve requests or have
+		// potential failure states should appear below here so they may rely
+		// on the presence of the generic utility middleware above.
+		midware.PathOverrides{
 			swaggerPath:     swaggerHandler,
 			healthCheckPath: healthCheckHandler(oracle, grpcSandboxProcessorClient),
 		},
