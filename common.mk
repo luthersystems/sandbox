@@ -20,7 +20,6 @@ BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
 
 BUILD_IMAGE_GO=luthersystems/build-go:${BUILDENV_TAG}
-BUILD_IMAGE_GODYNAMIC=luthersystems/build-godynamic:${BUILDENV_TAG}
 BUILD_IMAGE_API=luthersystems/build-api:${BUILDENV_TAG}
 
 SHIROCLIENT_IMAGE=luthersystems/shiroclient
