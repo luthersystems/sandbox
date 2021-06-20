@@ -1,3 +1,5 @@
+;; Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 ;; utils.lisp
 
 ;; This file is loaded first and is ideal for defining utilities functions that

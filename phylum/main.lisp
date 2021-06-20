@@ -1,3 +1,5 @@
+;; Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 ;; main.lisp
 
 ;; This file is the entrypoint for your chaincode application.  It should

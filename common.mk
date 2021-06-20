@@ -1,3 +1,5 @@
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 # common.mk
 #
 # A base makefile that is useful for writing other makefiles.  Outside of the

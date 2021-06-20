@@ -1,3 +1,5 @@
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 #!/bin/bash
 
 POSTMAN_ENVIRONMENT_FILE="$1"

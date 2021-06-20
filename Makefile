@@ -1,3 +1,5 @@
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
 DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})
