@@ -1,3 +1,5 @@
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 export VERSION="$(grep '^VERSION=' common.mk | awk -F= '{print $2}')"
 export VERSION_SUBSTRATE="$(grep '^SUBSTRATE_VERSION=' common.mk | awk -F= '{print $2}')"
 PHYLUM_VERSION_FILE="$(grep '^PHYLUM_VERSION_FILE=' common.fabric.mk | awk -F= '{print $2}')"

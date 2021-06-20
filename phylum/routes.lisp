@@ -1,3 +1,5 @@
+;; Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 ;; routes.lisp
 
 ;; This file defines all of the RPC endpoints exposed by the phylum.  This

@@ -1,3 +1,5 @@
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 # config.mk
 #
 # General project configuration that configures make targets and tracks

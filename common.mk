@@ -1,3 +1,5 @@
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 # common.mk
 #
 # A base makefile that is useful for writing other makefiles.  Outside of the
@@ -35,7 +37,7 @@ SUBSTRATE_PLUGIN=${SUBSTRATE_PLUGIN_DARWIN} ${SUBSTRATE_PLUGIN_LINUX}
 # FIXME: replace with optional GOPROXY?
 GO_PKG_VOLUME=${PROJECT}-build-gopath-pkg
 GO_PKG_PATH=/go/pkg
-GO_PKG_MOUNT=$(if $(CI),-v $(PWD)/build/pkg:${GO_PKG_PATH},--mount='type=volume,source=${GO_PKG_VOLUME},destination=${GO_PKG_PATH}')
+GO_PKG_MOUNT=$(if $(CI),-v $(PWD)/build/pkg:${GO_PKG_PATH},--mount='type=volume,source=${GO_PKG_VOLUME},destination=${GO_PKG_PATH}' -e GOCACHE=${GO_PKG_PATH}/${PROJECT}-go-build)
 
 #DOCKER_IN_DOCKER_MOUNT=-v /var/run/docker.sock:/var/run/docker.sock -v "${HOME}/.docker:/root/.docker"
 DOCKER_IN_DOCKER_MOUNT=-v /var/run/docker.sock:/var/run/docker.sock

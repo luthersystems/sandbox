@@ -1,3 +1,5 @@
+// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 package cmd
 
 import (

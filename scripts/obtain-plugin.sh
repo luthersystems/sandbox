@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
 #set -o xtrace
 set -o errexit
