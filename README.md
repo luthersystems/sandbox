@@ -107,11 +107,15 @@ sandbox_compose.py:
 build:
 	Temporary build artifacts (do not check into git).
 common.mk:
-	Common variables and utilities for Make across the project.
-common.godynamic.mk:
-	Common variables for building Go project across the project.
+	Common variables and targets for Make across the project.
+common.config.mk:
+	User-defined settings & overrides across the project.
 common.fabric.mk:
-    Common variables for running fabric networks
+	Common variables and targets for running fabric networks
+common.godynamic.mk:
+	Common variables and targets for building Go project across the project.
+common.phylum.mk:
+	Common variables and targets for building phylum code.
 api/:
 	API specification and artifacts. See README.
 compose/:
