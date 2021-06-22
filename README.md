@@ -101,7 +101,7 @@ make up integration
 To deploy your edits to the phylum on to the running fabric network, simply run:
 ```
 make init
-``
+```
 
 This uses the OTA module to immediately install the new business logic on to
 the fabric network.
