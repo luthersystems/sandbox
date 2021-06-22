@@ -31,6 +31,8 @@ This repository contains an example backend app (oracle, API, and chaincode).
  +------------------------------------------------------+
 ```
 
+This repo includes an end-to-end "hello world" application described below.
+
 ## Luther Documentation
 Check out the [docs](https://docs.luthersystems.com).
 
@@ -94,6 +96,20 @@ to run e2e martin tests against the application:
 make up integration
 ```
 
+### Over-the-air (OTA) Update
+
+To deploy your edits to the phylum on to the running fabric network, simply run:
+```
+make init
+``
+
+This uses the OTA module to immediately install the new business logic on to
+the fabric network.
+
+*NOTE*: In-memory mode automatically reads the latest files (live re-load).
+
+### Bring down the network
+
 Run `make down` to bring down all of the services.
 
 ## Directory Structure
@@ -155,12 +171,44 @@ tests/:
 	checked into Git.
 ```
 
+## "Hello World" Application
+
+This repo includes a small application (API, Middleware, Backend) for managing
+account balances. The API that a frontend or another service integrates with
+is defined in `api`. See `api/README.md` for details on visualizing the API
+using the "re-doc" tool.
+
+The API provides endpoints to 1) create an account with a balance, 2) look up
+the balance for an account, and 3) transfer between two accounts.
+
+This API is served by the middleware known as the "oracle". You can find the
+implementation of the oracle in the Go package here:
+
+> A blockchain oracle is a service that provides smart contracts with
+> information from the outside world.
+
+```
+cd oracleserv/sandbox-oracle/oracle
+```
+
+This oracle is a thin layer that interacts with the core business logic that
+is defined in the directory `phylum/`. The code defined in `phylum/` is written
+in `elps` and executes within a Smart Contract that runs on the Hyperledger
+Fabric blockchain.
+
+```
+cd phylum
+```
+
+The phylum defines a route for each of the 3 endpoints
+(see `phylum/routes.lisp`).  This code securely runs on all of the participant
+nodes on the network, and the platform ensures that these participants reach
+agreement on the execution of this code.
+
 ### Phylum: Chaincode Business Logic
 
 Phylum code can be found in `phylum/`. Typically each sub domain is
 encapsulated in its own file.
-
-## Getting started
 
 ## Testing
 
