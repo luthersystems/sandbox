@@ -2,7 +2,7 @@
 
 The phylum stores chaincode business logic.
 
-See (Phylum Best Practices)[https://docs.luthersystems.com/luther/application/development-guidelines/phylum-best-practices].
+See [Phylum Best Practices](https://docs.luthersystems.com/luther/application/development-guidelines/phylum-best-practices).
 
 ## Formatting
 
@@ -21,6 +21,7 @@ make format
 
 ## Directory Structure
 
+```
 build:
 	Temporary build artifacts (do not check into git).
 main.lisp:
@@ -33,3 +34,4 @@ utils.lisp:
 	Common utility functions for the app.
 utils_test.lisp:
 	ELPS tests for the utility functions.
+```
