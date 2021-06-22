@@ -59,8 +59,3 @@ phylum-path:
 .PHONY: format
 format: ${SOURCE_FILES}
 	yasi --no-exit --no-backup --no-warning --no-output --indent-comments --uniform --default-indent 2 --dialect clojure $^;
-
-# print out make variables, e.g.:
-# make echo:VERSION
-echo\:%:
-	@echo $($*)
