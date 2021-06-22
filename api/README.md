@@ -54,6 +54,7 @@ swagger files under api/swagger. `Redoc` is one such tool.
 To view the swagger file using redoc, you need to install  the CLI first:
 
 ```bash
+brew install npm
 npm i -g redoc-cli
 ```
 

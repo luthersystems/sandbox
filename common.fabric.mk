@@ -53,7 +53,7 @@ FABRIC_IMAGE_TARGETS=$(addprefix docker-pull/,${FABRIC_IMAGES})
 FABRIC_DOCKER_NETWORK=fnb_byfn
 
 .PHONY: default all
-default:
+default: ${CC_PATH}
 	@
 
 .PHONY: images

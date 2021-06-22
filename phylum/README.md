@@ -4,6 +4,21 @@ The phylum stores chaincode business logic.
 
 See (Phylum Best Practices)[https://docs.luthersystems.com/luther/application/development-guidelines/phylum-best-practices].
 
+## Formatting
+
+You need to install the `yasi` command line tool to use the `make format`
+target. This tool is installed using `pip` which requires python:
+
+```
+brew install pip
+pip install --upgrade yasi
+```
+
+And to format:
+```
+make format
+```
+
 ## Directory Structure
 
 build:
