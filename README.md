@@ -40,8 +40,7 @@ Check out the [docs](https://docs.luthersystems.com).
 
 *IMPORTANT:* Place your license key in `~/.luther-license.yaml`.
 
-Ensure you have the build dependencies. On MacOS you can use the commands,
-using [homebrew](https://brew.sh/):
+Ensure you have the build dependencies. On MacOS you can use the commands, using [homebrew](https://brew.sh/):
 
 ```
 brew install make git go wget
@@ -65,27 +64,11 @@ Run `make` to build all the services:
 make
 ```
 
-### Env Setup Confirmation
+### Bring up ??? and run API tests
 
-Let's run the smart contract unit tests, Go functional tests, and martin
-end-to-end (e2e) tests against the sandbox app to make sure your env
-is fully setup:
-
-Run `make phylumtest` to run the smart contract `elps` unit tests. These
-tests are defined in: `phylum/*_test.lisp`:
-```
-make phylumtest
-```
-
-Run `make oraclegotest` to run the Oracle Middleware Go tests. These
-tests are defined in `oracleserv/sandbox-oracle/**/*_test.go`:
-```
-make oraclegotest
-```
-
-Run `make mem-up` to bring up an in-memory mode of the fabric network,
-`make integration` to run the e2e martin tests against the application.
-These tests are defined in `tests/**/*.martin_collection.yaml`:
+Run `make mem-up` to bring up an in-memory mode of the fabric network, `make
+integration` to run the e2e martin tests against the application. These tests
+are defined in `tests/**/*.martin_collection.yaml`:
 ```
 make mem-up integration
 ```
@@ -116,46 +99,19 @@ Run `make down` to bring down all of the services.
 
 Overview of the directory structure
 
-```
-sandbox_compose.py:
-	Helper script to launch containers for testing. Called indirectly by
-	Make targets.
-build:
+```	
+build/:
 	Temporary build artifacts (do not check into git).
-common.mk:
-	Common variables and targets for Make across the project.
 common.config.mk:
 	User-defined settings & overrides across the project.
-common.fabric.mk:
-	Common variables and targets for running fabric networks
-common.go.mk:
-	Common variables and targets for building Go project across the project.
-common.phylum.mk:
-	Common variables and targets for building phylum code.
 api/:
 	API specification and artifacts. See README.
 compose/:
 	Configuration for docker compose networks that are brought up during
 	testing. These configurations are used by the existing Make targets
 	and `sandbox_compose.py`.
-	common.yaml:
-		Common network configuration that is imported into all other
-		compose configurations.
-	local.yaml:
-		Configuration for a local fabric network.
-	mem.yaml:
-		Configuration for an "in-memory" mode fabric network.
-	setenv.d/:
-		Common scripts for setting env variables for compose.
 fabric/:
 	Configuration and scripts to launch a fabric network locally.
-go.sum:
-	Version hashes for dependent Go libraries.
-go.mod:
-	Pinned dependencies for vendored Go libraries (go mod tool).
-Makefile:
-	Project-wide build targets, including running various tests and pushing
-	release artifacts.
 oracleserv/sandbox-oracle/:
 	The oracle service (Go) responsible for serving the REST/JSON APIs and
 	communicating with other microservices.
@@ -166,9 +122,6 @@ scripts/:
 	Helper scripts for the build process.
 tests/:
 	End-to-end API tests that use martin.
-.gitignore:
-	File patterns to identify files & directories that should not be
-	checked into Git.
 ```
 
 ## "Hello World" Application
@@ -216,6 +169,19 @@ Phylum code can be found in `phylum/`. Typically each sub domain is
 encapsulated in its own file.
 
 ## Testing
+
+### TODO: integrate
+Run `make phylumtest` to run the smart contract `elps` unit tests. These
+tests are defined in: `phylum/*_test.lisp`:
+```
+make phylumtest
+```
+
+Run `make oraclegotest` to run the Oracle Middleware Go tests. These
+tests are defined in `oracleserv/sandbox-oracle/**/*_test.go`:
+```
+make oraclegotest
+```
 
 > You can view our testing guidelines here: [Testing guidelines](./docs/testing-guidelines.md)
 

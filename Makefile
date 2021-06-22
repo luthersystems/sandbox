@@ -1,5 +1,10 @@
 # Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
+# Makefile
+#
+# The primary project makefile that should be run from the root directory and is
+# able to build and run the entire application.
+
 PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
 DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})

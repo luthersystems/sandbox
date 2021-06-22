@@ -1,5 +1,10 @@
 # Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
+# common.phylum.mk
+#
+# A base makefile for working with phyla (collections of lisp code making up a
+# smart contract).
+
 PROJECT_REL_DIR:=..
 include ${PROJECT_REL_DIR}/common.mk
 

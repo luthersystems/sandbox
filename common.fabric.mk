@@ -1,5 +1,9 @@
 # Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
+# common.fabric.mk
+#
+# A base makefile for running fabric networks locally with docker-compose.
+
 PROJECT_REL_DIR ?= .
 include ${PROJECT_REL_DIR}/common.mk
 
