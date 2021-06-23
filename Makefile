@@ -162,24 +162,9 @@ integrationcitest:
 	$(MAKE) integration
 	$(MAKE) down
 
-POSTMAN_ENVIRONMENT=Docker.postman_environment.json
-
-MARTIN_ENV_OPTS=
-MARTIN_COMMON_OPTS=-v "$(CURDIR)":/etc/postman -w /etc/postman ${MARTIN_ENV_OPTS} --entrypoint sh
-RUN_MARTIN=${DOCKER_RUN} ${MARTIN_COMMON_OPTS} ${MARTIN_IMAGE}
-RUN_MARTIN_NETWORK=${DOCKER_RUN} ${MARTIN_COMMON_OPTS} --network fnb_byfn ${MARTIN_IMAGE}
-
 .PHONY: integration
 integration:
-	./tests/run-postman-collections-docker.sh tests/$(POSTMAN_ENVIRONMENT)
-
-.PHONY: martincmd
-martincmd:
-	@echo ${RUN_MARTIN}
-
-.PHONY: martincmdnetwork
-martincmdnetwork:
-	@echo ${RUN_MARTIN_NETWORK}
+	cd tests && $(MAKE) test-docker
 
 .PHONY: repl
 repl:
