@@ -1,12 +1,25 @@
 # Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
+# run-postman-collections-docker.sh
+#
+# This script executes martin in a docker container, running any test
+# collection files it is given as argumont or running all tests if no arguments
+# are given.
+#
+# NOTE:  This script can only accept paths that are relative to the tests/
+# directory as the docker container will use that directory as the working
+# directory.  Run `make integration` in the project's root directory to run
+# tests from another directory.
+
 #!/bin/bash
 
 SCRIPT="${BASH_SOURCE:-$0}"
 SOURCE_DIR=$(dirname "$SCRIPT")
 
-MARTIN_NETWORK=$(cd ${SOURCE_DIR}/.. && make martincmdnetwork)
-MARTIN=$(cd ${SOURCE_DIR}/.. && make martincmd)
+cd "$SOURCE_DIR"
+
+MARTIN_NETWORK=$(make echo:RUN_MARTIN_NETWORK)
+MARTIN=$(make echo:RUN_MARTIN)
 
 docker network inspect fnb_byfn &> /dev/null
 RESULT="$?"

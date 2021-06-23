@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Helper script to launch containers for testing. Called indirectly by Make
+# targets.
+
 from glob import glob
 import os
 import shlex
