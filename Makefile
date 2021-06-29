@@ -181,5 +181,8 @@ pre-push:
 install: ${SUBSTRATE_PLUGIN}
 	@
 
-${SUBSTRATE_PLUGIN}:
+${PRESIGNED_PATH}:
+	./scripts/obtain-presigned.sh
+
+${SUBSTRATE_PLUGIN}: ${PRESIGNED_PATH}
 	./scripts/obtain-plugin.sh

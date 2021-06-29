@@ -6,19 +6,20 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-PROJECT_REL_DIR=$(make echo:PROJECT_REL_DIR)
-LICENSE_FILE=$(make echo:LICENSE_FILE)
+PRESIGNED_PATH=$(make echo:PRESIGNED_PATH)
 
-if [ ! -f $LICENSE_FILE ]; then
-    echo "File missing: $LICENSE_FILE"
+if [ ! -f $PRESIGNED_PATH ]; then
+    echo "File missing: $PRESIGNED_PATH"
 fi
 
 mkdir -p build
 
 download-cc() {
+  local cc_path=$1
   echo "Using pre-signed URL for chaincode:"
-  CC_URL=$(cat $LICENSE_FILE | grep cc_url | awk '{print $2;}')
-  wget -O "$1" $CC_URL
+  local jq_path=".substrate_cc_url"
+  local cc_url=$(cat ${PRESIGNED_PATH} | jq -r ${jq_path})
+  wget -O $cc_path $cc_url
 }
 
 download-cc $(make echo:CC_PATH)
