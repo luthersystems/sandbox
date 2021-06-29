@@ -178,11 +178,5 @@ pre-push:
 	$(MAKE) tests-api format
 	cd api && $(MAKE)
 
-install: ${SUBSTRATE_PLUGIN}
-	@
-
-${PRESIGNED_PATH}:
-	./scripts/obtain-presigned.sh
-
-${SUBSTRATE_PLUGIN}: ${PRESIGNED_PATH}
-	./scripts/obtain-plugin.sh
+download: ${SUBSTRATE_PLUGIN}
+	cd fabric && $(MAKE) download
