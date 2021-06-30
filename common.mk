@@ -94,19 +94,3 @@ echo\:%:
 docker-pull/%: id=$(shell docker image inspect -f "{{.Id}}" $* 2>/dev/null)
 docker-pull/%:
 	@[[ -n "${id}" ]] || { echo "retrieving $*" && docker pull $*; }
-
-${STATIC_PRESIGN_DUMMY}: ${LICENSE_FILE}
-	${MKDIR_P} $(dir $@)
-	./scripts/obtain-presigned.sh
-	touch $@
-
-${PRESIGNED_PATH}: ${STATIC_PRESIGN_DUMMY}
-	@
-
-${STATIC_PLUGINS_DUMMY}: ${PRESIGNED_PATH}
-	${MKDIR_P} $(dir $@)
-	./scripts/obtain-plugin.sh
-	touch $@
-
-${SUBSTRATE_PLUGIN}: ${STATIC_PLUGINS_DUMMY}
-	@
