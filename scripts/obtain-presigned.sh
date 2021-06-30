@@ -20,7 +20,7 @@ mkdir -p build
 
 download-presigned() {
   echo -n "Downloading pre-signed URLs..."
-  local license_b64=$(cat $LICENSE_FILE | base64)
+  local license_b64=$(cat $LICENSE_FILE | base64 | tr -d "\n")
   local req_json='{"version":"'${SUBSTRATE_VERSION}'","license":"'${license_b64}'"}'
   curl -S -f -s -X POST -H "Content-Type: application/json" --data ${req_json} ${LICENSE_URL} -o ${PRESIGNED_PATH}
   echo "OK"
