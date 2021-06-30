@@ -98,8 +98,11 @@ Running `docker ps` again will show all the containers have been removed.
 ## "Hello World" Application
 
 This repo includes a small application for managing account balances. It serves
-a JSON API that provides endpoints to 1) create an account with a balance, 2)
-look up the balance for an account, and 3) transfer between two accounts.
+a JSON API that provides endpoints to:
+
+1) create an account with a balance
+2) look up the balance for an account
+3) transfer between two accounts
 
 > To simplify the sandbox, we have omitted authentication which we handle
 > using [lutherauth](https://docs.luthersystems.com/luther/application/modules/lutherauth).
