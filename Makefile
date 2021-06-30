@@ -178,8 +178,5 @@ pre-push:
 	$(MAKE) tests-api format
 	cd api && $(MAKE)
 
-install: ${SUBSTRATE_PLUGIN}
-	@
-
-${SUBSTRATE_PLUGIN}:
-	./scripts/obtain-plugin.sh
+download: ${SUBSTRATE_PLUGIN}
+	cd fabric && $(MAKE) download

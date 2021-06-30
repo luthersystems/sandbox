@@ -361,5 +361,9 @@ compile-phylum-%: $$(shell find -L ../$$* -name "*.lisp" 2>/dev/null | grep -Fv 
 	cp $^    ./build/phylum_$*/src/
 	cd       ./build/phylum_$*/src && ls && rm -f ./../phylum.zip && zip ./../phylum.zip $(notdir $^)
 
-${CC_PATH}:
+${CC_PATH}: ${PRESIGNED_PATH}
 	${PROJECT_REL_DIR}/scripts/obtain-cc.sh
+	touch $@
+
+download: ${CC_PATH}
+	@
