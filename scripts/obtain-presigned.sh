@@ -10,7 +10,7 @@ PRESIGNED_PATH=$(make echo:PRESIGNED_PATH)
 PROJECT_REL_DIR=$(make echo:PROJECT_REL_DIR)
 LICENSE_FILE=$(make echo:LICENSE_FILE)
 SUBSTRATE_VERSION=$(make echo:SUBSTRATE_VERSION)
-LICENSE_URL=https://license.luthersystemsapp.com/prod
+LICENSE_URL=https://license.luthersystemsapp.com/presign
 
 if [ ! -f $LICENSE_FILE ]; then
     echo "File missing: $LICENSE_FILE"
