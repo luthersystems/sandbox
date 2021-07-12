@@ -66,7 +66,7 @@
 ; initialize entities a and b to integer values
 (defendpoint "create_account" (create)
   (let* ([acct (get create "account")])
-    (if (create-account! (get acct "account_id") (get acct "current_balance"))
+    (if (create-account! (get acct "account_id") (to-int (get acct "current_balance")))
       (route-success ())
       (set-exception-business "account_id already exists"))))
 
