@@ -157,9 +157,12 @@ func NewMockFrom(phylumVersion string, phylumPath string, log *logrus.Entry, r i
 		}
 	}
 	client := &Client{
-		log:       log,
-		rpc:       mock,
-		closeFunc: mock.Close,
+		log: log,
+		rpc: mock,
+		closeFunc: func() error {
+			defer conn.Close()
+			return mock.Close()
+		},
 	}
 	return client, nil
 }
