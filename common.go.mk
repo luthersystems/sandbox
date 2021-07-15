@@ -22,6 +22,8 @@ STATIC_IMAGE_DUMMY=$(call IMAGE_DUMMY,${STATIC_IMAGE}/${VERSION})
 
 GO_SOURCE_FILES=$(shell find ${PROJECT_REL_DIR} -name '*.go' | grep -v '/vendor/')
 
+GO_MOD_ENV=-e "GOPROXY=${GOPROXY}" -e "GOPRIVATE=${GOPRIVATE}" -e "GONOPROXY=${GONOPROXY}" -e "GONOSUMDB=${GONOSUMDB}"
+
 GO_PKG_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,pkg,${GO_PKG_VOLUME})
 GO_PKG_VOLUME_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,volume,${GO_PKG_VOLUME})
 
@@ -60,9 +62,9 @@ ${STATIC_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 	${MKDIR_P} $(dir $@)
 	${TIME_P} ${DOCKER_RUN} \
 		${DOCKER_IN_DOCKER_MOUNT} \
-		$(shell pinata-ssh-mount) \
 		${GO_PKG_MOUNT} \
 		${SUBSTRATEHCP_MOUNT} \
+		${GO_MOD_ENV} \
 		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
 		-e "CGO_LDFLAGS_ALLOW=-Wl,--no-as-needed" \
 		-e "BIN=${BIN}" \
@@ -75,9 +77,9 @@ ${STATIC_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 .PHONY: test
 test: ${GO_PKG_DUMMY}
 	${TIME_P} ${DOCKER_RUN} \
-		$(shell pinata-ssh-mount) \
 		${GO_PKG_MOUNT} \
 		${SUBSTRATEHCP_MOUNT} \
+		${GO_MOD_ENV} \
 		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
 		-w  ${BUILD_WORKDIR} \
 		${BUILD_IMAGE} test
