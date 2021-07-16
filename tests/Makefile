@@ -33,3 +33,8 @@ test-docker:
 
 ${POSTMAN_JSON}: ${POSTMAN_SOURCE_FILES}
 	cd ../ && ./tests/cat-postman-collections-docker.sh > tests/$@
+
+.PHONY: martincmd
+martincmd:
+	@echo ${RUN_MARTIN}
+
