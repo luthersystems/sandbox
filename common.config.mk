@@ -16,11 +16,12 @@ BUILDENV_TAG=0.0.41
 
 # These variables control the version numbers for parts of the LEIA platform
 # and should be kept up-to-date to leverage the latest platform features.
-SUBSTRATE_VERSION=2.160.0-fabric2-SNAPSHOT-4bdb08c
-SHIROCLIENT_VERSION=2.159.0-fabric2-SNAPSHOT
-SHIROTESTER_VERSION=2.159.0-fabric2-SNAPSHOT
+# See release notes: https://docs.luthersystems.com/luther/platform/release-notes
+SUBSTRATE_VERSION=2.160.0-fabric2
+SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
+SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${SUBSTRATE_VERSION}
-NETWORK_BUILDER_VERSION=2.159.0-fabric2-SNAPSHOT
+NETWORK_BUILDER_VERSION=${SUBSTRATE_VERSION}
 MARTIN_VERSION=0.1.0-SNAPSHOT
 
 # A golang module proxy server can greatly help speed up docker builds but the
