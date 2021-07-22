@@ -6,7 +6,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-unset MAKELEVEL
+unset MAKELEVEL MFLAGS MAKEFLAGS
 PRESIGNED_PATH=$(make echo:PRESIGNED_PATH)
 PROJECT_REL_DIR=$(make echo:PROJECT_REL_DIR)
 LICENSE_FILE=$(make echo:LICENSE_FILE)
