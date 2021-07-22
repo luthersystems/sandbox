@@ -13,16 +13,20 @@
 
 #!/bin/bash
 
+set -o errexit
+set -o nounset
+
+unset MAKELEVEL MFLAGS MAKEFLAGS
+
 SCRIPT="${BASH_SOURCE:-$0}"
 SOURCE_DIR=$(dirname "$SCRIPT")
 
 cd "$SOURCE_DIR"
 
-unset MAKELEVEL
 MARTIN_NETWORK=$(make echo:RUN_MARTIN_NETWORK)
 MARTIN=$(make echo:RUN_MARTIN)
 
-docker network inspect fnb_byfn &> /dev/null
+docker network inspect fnb_byfn 1>/dev/null 2>/dev/null
 RESULT="$?"
 if [ $RESULT -eq 0 ]; then
 	echo ${MARTIN_NETWORK}

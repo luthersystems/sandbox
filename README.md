@@ -40,20 +40,37 @@ Check out the [docs](https://docs.luthersystems.com).
 
 *IMPORTANT:* Place your license key in `~/.luther-license.yaml`.
 
-Ensure you have the build dependencies. On MacOS you can use the commands, using [homebrew](https://brew.sh/):
+Ensure you have the [build dependencies and system requirements](https://docs.luthersystems.com/luther/application/start/local-system-requirements).
+
+### MacOS
+
+On MacOS you can use the commands, using [homebrew](https://brew.sh/):
 
 ```
 brew install make git go wget jq
 brew install --cask docker
 ```
 
-*IMPORTANT:* Make sure your `docker --version` is  >= 20.10.6.
+*IMPORTANT:* Make sure your `docker --version` is  >= 20.10.6 and
+`docker-compose --version` is >= 1.29.1.
 
 If you are not using `brew`, make sure xcode tools are installed:
 
 ```
 xcode-select --install
 ```
+
+### Ubuntu
+
+If you are running Ubuntu 20.04+ you can use the commands to install the dependencies:
+```
+sudo apt update && sudo apt install make jq zip gcc docker.io python3-pip
+sudo pip3 install docker-compose
+```
+
+Make sure your user has permissions to run docker.
+
+### Build
 
 Clone this repo:
 

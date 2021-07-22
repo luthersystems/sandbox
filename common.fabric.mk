@@ -168,6 +168,7 @@ start-gw-%: metrics_port=$$(( 9601 + ${idx} ))
 start-gw-%: filter_args=$(if ${filter},-f ${filter})
 start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
 	${DOCKER_RUN} -d --name ${name} \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
@@ -190,6 +191,7 @@ notify-gw-%: name=$(word 2,${parts})
 notify-gw-%: ccname=$(word 3,${parts})
 notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} --rm -it \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_${ccname}/phylum.zip):/tmp/phylum.zip:ro" \
@@ -242,6 +244,7 @@ init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
 
 shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} -it \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_$*/phylum.zip):/tmp/phylum.zip:ro" \
@@ -259,6 +262,7 @@ shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp bui
 
 call_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 	@echo ${DOCKER_RUN} \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
@@ -278,6 +282,7 @@ call_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 enable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 	./logging-pbool-ctl.sh true \
 		${DOCKER_RUN} \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
@@ -296,6 +301,7 @@ enable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 disable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 	./logging-pbool-ctl.sh false \
 		${DOCKER_RUN} \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
@@ -313,6 +319,7 @@ disable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 
 metadump_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 	@echo ${DOCKER_RUN} -i \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
@@ -330,6 +337,7 @@ metadump_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 
 get_phyla-%: ${PHYLUM_VERSION_FILE}_exists
 	${DOCKER_RUN} -i \
+		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \

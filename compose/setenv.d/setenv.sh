@@ -1,4 +1,18 @@
+#!/usr/bin/env bash
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+
 # Common scripts for setting env variables for compose.
+
+#set -o xtrace
+set -o errexit
+set -o nounset
+set -o pipefail
+
+unset MAKELEVEL MFLAGS MAKEFLAGS
+
+export DOCKER_UID="$(id -u)"
+export DOCKER_GID="$(id -g)"
+
 export VERSION="$(grep '^VERSION=' common.mk | awk -F= '{print $2}')"
 export VERSION_SUBSTRATE="$(grep '^SUBSTRATE_VERSION=' common.mk | awk -F= '{print $2}')"
 PHYLUM_VERSION_FILE="$(grep '^PHYLUM_VERSION_FILE=' common.fabric.mk | awk -F= '{print $2}')"

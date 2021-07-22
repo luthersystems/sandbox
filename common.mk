@@ -98,4 +98,4 @@ echo\:%:
 # names.
 docker-pull/%: id=$(shell docker image inspect -f "{{.Id}}" $* 2>/dev/null)
 docker-pull/%:
-	@[[ -n "${id}" ]] || { echo "retrieving $*" && docker pull $*; }
+	@[ -n "${id}" ] || { echo "retrieving $*" && docker pull $*; }
