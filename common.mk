@@ -84,6 +84,11 @@ DOCKER_DIR=$(if $(IS_WINDOWS),$(call DOCKER_WIN_DIR, $(1)),$(call DOCKER_NIX_DIR
 
 # print out make variables, e.g.:
 # make echo:VERSION
+#
+# NOTE:  Depending on the version of make you may want to `unset MAKELEVEL` if
+# capturing variable values with `$(make echo:*)` in scripts (see the ./scripts
+# directory for examples of this).  Failing to do so can cause script targets
+# like `make plugin` fail.
 echo\:%:
 	@echo $($*)
 
