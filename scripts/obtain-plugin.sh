@@ -6,7 +6,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-unset MAKELEVEL
+unset MAKELEVEL MFLAGS MAKEFLAGS
 PRESIGNED_PATH=$(make echo:PRESIGNED_PATH)
 
 if [ ! -f "$PRESIGNED_PATH" ]; then
