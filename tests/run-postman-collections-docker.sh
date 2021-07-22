@@ -18,6 +18,7 @@ SOURCE_DIR=$(dirname "$SCRIPT")
 
 cd "$SOURCE_DIR"
 
+unset MAKELEVEL
 MARTIN_NETWORK=$(make echo:RUN_MARTIN_NETWORK)
 MARTIN=$(make echo:RUN_MARTIN)
 
