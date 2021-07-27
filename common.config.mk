@@ -12,7 +12,7 @@ VERSION=0.1.0-SNAPSHOT
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=0.0.41
+BUILDENV_TAG=0.0.42
 
 # These variables control the version numbers for parts of the LEIA platform
 # and should be kept up-to-date to leverage the latest platform features.

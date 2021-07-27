@@ -70,6 +70,8 @@ ${STATIC_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 		-e "BIN=${BIN}" \
 		-e "VERSION=${VERSION}" \
 		-e "STATIC_IMAGE=${STATIC_IMAGE}" \
+		-e "DOCKER_CHOWN_USER=${CHOWN_USR}" \
+		-e "DOCKER_CHOWN_GROUP=${CHOWN_GRP}" \
 		-w ${BUILD_WORKDIR} \
 		${BUILD_IMAGE} static
 	${TOUCH} $@
