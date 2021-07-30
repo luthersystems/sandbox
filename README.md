@@ -74,7 +74,11 @@ Install docker-compose:
 sudo pip3 install docker-compose
 ```
 
-Make sure your user has permissions to run docker.
+Make sure your [user has permissions](https://docs.docker.com/engine/install/linux-postinstall/) to run docker.
+
+See [this](https://dev.luthersystemsapp.com/ubuntu20_04-sandbox-install.sh)
+script for the exact steps to install the dependencies on a fresh Ubuntu 20.04
+instance.
 
 ### Build
 
