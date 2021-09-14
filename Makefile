@@ -70,21 +70,21 @@ phylumpush:
 all: oracle
 .PHONY: oracle
 oracle: plugin
-	cd oracleserv/${PROJECT}-oracle && $(MAKE)
+	cd ${SERVICE_DIR} && $(MAKE)
 clean: oracleclean
 .PHONY: oracleclean
 oracleclean:
-	cd oracleserv/${PROJECT}-oracle && $(MAKE) clean
-push: oraclepush
-oraclepush: plugin
-	cd oracleserv/${PROJECT}-oracle && $(MAKE) push
+	cd ${SERVICE_DIR} && $(MAKE) clean
+.PHONY: oraclestaticchecks
+oraclestaticchecks:
+	cd ${SERVICE_DIR} && $(MAKE) static-checks
 .PHONY: oracletest
 oracletest: plugin
-	cd oracleserv/${PROJECT}-oracle && $(MAKE) test
+	cd ${SERVICE_DIR} && $(MAKE) test
 test: oraclegotest
 .PHONY: oraclegotest
 oraclegotest: plugin
-	cd oracleserv/${PROJECT}-oracle && $(MAKE) go-test
+	cd ${SERVICE_DIR} && $(MAKE) go-test
 
 .PHONY: fabric
 all: fabric
@@ -146,12 +146,11 @@ unit: unit-oracle unit-other
 
 .PHONY: unit-other
 unit-other: phylumtest
-	@echo "all tests passed"
+	@echo "phylum tests passed"
 
 .PHONY: unit-oracle
 unit-oracle: oraclegotest
-	@echo "all tests passed"
-
+	@echo "service tests passed"
 
 # NOTE:  The `citest` target manages creating/destroying a compose network.  To
 # run tests repeatedly execute the `integration` target directly.

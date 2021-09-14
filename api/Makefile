@@ -7,7 +7,6 @@ BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 
 BUILD_IMAGE=${BUILD_IMAGE_API}
 PROTO_SOURCE_FILES=$(wildcard pb/*.proto) $(wildcard srvpb/*.proto)
-PROTO_MODTIME=$(shell ls -lt ${PROTO_SOURCE_FILES} | head -n 1 | awk '{print $$6 " " $$7 " " $$8};')
 
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 BUILD_WORKDIR=${BUILD_IMAGE_PROJECT_DIR}/api
@@ -34,7 +33,7 @@ ${ARTIFACTS}: ${PROTO_SOURCE_FILES}
 		-u ${DOCKER_USER} \
 		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
 		-e PROJECT_PATH="${PROJECT_PATH}" \
-		-e VERSION="${VERSION} (${PROTO_MODTIME})" \
+		-e VERSION="${VERSION}" \
 		-w ${BUILD_WORKDIR} \
 		--init \
 		--entrypoint make \

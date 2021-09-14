@@ -9,46 +9,41 @@ PROJECT_REL_DIR ?= .
 include ${PROJECT_REL_DIR}/common.mk
 DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})
 
-BIN_NAME=${PROJECT}-${SERVICE}
-BIN=./build/bin/${BIN_NAME}
-BUILD_IMAGE=${BUILD_IMAGE_GO}
+BUILD_IMAGE=${BUILD_IMAGE_GO_ALPINE}
+SERVICE_BASE_IMAGE=${SERVICE_BASE_IMAGE_ALPINE}
 
-BUILD_IMAGE_SERVICE_DIR=${SERVICE_ROOT_DIR}/${BIN_NAME}
+BUILD_IMAGE_SERVICE_DIR=${SERVICE_ROOT_DIR}
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 BUILD_WORKDIR=${BUILD_IMAGE_PROJECT_DIR}/${BUILD_IMAGE_SERVICE_DIR}
 
-STATIC_IMAGE=${PROJECT}/${SERVICE}
-STATIC_IMAGE_DUMMY=$(call IMAGE_DUMMY,${STATIC_IMAGE}/${VERSION})
+DOCKER_IMAGE=${PROJECT}/${SERVICE}
+
+DOCKER_IMAGE_DUMMY=$(call IMAGE_DUMMY,${DOCKER_IMAGE}/${VERSION})
 
 GO_SOURCE_FILES=$(shell find ${PROJECT_REL_DIR} -name '*.go' | grep -v '/vendor/')
-
-GO_MOD_ENV=-e "GOPROXY=${GOPROXY}" -e "GOPRIVATE=${GOPRIVATE}" -e "GONOPROXY=${GONOPROXY}" -e "GONOSUMDB=${GONOSUMDB}"
 
 GO_PKG_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,pkg,${GO_PKG_VOLUME})
 GO_PKG_VOLUME_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,volume,${GO_PKG_VOLUME})
 
-#GO_TEST_BASE=${PROJECT_REL_DIR}/scripts/containerize.sh ${PROJECT_REL_DIR} "gotestsum --format=testname -- -parallel 8"
 GO_TEST_BASE=${GO_HOST_EXTRA_ENV} go test
 GO_TEST_TIMEOUT_10=${GO_TEST_BASE} -timeout 10m
 GO_TEST_TIMEOUT_35=${GO_TEST_BASE} -timeout 35m
 
-GO_HOST_OS=$(shell uname | tr '[:upper:]' '[:lower:]')
-HOST_GO_ENV=SUBSTRATEHCP_FILE=${PWD}/$(call SUBSTRATE_PLUGIN_OS,${GO_HOST_OS})
-
-SUBSTRATEHCP_MOUNT_PATH=/opt/substrate/$(notdir ${SUBSTRATE_PLUGIN_LINUX})
-SUBSTRATEHCP_MOUNT=-v "${PWD}/${SUBSTRATE_PLUGIN_LINUX}:${SUBSTRATEHCP_MOUNT_PATH}" -e SUBSTRATEHCP_FILE=${SUBSTRATEHCP_MOUNT_PATH}
+GO_BUILD_TAGS ?= osusergo,netgo,cgo
+GO_BUILD_FLAGS="-installsuffix ${GO_BUILD_TAGS} -tags ${GO_BUILD_TAGS}"
+GO_TEST_FLAGS ?= -cover
 
 .PHONY: default
-default: static
+default: docker-build
 	@
 
-.PHONY: static
-static: ${STATIC_IMAGE_DUMMY}
+.PHONY: docker-build
+docker-build: ${DOCKER_IMAGE_DUMMY}
 	@
 
 .PHONY: clean
 clean:
-	${RM} -rf build ${GO_ZONEINFO} ${GO_CERTS} ${GO_PKG_VOLUME_DUMMY}
+	${RM} -rf build ${GO_PKG_VOLUME_DUMMY}
 	# docker volume rm will fail if the volume doesn't exist
 	-${DOCKER} volume rm ${GO_PKG_VOLUME}
 	# make sure it's really gone
@@ -58,33 +53,33 @@ clean:
 go-test:
 	env "${HOST_GO_ENV}" ${GO_TEST_TIMEOUT_10} ./...
 
-${STATIC_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk
+${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk ${PROJECT_REL_DIR}/Dockerfile
 	${MKDIR_P} $(dir $@)
-	${TIME_P} ${DOCKER_RUN} \
-		${DOCKER_IN_DOCKER_MOUNT} \
-		${GO_PKG_MOUNT} \
-		${SUBSTRATEHCP_MOUNT} \
-		${GO_MOD_ENV} \
-		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
-		-e "CGO_LDFLAGS_ALLOW=-Wl,--no-as-needed" \
-		-e "BIN=${BIN}" \
-		-e "VERSION=${VERSION}" \
-		-e "STATIC_IMAGE=${STATIC_IMAGE}" \
-		-e "DOCKER_CHOWN_USER=${CHOWN_USR}" \
-		-e "DOCKER_CHOWN_GROUP=${CHOWN_GRP}" \
-		-w ${BUILD_WORKDIR} \
-		${BUILD_IMAGE} static
+	@echo "Building image ${DOCKER_IMAGE}"
+	${TIME_P} ${DOCKER} build \
+		--build-arg "BUILD_IMAGE=${BUILD_IMAGE}" \
+		--build-arg "SERVICE_BASE_IMAGE=${SERVICE_BASE_IMAGE}" \
+		--build-arg "GONOSUMDB=${GONOSUMDB}" \
+		--build-arg "GOPROXY=${GOPROXY}" \
+		--build-arg "GO_BUILD_TAGS=${GO_BUILD_TAGS}" \
+		--build-arg "VERSION=${VERSION}" \
+		--build-arg "SERVICE_DIR=${SERVICE_DIR}" \
+		-t ${DOCKER_IMAGE}:latest \
+		-t ${DOCKER_IMAGE}:${VERSION} \
+		-f ${PROJECT_REL_DIR}/Dockerfile ${PROJECT_REL_DIR}
 	${TOUCH} $@
 
-.PHONY: test
-test: ${GO_PKG_DUMMY}
+.PHONY: static-checks
+static-checks: ${GO_PKG_DUMMY}
 	${TIME_P} ${DOCKER_RUN} \
 		${GO_PKG_MOUNT} \
-		${SUBSTRATEHCP_MOUNT} \
-		${GO_MOD_ENV} \
+		-e "GONOSUMDB=${GONOSUMDB}" \
+		-e "GOPROXY=${GOPROXY}" \
 		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
-		-w  ${BUILD_WORKDIR} \
-		${BUILD_IMAGE} test
+		-e CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool \
+		--entrypoint ${BUILD_IMAGE_PROJECT_DIR}/scripts/static-checks.sh \
+		-w ${BUILD_WORKDIR} \
+		${BUILD_IMAGE}
 
 ${GO_PKG_DUMMY}:
 	${DOCKER} volume inspect ${GO_PKG_VOLUME} || ${DOCKER} volume create ${GO_PKG_VOLUME}

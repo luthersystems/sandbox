@@ -1,10 +1,8 @@
 // Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
 /*
-HTTP Middleware
-
-The oracle defines a simple system for http middleware built around functions
-with the following signature:
+Package oracle defines a simple system for http middleware built around
+functions with the following signature:
 
 	func Wrap(h http.Handler) http.Handler
 

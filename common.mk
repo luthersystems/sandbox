@@ -22,7 +22,8 @@ PRESIGNED_PATH=${PROJECT_REL_DIR}/build/presigned.json
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
 
-BUILD_IMAGE_GO=luthersystems/build-go:${BUILDENV_TAG}
+BUILD_IMAGE_GO_ALPINE=luthersystems/build-go-alpine:${BUILDENV_TAG}
+SERVICE_BASE_IMAGE_ALPINE=luthersystems/service-base-alpine:${BUILDENV_TAG}
 BUILD_IMAGE_API=luthersystems/build-api:${BUILDENV_TAG}
 
 SHIROCLIENT_IMAGE=luthersystems/shiroclient
@@ -35,13 +36,9 @@ SUBSTRATE_PLUGIN_LINUX=$(call SUBSTRATE_PLUGIN_OS,linux)
 SUBSTRATE_PLUGIN_DARWIN=$(call SUBSTRATE_PLUGIN_OS,darwin)
 SUBSTRATE_PLUGIN=${SUBSTRATE_PLUGIN_DARWIN} ${SUBSTRATE_PLUGIN_LINUX}
 
-# FIXME: replace with optional GOPROXY?
 GO_PKG_VOLUME=${PROJECT}-build-gopath-pkg
 GO_PKG_PATH=/go/pkg
-GO_PKG_MOUNT=$(if $(CI),-v $(PWD)/build/pkg:${GO_PKG_PATH},--mount='type=volume,source=${GO_PKG_VOLUME},destination=${GO_PKG_PATH}' -e GOCACHE=${GO_PKG_PATH}/${PROJECT}-go-build)
-
-#DOCKER_IN_DOCKER_MOUNT=-v /var/run/docker.sock:/var/run/docker.sock -v "${HOME}/.docker:/root/.docker"
-DOCKER_IN_DOCKER_MOUNT=-v /var/run/docker.sock:/var/run/docker.sock
+GO_PKG_MOUNT=--mount='type=volume,source=${GO_PKG_VOLUME},destination=${GO_PKG_PATH}' -e GOCACHE=${GO_PKG_PATH}/${PROJECT}-go-build
 
 ifeq ($(OS),Windows_NT)
 	IS_WINDOWS=1
@@ -91,7 +88,6 @@ DOCKER_DIR=$(if $(IS_WINDOWS),$(call DOCKER_WIN_DIR, $(1)),$(call DOCKER_NIX_DIR
 # like `make plugin` fail.
 echo\:%:
 	@echo $($*)
-
 
 # Check if the requested image exists locally then pull it if necessary.
 # NOTE: The / is necessary to prevent automatic path splitting on the target
