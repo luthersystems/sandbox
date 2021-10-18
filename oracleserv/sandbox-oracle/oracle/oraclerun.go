@@ -102,7 +102,7 @@ func Run(config *Config) error {
 
 	opts := []Option{}
 	if config.EmulateCC {
-		opts = append(opts, WithMockPhylum(config.PhylumVersion, config.PhylumPath))
+		opts = append(opts, WithMockPhylum(config.PhylumPath))
 	}
 	oracle, err := New(config, opts...)
 	if err != nil {

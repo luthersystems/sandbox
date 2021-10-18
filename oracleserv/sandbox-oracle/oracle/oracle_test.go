@@ -60,7 +60,7 @@ func newTestOracleFrom(t *testing.T, snapshot []byte, opts ...Option) (*Oracle, 
 	}
 	finalOpts := []Option{
 		WithLogBase(logger.WithFields(nil)),
-		WithMockPhylumFrom("test", "../../../phylum", r),
+		WithMockPhylumFrom("../../../phylum", r),
 	}
 	finalOpts = append(finalOpts, opts...)
 	server, err := New(cfg, finalOpts...)

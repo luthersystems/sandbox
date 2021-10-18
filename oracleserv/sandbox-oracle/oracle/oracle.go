@@ -142,15 +142,15 @@ func WithPhylum(gatewayEndpoint string) Option {
 }
 
 // WithMockPhylum runs the phylum in memory.
-func WithMockPhylum(version, path string) Option {
-	return WithMockPhylumFrom(version, path, nil)
+func WithMockPhylum(path string) Option {
+	return WithMockPhylumFrom(path, nil)
 }
 
 // WithMockPhylumFrom runs the phylum in memory from a snapshot.
-func WithMockPhylumFrom(version, path string, r io.Reader) Option {
+func WithMockPhylumFrom(path string, r io.Reader) Option {
 	return func(orc *Oracle) error {
 		orc.logBase.Infof("NewMock")
-		ph, err := phylum.NewMockFrom(version, path, orc.logBase, r)
+		ph, err := phylum.NewMockFrom(path, orc.logBase, r)
 		if err != nil {
 			return fmt.Errorf("unable to initialize mock phylum: %w", err)
 		}
