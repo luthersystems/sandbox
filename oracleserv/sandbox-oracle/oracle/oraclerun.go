@@ -108,7 +108,12 @@ func Run(config *Config) error {
 	if err != nil {
 		return err
 	}
-	defer oracle.Close()
+	defer func() {
+		err := oracle.Close()
+		if err != nil {
+			oracle.log(ctx).WithError(err).Warn("failed to close oracle")
+		}
+	}()
 
 	if err != nil {
 		return err

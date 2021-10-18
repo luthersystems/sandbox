@@ -29,7 +29,7 @@ func newTestWriter(t *testing.T) *testWriter {
 func (tw testWriter) Write(p []byte) (n int, err error) {
 	for _, b := range p {
 		if b == '\n' {
-			tw.t.Log(string(tw.b.Bytes()))
+			tw.t.Log(tw.b.String())
 			tw.b.Reset()
 			continue
 		}
@@ -74,7 +74,7 @@ func newTestOracleFrom(t *testing.T, snapshot []byte, opts ...Option) (*Oracle, 
 
 	orcStop := func() {
 		err := server.Close()
-		require.Nil(t, err)
+		require.NoError(t, err)
 	}
 
 	return server, orcStop
@@ -83,7 +83,7 @@ func newTestOracleFrom(t *testing.T, snapshot []byte, opts ...Option) (*Oracle, 
 func snapshotServer(t *testing.T, oracle *Oracle) []byte {
 	var snapshot bytes.Buffer
 	err := oracle.phylum.MockSnapshot(&snapshot)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	return snapshot.Bytes()
 }
 
@@ -100,7 +100,7 @@ func TestSnapshot(t *testing.T) {
 		req := &pb.GetHealthCheckRequest{}
 		ctx := context.Background()
 		resp, err := server.HealthCheck(ctx, req)
-		require.Nil(t, err)
+		require.NoError(t, err)
 		require.Nil(t, resp.GetException())
 	}
 }
@@ -130,7 +130,7 @@ func TestHealthCheck(t *testing.T) {
 	defer stop()
 	ctx := context.Background()
 	resp, err := server.HealthCheck(ctx, &pb.GetHealthCheckRequest{})
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Equal(t, 2, len(resp.GetReports()))
 }
 

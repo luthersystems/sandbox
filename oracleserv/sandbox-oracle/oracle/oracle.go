@@ -256,8 +256,12 @@ func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.GetHealthCheckReques
 		Reports: reports,
 	}
 	if !healthy {
-		reportsJSON, _ := json.Marshal(resp)
-		orc.log(ctx).WithField("reports_json", string(reportsJSON)).Errorf("Oracle unhealthy")
+		reportsJSON, err := json.Marshal(resp)
+		if err != nil {
+			orc.log(ctx).WithError(err).Errorf("Oracle unhealthy")
+		} else {
+			orc.log(ctx).WithField("reports_json", string(reportsJSON)).Errorf("Oracle unhealthy")
+		}
 	}
 
 	return resp, nil
