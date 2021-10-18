@@ -25,13 +25,13 @@ GO_SOURCE_FILES=$(shell find ${PROJECT_REL_DIR} -name '*.go' | grep -v '/vendor/
 GO_PKG_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,pkg,${GO_PKG_VOLUME})
 GO_PKG_VOLUME_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,volume,${GO_PKG_VOLUME})
 
-GO_TEST_BASE=${GO_HOST_EXTRA_ENV} go test
-GO_TEST_TIMEOUT_10=${GO_TEST_BASE} -timeout 10m
-GO_TEST_TIMEOUT_35=${GO_TEST_BASE} -timeout 35m
-
 GO_BUILD_TAGS ?= osusergo,netgo,cgo
 GO_BUILD_FLAGS="-installsuffix ${GO_BUILD_TAGS} -tags ${GO_BUILD_TAGS}"
 GO_TEST_FLAGS ?= -cover
+
+GO_TEST_BASE=${GO_HOST_EXTRA_ENV} SUBSTRATEHCP_FILE=${PWD}/${SUBSTRATE_PLUGIN_DARWIN} go test ${GO_TEST_FLAGS}
+GO_TEST_TIMEOUT_10=${GO_TEST_BASE} -timeout 10m
+GO_TEST_TIMEOUT_35=${GO_TEST_BASE} -timeout 35m
 
 .PHONY: default
 default: docker-build
@@ -51,7 +51,7 @@ clean:
 
 .PHONY: go-test
 go-test:
-	env "${HOST_GO_ENV}" ${GO_TEST_TIMEOUT_10} ./...
+	${GO_TEST_TIMEOUT_10} ./...
 
 ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk ${PROJECT_REL_DIR}/Dockerfile
 	${MKDIR_P} $(dir $@)
