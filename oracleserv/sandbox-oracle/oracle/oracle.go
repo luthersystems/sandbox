@@ -142,15 +142,15 @@ func WithPhylum(gatewayEndpoint string) Option {
 }
 
 // WithMockPhylum runs the phylum in memory.
-func WithMockPhylum(version, path string) Option {
-	return WithMockPhylumFrom(version, path, nil)
+func WithMockPhylum(path string) Option {
+	return WithMockPhylumFrom(path, nil)
 }
 
 // WithMockPhylumFrom runs the phylum in memory from a snapshot.
-func WithMockPhylumFrom(version, path string, r io.Reader) Option {
+func WithMockPhylumFrom(path string, r io.Reader) Option {
 	return func(orc *Oracle) error {
 		orc.logBase.Infof("NewMock")
-		ph, err := phylum.NewMockFrom(version, path, orc.logBase, r)
+		ph, err := phylum.NewMockFrom(path, orc.logBase, r)
 		if err != nil {
 			return fmt.Errorf("unable to initialize mock phylum: %w", err)
 		}
@@ -256,8 +256,12 @@ func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.GetHealthCheckReques
 		Reports: reports,
 	}
 	if !healthy {
-		reportsJSON, _ := json.Marshal(resp)
-		orc.log(ctx).WithField("reports_json", string(reportsJSON)).Errorf("Oracle unhealthy")
+		reportsJSON, err := json.Marshal(resp)
+		if err != nil {
+			orc.log(ctx).WithError(err).Errorf("Oracle unhealthy")
+		} else {
+			orc.log(ctx).WithField("reports_json", string(reportsJSON)).Errorf("Oracle unhealthy")
+		}
 	}
 
 	return resp, nil

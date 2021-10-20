@@ -9,15 +9,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"github.com/hashicorp/go-hclog"
 	pb "github.com/luthersystems/sandbox/api/pb"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
+	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/mock"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/private"
-	"github.com/luthersystems/substratecommon"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -112,41 +110,29 @@ type Client struct {
 func New(endpoint string, log *logrus.Entry) (*Client, error) {
 	opts := []Config{
 		shiroclient.WithEndpoint(endpoint),
-		shiroclient.WithLog(log.Logger),
 		shiroclient.WithLogrusFields(log.Data),
 	}
 	client := &Client{
 		log: log,
-		rpc: shiroclient.NewRPC(opts...),
+		rpc: shiroclient.NewRPC(opts),
 	}
 	return client, nil
 }
 
 // NewMock returns a mock phylum client.
-func NewMock(phylumVersion string, phylumPath string, log *logrus.Entry) (*Client, error) {
-	return NewMockFrom(phylumVersion, phylumPath, log, nil)
+func NewMock(phylumPath string, log *logrus.Entry) (*Client, error) {
+	return NewMockFrom(phylumPath, log, nil)
 }
 
 // NewMockFrom returns a mock phylum client restored from a DB snapshot.
-func NewMockFrom(phylumVersion string, phylumPath string, log *logrus.Entry, r io.Reader) (*Client, error) {
-	const pluginEnv = "SUBSTRATEHCP_FILE"
-	pluginPath := os.Getenv(pluginEnv)
-	if pluginPath == "" {
-		return nil, fmt.Errorf("%s not found in environment", pluginEnv)
-	}
-	conn, err := substratecommon.NewSubstrateConnection(
-		substratecommon.ConnectWithCommand(pluginPath),
-		substratecommon.ConnectWithAttachStdamp(log.Writer()),
-		substratecommon.ConnectWithLogLevel(hclog.Info),
-	)
-	if err != nil {
-		return nil, err
-	}
-	opts := []Config{
-		shiroclient.WithLog(log.Logger),
+func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, error) {
+	clientOpts := []Config{
 		shiroclient.WithLogrusFields(log.Data),
 	}
-	mock, err := shiroclient.NewMockFrom(conn.GetSubstrate(), "sandbox", phylumVersion, r, opts...)
+	mockOpts := []mock.Option{
+		mock.WithSnapshotReader(r),
+	}
+	mock, err := shiroclient.NewMock(clientOpts, mockOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,12 +143,9 @@ func NewMockFrom(phylumVersion string, phylumPath string, log *logrus.Entry, r i
 		}
 	}
 	client := &Client{
-		log: log,
-		rpc: mock,
-		closeFunc: func() error {
-			defer conn.Close()
-			return mock.Close()
-		},
+		log:       log,
+		rpc:       mock,
+		closeFunc: mock.Close,
 	}
 	return client, nil
 }

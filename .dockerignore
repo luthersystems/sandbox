@@ -1,0 +1,19 @@
+# ignore build directories other than /build
+*/**/build
+# ignore most of /build
+/build/*
+!/build/substratehcp-linux*
+
+**/*.lisp
+**/*.md
+**/*.proto
+**/*.py
+**/*.yaml
+**/*_test.go
+**/.gitignore
+**/Makefile
+
+/common.*
+/compose
+/fabric
+/tests

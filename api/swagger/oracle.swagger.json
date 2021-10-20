@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Sandbox API",
-    "version": "0.1.0-SNAPSHOT (Jun 21 13:35)"
+    "version": "0.1.0-SNAPSHOT"
   },
   "schemes": [
     "https"

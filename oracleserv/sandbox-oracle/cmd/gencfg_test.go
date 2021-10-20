@@ -4,10 +4,10 @@ package cmd
 
 import (
 	"bytes"
-	"reflect"
 	"testing"
 
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )
 
@@ -30,9 +30,8 @@ func TestConfig(t *testing.T) {
 		GatewayEndpoint: "gateway-endpoint",
 	}
 	var yamlExample = []byte(pretty(expectCfg))
-	myViper.ReadConfig(bytes.NewBuffer(yamlExample))
+	err := myViper.ReadConfig(bytes.NewBuffer(yamlExample))
+	require.NoError(t, err)
 	gotCfg := getConfig()
-	if !reflect.DeepEqual(expectCfg, gotCfg) {
-		t.Errorf("Unexpected config\n-- Got:\n%v\n-- Expected:\n%v\n", pretty(gotCfg), pretty(expectCfg))
-	}
+	require.Equal(t, expectCfg, gotCfg)
 }

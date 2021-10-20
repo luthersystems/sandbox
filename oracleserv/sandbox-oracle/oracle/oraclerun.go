@@ -102,13 +102,18 @@ func Run(config *Config) error {
 
 	opts := []Option{}
 	if config.EmulateCC {
-		opts = append(opts, WithMockPhylum(config.PhylumVersion, config.PhylumPath))
+		opts = append(opts, WithMockPhylum(config.PhylumPath))
 	}
 	oracle, err := New(config, opts...)
 	if err != nil {
 		return err
 	}
-	defer oracle.Close()
+	defer func() {
+		err := oracle.Close()
+		if err != nil {
+			oracle.log(ctx).WithError(err).Warn("failed to close oracle")
+		}
+	}()
 
 	if err != nil {
 		return err

@@ -9,15 +9,16 @@
 # artifacts created during the build process.
 PROJECT=sandbox
 VERSION=0.1.0-SNAPSHOT
+SERVICE_DIR=oracleserv/sandbox-oracle
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=0.0.42
+BUILDENV_TAG=0.0.45
 
 # These variables control the version numbers for parts of the LEIA platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=2.160.0-fabric2
+SUBSTRATE_VERSION=2.162.0-fabric2
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${SUBSTRATE_VERSION}
