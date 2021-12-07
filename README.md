@@ -64,7 +64,7 @@ xcode-select --install
 
 If you are running Ubuntu 20.04+ you can use the commands to install the dependencies:
 ```
-sudo apt update && sudo apt install make jq zip gcc python3-pip
+sudo apt update && sudo apt install make jq zip gcc python3-pip golang-1.16
 ```
 
 Install docker using the official [steps](https://docs.docker.com/engine/install/ubuntu/).
