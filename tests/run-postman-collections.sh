@@ -1,6 +1,5 @@
-# Copyright © 2021 Luther Systems, Ltd. All right reserved.
-
 #!/bin/bash
+# Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
 POSTMAN_ENVIRONMENT_FILE="$1"
 SCRIPT="${BASH_SOURCE:-$0}"

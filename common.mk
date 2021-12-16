@@ -12,11 +12,13 @@
 # PROJECT_REL_DIR is the (relative) path to the repository's root directory.
 # This facilitates cross-directory make dependencies.
 PROJECT_REL_DIR ?= .
+PROJECT_ABS_DIR=$(abspath ${PROJECT_REL_DIR})
 
 include ${PROJECT_REL_DIR}/common.config.mk
 
 PROJECT_PATH=$(shell awk '$$1 == "module" {print $$2};' ${PROJECT_REL_DIR}/go.mod)
-LICENSE_FILE=${HOME}/.luther-license.yaml
+LICENSE_FILE_ROOT=${DOCKER_PROJECT_DIR}/.luther-license.yaml
+LICENSE_FILE=${PROJECT_ABS_DIR}/.luther-license.yaml
 PRESIGNED_PATH=${PROJECT_REL_DIR}/build/presigned.json
 
 BUILD_ID=$(shell git rev-parse --short HEAD)
@@ -31,10 +33,17 @@ NETWORK_BUILDER_IMAGE=luthersystems/fabric-network-builder
 SHIROTESTER_IMAGE=luthersystems/shirotester:${SHIROTESTER_VERSION}
 MARTIN_IMAGE=luthersystems/martin:${MARTIN_VERSION}
 
+UNAME := $(shell uname)
 SUBSTRATE_PLUGIN_OS=${PROJECT_REL_DIR}/build/substratehcp-$(1)-amd64-${SUBSTRATE_VERSION}
 SUBSTRATE_PLUGIN_LINUX=$(call SUBSTRATE_PLUGIN_OS,linux)
 SUBSTRATE_PLUGIN_DARWIN=$(call SUBSTRATE_PLUGIN_OS,darwin)
 SUBSTRATE_PLUGIN=${SUBSTRATE_PLUGIN_DARWIN} ${SUBSTRATE_PLUGIN_LINUX}
+ifeq ($(UNAME), Linux)
+SUBSTRATE_PLUGIN_PLATFORM_TARGETED=${SUBSTRATE_PLUGIN_LINUX}
+endif
+ifeq ($(UNAME), Darwin)
+SUBSTRATE_PLUGIN_PLATFORM_TARGETED=${SUBSTRATE_PLUGIN_DARWIN}
+endif
 
 GO_PKG_VOLUME=${PROJECT}-build-gopath-pkg
 GO_PKG_PATH=/go/pkg
@@ -72,12 +81,15 @@ PRESIGN_DUMMY=$(call DUMMY_TARGET,presign,$(1))
 STATIC_PLUGINS_DUMMY=$(call PLUGIN_DUMMY,${SUBSTRATE_VERSION})
 STATIC_PRESIGN_DUMMY=$(abspath ${PROJECT_REL_DIR}/$(call PRESIGN_DUMMY,${SUBSTRATE_VERSION}))
 
-UNAME := $(shell uname)
 GIT_LS_FILES=$(shell git ls-files $(1))
 
 DOCKER_WIN_DIR=$(shell cygpath -wm $(realpath $(1)))
 DOCKER_NIX_DIR=$(realpath $(1))
 DOCKER_DIR=$(if $(IS_WINDOWS),$(call DOCKER_WIN_DIR, $(1)),$(call DOCKER_NIX_DIR, $(1)))
+
+CODESPACE_DOCKER_PROJECT_DIR:=$(abspath ${LOCAL_WORKSPACE_FOLDER})
+STANDALONE_DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})
+DOCKER_PROJECT_DIR:=$(if $(LOCAL_WORKSPACE_FOLDER),${CODESPACE_DOCKER_PROJECT_DIR},${STANDALONE_DOCKER_PROJECT_DIR})
 
 # print out make variables, e.g.:
 # make echo:VERSION

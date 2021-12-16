@@ -7,7 +7,6 @@
 
 PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
-DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 
 GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
