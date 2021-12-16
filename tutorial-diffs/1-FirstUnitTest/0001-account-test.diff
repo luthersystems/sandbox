@@ -1,0 +1,15 @@
+diff --git a/phylum/utils_test.lisp b/phylum/utils_test.lisp
+index f859e17..f789dbe 100644
+--- a/phylum/utils_test.lisp
++++ b/phylum/utils_test.lisp
+@@ -13,7 +13,6 @@
+     (assert-equal 50 (get (create-account! person1 50) "current_balance"))
+     (assert-equal 100 (get (get-account person0) "current_balance"))
+     (assert (account-transfer! person0 person1 25))
+-    (assert (account-transfer! person1 person0 100))
+-    (assert (account-do person0 account-found?))
+-    (assert-equal -25 (account-do person1 get-balance))
+-    (assert-equal 175 (account-do person0 get-balance))))
++    (assert-not (account-transfer! person1 person0 100))
++    (assert-equal 75 (get (get-account person0) "current_balance"))
++    (assert-equal 75 (get (get-account person1) "current_balance"))))
