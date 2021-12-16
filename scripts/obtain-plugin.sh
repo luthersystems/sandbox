@@ -27,9 +27,6 @@ download-plugin() {
     chmod +x "$path"
 }
 
-for os in linux darwin
-do
-    download-plugin $os
-done
+download-plugin $(uname)
 
 echo "+OK (obtain-plugin.sh)"
