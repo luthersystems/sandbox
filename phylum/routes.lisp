@@ -79,6 +79,7 @@
 
 ; make a payment of x units from entity a to entity b
 (defendpoint "transfer" (xfer)
+  (trace xfer "TRANSFER")
   (let* ([payer-id (get xfer "payer_id")]
          [payee-id (get xfer "payee_id")]
          [xfer-amount (to-int (get xfer "transfer_amount"))])
