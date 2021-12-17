@@ -1,0 +1,16 @@
+diff --git a/api/pb/oracle.proto b/api/pb/oracle.proto
+index c0862d0..565ed7f 100644
+--- a/api/pb/oracle.proto
++++ b/api/pb/oracle.proto
+@@ -75,3 +75,11 @@ message Account {
+   int64 current_balance = 2;
+   string name = 3;
+ }
++
++message DeleteAccountRequest {
++  string account_id = 1;
++}
++
++message DeleteAccountResponse {
++  common.Exception exception = 1;
++}

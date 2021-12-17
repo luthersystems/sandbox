@@ -1,0 +1,13 @@
+diff --git a/oracleserv/sandbox-oracle/oracle/oracle.go b/oracleserv/sandbox-oracle/oracle/oracle.go
+index 1b7d645..0412ec7 100644
+--- a/oracleserv/sandbox-oracle/oracle/oracle.go
++++ b/oracleserv/sandbox-oracle/oracle/oracle.go
+@@ -289,3 +289,8 @@ func (orc *Oracle) Transfer(ctx context.Context, in *pb.TransferRequest) (*pb.Tr
+ func (orc *Oracle) Close() error {
+ 	return orc.phylum.Close()
+ }
++
++func (orc *Oracle) DeleteAccount(ctx context.Context, in *pb.DeleteAccountRequest) (*pb.DeleteAccountResponse, error) {
++	sopts := orc.txConfigs(ctx)
++	return orc.phylum.DeleteAccount(ctx, in, sopts...)
++}

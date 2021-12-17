@@ -1,0 +1,20 @@
+diff --git a/phylum/utils.lisp b/phylum/utils.lisp
+index 531ce1a..9f92528 100644
+--- a/phylum/utils.lisp
++++ b/phylum/utils.lisp
+@@ -47,7 +47,6 @@
+                              (put-account! acct-id balance)))))
+ 
+         ;; account-transfer! moves amount units between two accounts.
+-        ;; account-transfer! will allow account balances to go negative.
+         (defun account-transfer! (from-id to-id amount)
+           (account-do from-id
+                       (lambda (from-found? from-bal)
+@@ -55,6 +54,7 @@
+                              (account-do to-id
+                                          (lambda (to-found? to-bal)
+                                            (and to-found?
++                                                (>= (- from-bal amount) 0)
+                                                 (put-account! from-id (- from-bal amount))
+                                                 (put-account! to-id (+ to-bal amount)))))))))
+ 

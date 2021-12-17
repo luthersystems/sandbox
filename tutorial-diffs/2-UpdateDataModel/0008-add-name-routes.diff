@@ -1,0 +1,13 @@
+diff --git a/phylum/routes.lisp b/phylum/routes.lisp
+index fdb34e4..c315e72 100644
+--- a/phylum/routes.lisp
++++ b/phylum/routes.lisp
+@@ -66,7 +66,7 @@
+ ; initialize entities a and b to integer values
+ (defendpoint "create_account" (create)
+   (let* ([acct (get create "account")])
+-    (if (create-account! (get acct "account_id") (to-int (get acct "current_balance")))
++    (if (create-account! (get acct "account_id") (to-int (get acct "current_balance")) (get acct "name"))
+       (route-success ())
+       (set-exception-business "account_id already exists"))))
+ 

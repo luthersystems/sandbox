@@ -1,0 +1,12 @@
+diff --git a/tests/example/account.martin_collection.yaml b/tests/example/account.martin_collection.yaml
+index 2a4e686..69515ac 100644
+--- a/tests/example/account.martin_collection.yaml
++++ b/tests/example/account.martin_collection.yaml
+@@ -25,6 +25,7 @@ tests:
+       path: "v1/accounts/{{ACCT2}}"
+       body: |
+           {
++            "name": "Martin",
+             "current_balance": 100
+           }
+       setup_script: |

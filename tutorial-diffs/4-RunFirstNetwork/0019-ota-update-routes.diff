@@ -1,0 +1,12 @@
+diff --git a/phylum/routes.lisp b/phylum/routes.lisp
+index fdb34e4..36684ac 100644
+--- a/phylum/routes.lisp
++++ b/phylum/routes.lisp
+@@ -79,6 +79,7 @@
+ 
+ ; make a payment of x units from entity a to entity b
+ (defendpoint "transfer" (xfer)
++  (trace xfer "TRANSFER")
+   (let* ([payer-id (get xfer "payer_id")]
+          [payee-id (get xfer "payee_id")]
+          [xfer-amount (to-int (get xfer "transfer_amount"))])

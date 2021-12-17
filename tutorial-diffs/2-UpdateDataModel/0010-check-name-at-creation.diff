@@ -1,0 +1,29 @@
+diff --git a/phylum/utils.lisp b/phylum/utils.lisp
+index 5a9d22b..842557e 100644
+--- a/phylum/utils.lisp
++++ b/phylum/utils.lisp
+@@ -30,20 +30,20 @@
+         ;; create-account! creates a new account record in statedb and records an
+         ;; account object.  If the given acct-id already exists in statedb
+         ;; create-account! does nothing and returns nil.
+-        (defun create-account! (acct-id balance)
++        (defun create-account! (acct-id balance &optional name)
+           (account-do acct-id
+                       (lambda (found? _)
+                         (and (not found?)
+                              (>= balance 0)
+                              (put-account! acct-id balance)
+-                             (make-account acct-id balance)))))
+-
++                             (put-account-name! acct-id name)
++                             (make-account acct-id balance name)))))
+         ;; get-account retrieves an account record from statedb.  If the given
+         ;; account does not exist a nil value is returned.
+         (defun get-account (acct-id)
+           (account-do acct-id
+                       (lambda (found? balance)
+-                        (if found? (make-account acct-id balance) '()))))
++                        (if found? (make-account acct-id balance (get-account-name acct-id)) '()))))
+ 
+         ;; set-balance! sets the balance in the specified account and returns true.
+         ;; If the specified account does not exist set-balance! returns false.
