@@ -1,0 +1,12 @@
+diff --git a/phylum/utils.lisp b/phylum/utils.lisp
+index 9f92528..da3033c 100644
+--- a/phylum/utils.lisp
++++ b/phylum/utils.lisp
+@@ -28,6 +28,7 @@
+           (account-do acct-id
+                       (lambda (found? _)
+                         (and (not found?)
++                             (>= balance 0)
+                              (put-account! acct-id balance)
+                              (make-account acct-id balance)))))
+ 

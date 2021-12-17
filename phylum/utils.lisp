@@ -28,6 +28,7 @@
           (account-do acct-id
                       (lambda (found? _)
                         (and (not found?)
+                             (>= balance 0)
                              (put-account! acct-id balance)
                              (make-account acct-id balance)))))
 

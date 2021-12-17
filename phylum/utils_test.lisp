@@ -16,3 +16,7 @@
     (assert-not (account-transfer! person1 person0 100))
     (assert-equal 75 (get (get-account person0) "current_balance"))
     (assert-equal 75 (get (get-account person1) "current_balance"))))
+
+(test "no-negative-accounts"
+  (let ([person0 "person0"])
+    (assert-not (create-account! person0 -100))))
