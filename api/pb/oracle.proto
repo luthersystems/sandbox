@@ -73,4 +73,5 @@ message TransferResponse {
 message Account {
   string account_id = 1;
   int64 current_balance = 2;
+  string name = 3;
 }

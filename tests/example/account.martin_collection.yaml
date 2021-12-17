@@ -25,6 +25,7 @@ tests:
       path: "v1/accounts/{{ACCT2}}"
       body: |
           {
+            "name": "Martin",
             "current_balance": 100
           }
       setup_script: |
