@@ -22,6 +22,10 @@
           (cc:infof (sorted-map "account_id" acct-id) "GET")
           (let* ([balance (statedb:get acct-id)])
             (if (nil? balance) '() (to-int balance)))]
+         [delete-account! (acct-id)
+          (cc:infof (sorted-map "account_id" acct-id) "DELETE")
+          (statedb:put acct-id '())
+          true]
          [put-account! (acct-id balance)
           (cc:infof (sorted-map "account_id" acct-id "balance" balance) "PUT")
           (statedb:put acct-id (to-int balance))
@@ -38,6 +42,12 @@
                              (put-account! acct-id balance)
                              (put-account-name! acct-id name)
                              (make-account acct-id balance name)))))
+
+        (defun delete-account! (acct-id)
+          (account-do acct-id
+                      (lambda (found? balance)
+                        (if found? (delete-account! acct-id) '()))))
+
         ;; get-account retrieves an account record from statedb.  If the given
         ;; account does not exist a nil value is returned.
         (defun get-account (acct-id)

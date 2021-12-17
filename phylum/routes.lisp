@@ -85,3 +85,10 @@
     (if (account-transfer! payer-id payee-id xfer-amount)
       (route-success ())
       (set-exception-business "account does not exist"))))
+
+; initialize entities a and b to integer values
+(defendpoint "delete_account" (acct)
+  (let* ([id (get acct "account_id")])
+    (if (delete-account! id)
+      (route-success ())
+      (set-exception-business "account does not exist"))))

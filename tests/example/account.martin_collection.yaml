@@ -69,3 +69,14 @@ tests:
               pm.expect(data.account.current_balance).to.equal('120');
               pm.expect(data.account.name).to.equal("Martin");
           });
+
+    - name: "Delete Account: 1"
+      method: DELETE
+      path: "v1/accounts/{{ACCT1}}"
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("exception");
+            });
