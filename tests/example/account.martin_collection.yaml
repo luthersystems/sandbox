@@ -67,4 +67,5 @@ tests:
               pm.expect(data.account.account_id).to.equal(pm.environment.get("ACCT2"));
               // int64 protobuf fields come out as strings in javascript
               pm.expect(data.account.current_balance).to.equal('120');
+              pm.expect(data.account.name).to.equal("Martin");
           });
