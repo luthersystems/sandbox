@@ -150,6 +150,10 @@ func TestCreateAccount(t *testing.T) {
 				assert.NotNil(t, resp.Exception)
 			}
 		}
+		_, err = server.DeleteAccount(ctx, &pb.DeleteAccountRequest{
+			AccountId: "abc",
+		})
+		assert.Nil(t, err)
 	}
 }
 

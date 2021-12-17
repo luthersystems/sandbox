@@ -51,6 +51,9 @@ var (
 	phylumTransfer = &phylumMethod{
 		method: "transfer",
 	}
+	phylumDeleteAccount = &phylumMethod{
+		method: "delete_account",
+	}
 )
 
 func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err error) {
@@ -283,6 +286,15 @@ func (s *Client) GetAccount(ctx context.Context, req *pb.GetAccountRequest, conf
 func (s *Client) Transfer(ctx context.Context, req *pb.TransferRequest, config ...Config) (*pb.TransferResponse, error) {
 	resp := &pb.TransferResponse{}
 	err := s.callMethod(ctx, phylumTransfer, cmdParams(req), resp, config)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *Client) DeleteAccount(ctx context.Context, req *pb.DeleteAccountRequest, config ...Config) (*pb.DeleteAccountResponse, error) {
+	resp := &pb.DeleteAccountResponse{}
+	err := s.callMethod(ctx, phylumDeleteAccount, cmdParams(req), resp, config)
 	if err != nil {
 		return nil, err
 	}

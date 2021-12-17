@@ -1,0 +1,17 @@
+diff --git a/api/srvpb/oracle.proto b/api/srvpb/oracle.proto
+index de9fa94..13b5008 100644
+--- a/api/srvpb/oracle.proto
++++ b/api/srvpb/oracle.proto
+@@ -152,4 +152,12 @@ service SandboxProcessor {
+       tags: "Service"
+     };
+   }
++  rpc DeleteAccount(cdm.DeleteAccountRequest) returns (cdm.DeleteAccountResponse) {
++    option (google.api.http) = {
++      delete: "/v1/accounts/{account_id}"
++    };
++    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
++      tags: "Service"
++    };
++  }
+ }

@@ -75,3 +75,11 @@ message Account {
   int64 current_balance = 2;
   string name = 3;
 }
+
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+message DeleteAccountResponse {
+  common.Exception exception = 1;
+}

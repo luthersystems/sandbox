@@ -152,4 +152,12 @@ service SandboxProcessor {
       tags: "Service"
     };
   }
+  rpc DeleteAccount(cdm.DeleteAccountRequest) returns (cdm.DeleteAccountResponse) {
+    option (google.api.http) = {
+      delete: "/v1/accounts/{account_id}"
+    };
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
 }

@@ -1,0 +1,15 @@
+diff --git a/oracleserv/sandbox-oracle/oracle/oracle_test.go b/oracleserv/sandbox-oracle/oracle/oracle_test.go
+index 6e18624..8b9e634 100644
+--- a/oracleserv/sandbox-oracle/oracle/oracle_test.go
++++ b/oracleserv/sandbox-oracle/oracle/oracle_test.go
+@@ -150,6 +150,10 @@ func TestCreateAccount(t *testing.T) {
+ 				assert.NotNil(t, resp.Exception)
+ 			}
+ 		}
++		_, err = server.DeleteAccount(ctx, &pb.DeleteAccountRequest{
++			AccountId: "abc",
++		})
++		assert.Nil(t, err)
+ 	}
+ }
+ 

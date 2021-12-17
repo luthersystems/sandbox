@@ -289,3 +289,8 @@ func (orc *Oracle) Transfer(ctx context.Context, in *pb.TransferRequest) (*pb.Tr
 func (orc *Oracle) Close() error {
 	return orc.phylum.Close()
 }
+
+func (orc *Oracle) DeleteAccount(ctx context.Context, in *pb.DeleteAccountRequest) (*pb.DeleteAccountResponse, error) {
+	sopts := orc.txConfigs(ctx)
+	return orc.phylum.DeleteAccount(ctx, in, sopts...)
+}
