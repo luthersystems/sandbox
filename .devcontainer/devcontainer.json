@@ -26,6 +26,7 @@
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
+	"remoteEnv": { "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}" },
 	"features": {
 		"docker-from-docker": {
 			"version": "latest",
@@ -35,5 +36,6 @@
 		"git-lfs": "latest",
 		"python": "latest",
 		"golang": "latest"
-	}
+	},
+	"postCreateCommand": "sudo apt-get install time"
 }
