@@ -20,6 +20,7 @@ services:
       - CORE_CHAINCODE_BUILDER=$IMAGE_NS/fabric-ccenv:$IMAGE_TAG
       - CORE_CHAINCODE_STARTUPTIMEOUT=500s
       - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+      - DOCKER_PROJECT_DIR
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     volumes:
