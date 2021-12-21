@@ -21,6 +21,8 @@ CC_PATH=chaincodes/${CC_FILE}
 # path within cli docker container of chaincode
 CC_MOUNT_PATH=/chaincodes/${CC_FILE}
 
+FABRIC_DIR := ${DOCKER_PROJECT_DIR}/fabric
+
 PHYLUM_VERSION_FILE=./build/phylum_version
 
 # DOCKER_CHOWN_USER differs from CHOWN_USER because DOCKER_CHOWN_USER needs to
@@ -97,7 +99,7 @@ channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
 	rm -rf ./crypto-config ./channel-artifacts
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${DOCKER_PROJECT_DIR}/fabric:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
 			--domain=luther.systems \
@@ -112,7 +114,7 @@ up: fnb-up gateway-up
 fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
@@ -121,7 +123,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/gene
 fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" extend \
@@ -131,7 +133,7 @@ fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		-e CHANNEL=${CHANNEL} \
@@ -145,7 +147,7 @@ all: install
 install: ${NETWORK_BUILDER_TARGET} ${CC_PATH}
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force install \
@@ -171,7 +173,7 @@ start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
@@ -195,7 +197,7 @@ notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp bu
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_${ccname}/phylum.zip):/tmp/phylum.zip:ro" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
@@ -220,7 +222,7 @@ fnb-down: ${NETWORK_BUILDER_TARGET}
 	-rm -f "${PHYLUM_VERSION_FILE}"
 	-${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" down
@@ -248,7 +250,7 @@ shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp bui
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_$*/phylum.zip):/tmp/phylum.zip:ro" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -265,7 +267,7 @@ call_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -285,7 +287,7 @@ enable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -304,7 +306,7 @@ disable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -322,7 +324,7 @@ metadump_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -340,7 +342,7 @@ get_phyla-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
 		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
