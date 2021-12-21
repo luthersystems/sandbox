@@ -97,7 +97,7 @@ channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
 	rm -rf ./crypto-config ./channel-artifacts
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${DOCKER_PROJECT_DIR}/fabric:${CURDIR}" \
 		-w "${CURDIR}" \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
 			--domain=luther.systems \
