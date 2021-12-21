@@ -33,6 +33,5 @@
 			"moby": true
 		},
 		"golang": "latest"
-	},
-	"postCreateCommand": "sudo apt-get install time"
+	}
 }

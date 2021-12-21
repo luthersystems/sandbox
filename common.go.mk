@@ -32,6 +32,8 @@ GO_TEST_BASE=${GO_HOST_EXTRA_ENV} SUBSTRATEHCP_FILE=${PWD}/${SUBSTRATE_PLUGIN_PL
 GO_TEST_TIMEOUT_10=${GO_TEST_BASE} -timeout 10m
 GO_TEST_TIMEOUT_35=${GO_TEST_BASE} -timeout 35m
 
+GET_TIME=${PROJECT_ABS_DIR}/scripts/get-time.sh
+
 .PHONY: default
 default: docker-build
 	@
@@ -54,6 +56,7 @@ go-test:
 
 ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk ${PROJECT_REL_DIR}/Dockerfile
 	${MKDIR_P} $(dir $@)
+	${GET_TIME}
 	@echo "Building image ${DOCKER_IMAGE}"
 	${TIME_P} ${DOCKER} build \
 		--build-arg "BUILD_IMAGE=${BUILD_IMAGE}" \
@@ -70,6 +73,7 @@ ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 
 .PHONY: static-checks
 static-checks: ${GO_PKG_DUMMY}
+	${GET_TIME}
 	${TIME_P} ${DOCKER_RUN} \
 		${GO_PKG_MOUNT} \
 		-e "GONOSUMDB=${GONOSUMDB}" \
