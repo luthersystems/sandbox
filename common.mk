@@ -12,11 +12,12 @@
 # PROJECT_REL_DIR is the (relative) path to the repository's root directory.
 # This facilitates cross-directory make dependencies.
 PROJECT_REL_DIR ?= .
+PROJECT_ABS_DIR=$(shell realpath ${PROJECT_REL_DIR})
 
 include ${PROJECT_REL_DIR}/common.config.mk
 
 PROJECT_PATH=$(shell awk '$$1 == "module" {print $$2};' ${PROJECT_REL_DIR}/go.mod)
-LICENSE_FILE=${HOME}/.luther-license.yaml
+LICENSE_FILE=${PROJECT_ABS_DIR}/.luther-license.yaml
 PRESIGNED_PATH=${PROJECT_REL_DIR}/build/presigned.json
 
 BUILD_ID=$(shell git rev-parse --short HEAD)
