@@ -179,7 +179,7 @@ start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -204,7 +204,7 @@ notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp bu
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_${ccname}/phylum.zip):/tmp/phylum.zip:ro" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -259,7 +259,7 @@ shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp bui
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_$*/phylum.zip):/tmp/phylum.zip:ro" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		-e DOCKER_PROJECT_DIR \
@@ -277,7 +277,7 @@ call_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		-e DOCKER_PROJECT_DIR \
@@ -298,7 +298,7 @@ enable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		-e DOCKER_PROJECT_DIR \
@@ -318,7 +318,7 @@ disable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		-e DOCKER_PROJECT_DIR \
@@ -337,7 +337,7 @@ metadump_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		-e DOCKER_PROJECT_DIR \
@@ -356,7 +356,7 @@ get_phyla-%: ${PHYLUM_VERSION_FILE}_exists
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		-e DOCKER_PROJECT_DIR \
