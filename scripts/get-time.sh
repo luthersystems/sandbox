@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ -n $(which time) ]; then
+if [ -z $(which time) ]; then
     UNAME=$(uname)
     if [ "$UNAME" == "Linux" ]; then
         sudo apt-get install time
