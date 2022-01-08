@@ -117,7 +117,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/gene
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
-		-e DOCKER_PROJECT_DIR \
+		-e DOCKER_PROJECT_DIR="${DOCKER_PROJECT_DIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
 
@@ -231,7 +231,7 @@ fnb-down: ${NETWORK_BUILDER_TARGET}
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
-		-e DOCKER_PROJECT_DIR \
+		-e DOCKER_PROJECT_DIR="${DOCKER_PROJECT_DIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" down
 
