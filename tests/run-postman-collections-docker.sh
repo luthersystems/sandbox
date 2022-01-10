@@ -32,8 +32,8 @@ docker network inspect fnb_byfn 1>/dev/null 2>/dev/null
 RESULT="$?"
 if [ $RESULT -eq 0 ]; then
 	echo ${MARTIN_NETWORK}
-	${MARTIN_NETWORK} ${MARTIN_BIND_DEST}/run-postman-collections.sh "$@"
+	${MARTIN_NETWORK} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"
 else
 	echo ${MARTIN}
-	${MARTIN} ${MARTIN_BIND_DEST}/run-postman-collections.sh "$@"
+	${MARTIN} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"
 fi
