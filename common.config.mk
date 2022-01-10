@@ -18,7 +18,7 @@ BUILDENV_TAG=0.0.45
 # These variables control the version numbers for parts of the LEIA platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=2.162.0-fabric2
+SUBSTRATE_VERSION=2.167.0-fabric2
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${SUBSTRATE_VERSION}
