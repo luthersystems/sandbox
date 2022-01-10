@@ -3,6 +3,8 @@
 PROJECT_REL_DIR=..
 include ${PROJECT_REL_DIR}/common.mk
 
+TESTS_DIR=${PROJECT_ABS_DIR}/tests
+
 LOCAL_POSTMAN_ENVIRONMENT=Docker.postman_environment.json
 
 MARTIN_ENV_OPTS=
@@ -33,7 +35,7 @@ build: ${POSTMAN_JSON}
 
 .PHONY: test-docker
 test-docker:
-	./run-postman-collections-docker.sh ${LOCAL_POSTMAN_ENVIRONMENT}
+	${TESTS_DIR}/run-postman-collections-docker.sh ${LOCAL_POSTMAN_ENVIRONMENT}
 
 ${POSTMAN_JSON}: ${POSTMAN_SOURCE_FILES}
 	cd ../ && ./tests/cat-postman-collections-docker.sh > tests/$@
