@@ -248,10 +248,6 @@ ${PHYLUM_VERSION_FILE}:
 ${PHYLUM_VERSION_FILE}_exists:
 	@test -f ${PHYLUM_VERSION_FILE}
 
-.PHONY: init
-all: init
-init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
-
 shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} -it \
 		-u ${DOCKER_USER} \

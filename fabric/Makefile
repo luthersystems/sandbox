@@ -7,3 +7,4 @@ CC_VERSION=${SUBSTRATE_VERSION}
 
 PROJECT_REL_DIR=..
 include ${PROJECT_REL_DIR}/common.fabric.mk
+include ${PROJECT_REL_DIR}/fabric/common.fullnetwork.mk
