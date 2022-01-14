@@ -6,5 +6,4 @@ BASE_IMAGE_TAG=amd64-0.4.20
 CC_VERSION=${SUBSTRATE_VERSION}
 
 PROJECT_REL_DIR=..
-include ${PROJECT_REL_DIR}/common.fabric.mk
-include ${PROJECT_REL_DIR}/fabric/common.fullnetwork.mk
+include ${PROJECT_REL_DIR}/fabric/common.fabric.mk

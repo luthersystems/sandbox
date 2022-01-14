@@ -103,11 +103,6 @@ mem-up: all mem-down
 mem-down:
 	-./${PROJECT}_compose.py mem down
 
-# citest runs unit tests and integration tests within containers, like CI.
-.PHONY: citest
-citest: plugin lint gosec unit integrationcitest
-	@
-
 .PHONY: unit
 unit: unit-oracle unit-other
 	@echo "all tests passed"
@@ -119,19 +114,6 @@ unit-other: phylumtest
 .PHONY: unit-oracle
 unit-oracle: oraclegotest
 	@echo "service tests passed"
-
-# NOTE:  The `citest` target manages creating/destroying a compose network.  To
-# run tests repeatedly execute the `integration` target directly.
-.PHONY: integrationcitest
-# The `down` wouldn't execute without this syntax
-integrationcitest:
-	$(MAKE) up
-	$(MAKE) integration
-	$(MAKE) down
-
-.PHONY: integration
-integration:
-	cd tests && $(MAKE) test-docker
 
 .PHONY: repl
 repl:

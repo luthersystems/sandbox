@@ -1,11 +1,30 @@
-# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+# Copyright © 2021 Luther Systems, Ltd. All rights reserved.
 
 # common.fabric.mk
 #
 # A base makefile for running fabric networks locally with docker-compose.
+# Targets which are only used in the 'full' network,
+# not in the in-memory network, are disabled within Codespaces.
 
-PROJECT_REL_DIR ?= .
+.PHONY: clean
+clean:
+	rm -rf build
+	rm -rf chaincodes/*.tar.gz
+
+.PHONY: pristine
+pristine: clean clean-generated
+
+.PHONY: clean-generated
+clean-generated:
+	rm -rf \
+		channel-artifacts \
+		crypto-config
+
+PROJECT_REL_DIR ?= ..
 include ${PROJECT_REL_DIR}/common.mk
+
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+# All the non-cleaning targets of Fabric do not work in the in-memory network and so are disabled in codespace
 
 FABRIC_ORG ?= org1
 FABRIC_DOMAIN ?= luther.systems
@@ -79,72 +98,6 @@ clean-generated:
 	rm -rf \
 		channel-artifacts \
 		crypto-config
-
-.PHONY: go-test
-go-test:
-	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go test -race -cover -v ./...
-	$(MAKE) functional-tests
-
-.PHONY: functional-tests
-functional-tests: ${FUNCTIONAL_TEST_PHYLA}
-
-functional-test-phylum-%: compile-phylum-%
-	# NOTE: shirotester path must be relative to properly work within docker container.
-	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go run ../lib/shiro/shirotester/main.go functional-tests --verbose phylum_$*/testfixtures/*.yaml
-
-.PHONY: generate-assets
-generate-assets: channel-artifacts/genesis.block
-
-channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
-	rm -rf ./crypto-config ./channel-artifacts
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${FABRIC_DIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e DOCKER_PROJECT_DIR \
-		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
-			--domain=luther.systems \
-			--cc-name="${CC_NAME}" \
-			${GENERATE_OPTS} --no-template
-
-.PHONY: up
-all: up
-up: fnb-up gateway-up
-
-.PHONY: fnb-up
-fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${FABRIC_DIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e DOCKER_PROJECT_DIR="${DOCKER_PROJECT_DIR}" \
-		-e FABRIC_LOGGING_SPEC \
-		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
-
-.PHONY: fnb-extend
-fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${FABRIC_DIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e DOCKER_PROJECT_DIR \
-		-e FABRIC_LOGGING_SPEC \
-		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" extend \
-			--domain-name=luther.systems
-
-.PHONY: fnb-shell
-fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${FABRIC_DIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e DOCKER_PROJECT_DIR \
-		-e FABRIC_LOGGING_SPEC \
-		-e CHANNEL=${CHANNEL} \
-		-e FABRIC_DOMAIN=luther.systems \
-		-e FABRIC_DBMODE="${DBMODE}" \
-		--entrypoint bash \
-		${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
 
 .PHONY: install
 all: install
@@ -387,3 +340,75 @@ ${CC_PATH}: ${PRESIGNED_PATH}
 
 download: ${CC_PATH}
 	@
+
+.PHONY: init
+all: init
+init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
+
+.PHONY: up
+all: up
+up: fnb-up gateway-up
+
+.PHONY: fnb-up
+fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR="${DOCKER_PROJECT_DIR}" \
+		-e FABRIC_LOGGING_SPEC \
+		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
+
+.PHONY: fnb-extend
+fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
+		-e FABRIC_LOGGING_SPEC \
+		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" extend \
+			--domain-name=luther.systems
+
+.PHONY: fnb-shell
+fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
+		-e FABRIC_LOGGING_SPEC \
+		-e CHANNEL=${CHANNEL} \
+		-e FABRIC_DOMAIN=luther.systems \
+		-e FABRIC_DBMODE="${DBMODE}" \
+		--entrypoint bash \
+		${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
+
+.PHONY: go-test
+go-test:
+	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go test -race -cover -v ./...
+	$(MAKE) functional-tests
+
+.PHONY: functional-tests
+functional-tests: ${FUNCTIONAL_TEST_PHYLA}
+
+functional-test-phylum-%: compile-phylum-%
+	# NOTE: shirotester path must be relative to properly work within docker container.
+	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go run ../lib/shiro/shirotester/main.go functional-tests --verbose phylum_$*/testfixtures/*.yaml
+.PHONY: generate-assets
+generate-assets: channel-artifacts/genesis.block
+
+channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
+	rm -rf ./crypto-config ./channel-artifacts
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
+		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
+			--domain=luther.systems \
+			--cc-name="${CC_NAME}" \
+			${GENERATE_OPTS} --no-template
+
+
+endif

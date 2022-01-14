@@ -1,3 +1,10 @@
+# Copyright © 2022 Luther Systems, Ltd. All rights reserved.
+
+# common.fullnetwork.mk
+#
+# Portions of primary project makefile which are only used in the 'full' network,
+# not in the in-memory network. Not used within Codespaces.
+
 .PHONY: storage-up
 storage-up:
 	cd fabric && $(MAKE) up install init
@@ -29,3 +36,21 @@ init:
 .PHONY: upgrade
 upgrade: all service-down init service-up
 	@
+
+# citest runs unit tests and integration tests within containers, like CI.
+.PHONY: citest
+citest: plugin lint gosec unit integrationcitest
+	@
+
+# NOTE:  The `citest` target manages creating/destroying a compose network.  To
+# run tests repeatedly execute the `integration` target directly.
+.PHONY: integrationcitest
+# The `down` wouldn't execute without this syntax
+integrationcitest:
+	$(MAKE) up
+	$(MAKE) integration
+	$(MAKE) down
+
+.PHONY: integration
+integration:
+	cd tests && $(MAKE) test-docker
