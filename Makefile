@@ -98,6 +98,21 @@ clean: fabricclean
 fabricclean:
 	cd fabric && $(MAKE) clean
 
+.PHONY: up
+up: all mem-down
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+	make full-up
+else
+	$(error Target 'up' is for a full network, not supported in codespaces)
+endif
+
+.PHONY: down
+down: mem-down
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+	make full-down
+endif
+	@
+
 .PHONY: mem-up
 mem-up: all mem-down
 	./${PROJECT}_compose.py mem up -d

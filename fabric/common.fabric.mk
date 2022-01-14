@@ -86,7 +86,10 @@ images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
 .PHONY: clean
-clean:
+clean: fabric-clean
+
+.PHONY: fabric-clean
+fabric-clean:
 	rm -rf build
 	rm -rf chaincodes/*.tar.gz
 
@@ -94,10 +97,7 @@ clean:
 pristine: clean clean-generated
 
 .PHONY: clean-generated
-clean-generated:
-	rm -rf \
-		channel-artifacts \
-		crypto-config
+clean-generated: fabric-clean
 
 .PHONY: install
 all: install

@@ -22,11 +22,17 @@ service-down:
 	-./${PROJECT}_compose.py local down
 
 .PHONY: up
-up: all service-down storage-down storage-up service-up
+up: full-down full-up
+
+.PHONY: full-up
+full-up: all service-down storage-down storage-up service-up
 	@
 
 .PHONY: down
-down: service-down storage-down
+up: full-down
+
+.PHONY: full-down
+full-down: service-down storage-down
 	@
 
 .PHONY: init
