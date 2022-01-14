@@ -7,8 +7,11 @@
 
 PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
-include ${PROJECT_REL_DIR}/common.fullnetwork.mk
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
+
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+  include ${PROJECT_REL_DIR}/common.fullnetwork.mk
+endif
 
 GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
 GO_API_PACKAGES=./api/...
