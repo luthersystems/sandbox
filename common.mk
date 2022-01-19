@@ -12,7 +12,7 @@
 # PROJECT_REL_DIR is the (relative) path to the repository's root directory.
 # This facilitates cross-directory make dependencies.
 PROJECT_REL_DIR ?= .
-PROJECT_ABS_DIR=$(shell realpath ${PROJECT_REL_DIR})
+PROJECT_ABS_DIR=$(abspath ${PROJECT_REL_DIR})
 
 include ${PROJECT_REL_DIR}/common.config.mk
 
