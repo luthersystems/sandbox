@@ -43,10 +43,9 @@ init:
 upgrade: all service-down init service-up
 	@
 
-# citest runs unit tests and integration tests within containers, like CI.
+# additional prerequisite assuming it exists
 .PHONY: citest
-citest: plugin lint gosec unit integrationcitest
-	@
+citest: integrationcitest
 
 # NOTE:  The `citest` target manages creating/destroying a compose network.  To
 # run tests repeatedly execute the `integration` target directly.

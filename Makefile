@@ -121,6 +121,11 @@ mem-up: all mem-down
 mem-down:
 	-./${PROJECT}_compose.py mem down
 
+# citest runs unit tests and integration tests within containers, like CI.
+.PHONY: citest
+citest: plugin lint gosec unit
+	@
+
 .PHONY: unit
 unit: unit-oracle unit-other
 	@echo "all tests passed"
