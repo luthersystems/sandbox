@@ -38,7 +38,7 @@ Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-*IMPORTANT:* Place your license key in `~/.luther-license.yaml`.
+*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project root directory. (This is a change from previous versions, in order to support parallel Docker containers.)
 
 Ensure you have the [build dependencies and system requirements](https://docs.luthersystems.com/luther/application/start/local-system-requirements).
 

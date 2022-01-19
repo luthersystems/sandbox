@@ -15,7 +15,7 @@ services:
     #- AWS_SESSION_TOKEN
     #- AWS_REGION
     - SANDBOX_ORACLE_VERBOSE=true
-    - SANDBOX_ORACLE_PHYLUM_VERSION=${PHYLUM_VERSION}
+    - SANDBOX_ORACLE_PHYLUM_VERSION=${PHYLUM_VERSION-}
     volumes:
     - ${PROJECT_DIR:-..}/phylum:/opt/phylum:ro
     restart: always

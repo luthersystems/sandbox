@@ -3,10 +3,16 @@
 PROJECT_REL_DIR=..
 include ${PROJECT_REL_DIR}/common.mk
 
+TESTS_DIR=${PROJECT_ABS_DIR}/tests
+
 LOCAL_POSTMAN_ENVIRONMENT=Docker.postman_environment.json
 
 MARTIN_ENV_OPTS=
-MARTIN_COMMON_OPTS=-v "$(CURDIR)/${PROJECT_REL_DIR}":/etc/postman -w /etc/postman/tests ${MARTIN_ENV_OPTS} --entrypoint sh
+MARTIN_BIND_SOURCE=${PROJECT_ABS_DIR}
+MARTIN_BIND_DEST=/etc/postman
+MARTIN_BIND=${MARTIN_BIND_SOURCE}:${MARTIN_BIND_DEST}
+
+MARTIN_COMMON_OPTS=-v ${MARTIN_BIND} -w ${MARTIN_BIND_DEST}/tests ${MARTIN_ENV_OPTS} --entrypoint sh
 RUN_MARTIN=${DOCKER_RUN} ${MARTIN_COMMON_OPTS} ${MARTIN_IMAGE}
 RUN_MARTIN_NETWORK=${DOCKER_RUN} ${MARTIN_COMMON_OPTS} --network fnb_byfn ${MARTIN_IMAGE}
 
@@ -29,7 +35,7 @@ build: ${POSTMAN_JSON}
 
 .PHONY: test-docker
 test-docker:
-	./run-postman-collections-docker.sh ${LOCAL_POSTMAN_ENVIRONMENT}
+	${TESTS_DIR}/run-postman-collections-docker.sh ${LOCAL_POSTMAN_ENVIRONMENT}
 
 ${POSTMAN_JSON}: ${POSTMAN_SOURCE_FILES}
 	cd ../ && ./tests/cat-postman-collections-docker.sh > tests/$@

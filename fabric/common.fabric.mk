@@ -1,11 +1,30 @@
-# Copyright © 2021 Luther Systems, Ltd. All right reserved.
+# Copyright © 2021 Luther Systems, Ltd. All rights reserved.
 
 # common.fabric.mk
 #
 # A base makefile for running fabric networks locally with docker-compose.
+# Targets which are only used in the 'full' network,
+# not in the in-memory network, are disabled within Codespaces.
 
-PROJECT_REL_DIR ?= .
+.PHONY: clean
+clean:
+	rm -rf build
+	rm -rf chaincodes/*.tar.gz
+
+.PHONY: pristine
+pristine: clean clean-generated
+
+.PHONY: clean-generated
+clean-generated:
+	rm -rf \
+		channel-artifacts \
+		crypto-config
+
+PROJECT_REL_DIR ?= ..
 include ${PROJECT_REL_DIR}/common.mk
+
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+# All the non-cleaning targets of Fabric do not work in the in-memory network and so are disabled in codespace
 
 FABRIC_ORG ?= org1
 FABRIC_DOMAIN ?= luther.systems
@@ -20,6 +39,8 @@ CC_FILE=${CC_PKG_NAME}-${CC_VERSION}.tar.gz
 CC_PATH=chaincodes/${CC_FILE}
 # path within cli docker container of chaincode
 CC_MOUNT_PATH=/chaincodes/${CC_FILE}
+
+FABRIC_DIR := ${DOCKER_PROJECT_DIR}/fabric
 
 PHYLUM_VERSION_FILE=./build/phylum_version
 
@@ -65,7 +86,10 @@ images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
 .PHONY: clean
-clean:
+clean: fabric-clean
+
+.PHONY: fabric-clean
+fabric-clean:
 	rm -rf build
 	rm -rf chaincodes/*.tar.gz
 
@@ -73,80 +97,16 @@ clean:
 pristine: clean clean-generated
 
 .PHONY: clean-generated
-clean-generated:
-	rm -rf \
-		channel-artifacts \
-		crypto-config
-
-.PHONY: go-test
-go-test:
-	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go test -race -cover -v ./...
-	$(MAKE) functional-tests
-
-.PHONY: functional-tests
-functional-tests: ${FUNCTIONAL_TEST_PHYLA}
-
-functional-test-phylum-%: compile-phylum-%
-	# NOTE: shirotester path must be relative to properly work within docker container.
-	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go run ../lib/shiro/shirotester/main.go functional-tests --verbose phylum_$*/testfixtures/*.yaml
-
-.PHONY: generate-assets
-generate-assets: channel-artifacts/genesis.block
-
-channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
-	rm -rf ./crypto-config ./channel-artifacts
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
-			--domain=luther.systems \
-			--cc-name="${CC_NAME}" \
-			${GENERATE_OPTS} --no-template
-
-.PHONY: up
-all: up
-up: fnb-up gateway-up
-
-.PHONY: fnb-up
-fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e FABRIC_LOGGING_SPEC \
-		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
-
-.PHONY: fnb-extend
-fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e FABRIC_LOGGING_SPEC \
-		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" extend \
-			--domain-name=luther.systems
-
-.PHONY: fnb-shell
-fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
-	${DOCKER_RUN} -it \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
-		-w "${CURDIR}" \
-		-e FABRIC_LOGGING_SPEC \
-		-e CHANNEL=${CHANNEL} \
-		-e FABRIC_DOMAIN=luther.systems \
-		-e FABRIC_DBMODE="${DBMODE}" \
-		--entrypoint bash \
-		${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
+clean-generated: fabric-clean
 
 .PHONY: install
 all: install
 install: ${NETWORK_BUILDER_TARGET} ${CC_PATH}
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force install \
 			"${CC_NAME}" \
@@ -171,11 +131,12 @@ start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		--publish 127.0.0.1:${port}:8082/tcp \
 		--publish 127.0.0.1:${metrics_port}:9602/tcp \
@@ -195,11 +156,12 @@ notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp bu
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_${ccname}/phylum.zip):/tmp/phylum.zip:ro" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
 			--config ${SHIROCLIENT_FABRIC_CONFIG_FAST_BASENAME}_${ccname}.yaml \
@@ -220,8 +182,9 @@ fnb-down: ${NETWORK_BUILDER_TARGET}
 	-rm -f "${PHYLUM_VERSION_FILE}"
 	-${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-		-v "${CURDIR}:${CURDIR}" \
+		-v "${FABRIC_DIR}:${CURDIR}" \
 		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR="${DOCKER_PROJECT_DIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" down
 
@@ -238,20 +201,17 @@ ${PHYLUM_VERSION_FILE}:
 ${PHYLUM_VERSION_FILE}_exists:
 	@test -f ${PHYLUM_VERSION_FILE}
 
-.PHONY: init
-all: init
-init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
-
 shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} -it \
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_$*/phylum.zip):/tmp/phylum.zip:ro" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
@@ -265,10 +225,11 @@ call_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		-e SHIROCLIENT_LOG_LEVEL \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
@@ -285,10 +246,11 @@ enable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
@@ -304,10 +266,11 @@ disable_logging-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
@@ -322,10 +285,11 @@ metadump_cmd-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
@@ -340,10 +304,11 @@ get_phyla-%: ${PHYLUM_VERSION_FILE}_exists
 		-u ${DOCKER_USER} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
-		-v "${CURDIR}:/tmp/fabric:ro" \
-		-v "${LICENSE_FILE}:/tmp/license.yaml:ro" \
+		-v "${FABRIC_DIR}:/tmp/fabric:ro" \
+		-v "${LICENSE_FILE_ROOT}:/tmp/license.yaml:ro" \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
+		-e DOCKER_PROJECT_DIR \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
@@ -375,3 +340,75 @@ ${CC_PATH}: ${PRESIGNED_PATH}
 
 download: ${CC_PATH}
 	@
+
+.PHONY: init
+all: init
+init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
+
+.PHONY: up
+all: up
+up: fnb-up gateway-up
+
+.PHONY: fnb-up
+fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR="${DOCKER_PROJECT_DIR}" \
+		-e FABRIC_LOGGING_SPEC \
+		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
+
+.PHONY: fnb-extend
+fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
+		-e FABRIC_LOGGING_SPEC \
+		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" extend \
+			--domain-name=luther.systems
+
+.PHONY: fnb-shell
+fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
+		-e FABRIC_LOGGING_SPEC \
+		-e CHANNEL=${CHANNEL} \
+		-e FABRIC_DOMAIN=luther.systems \
+		-e FABRIC_DBMODE="${DBMODE}" \
+		--entrypoint bash \
+		${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
+
+.PHONY: go-test
+go-test:
+	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go test -race -cover -v ./...
+	$(MAKE) functional-tests
+
+.PHONY: functional-tests
+functional-tests: ${FUNCTIONAL_TEST_PHYLA}
+
+functional-test-phylum-%: compile-phylum-%
+	# NOTE: shirotester path must be relative to properly work within docker container.
+	CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool go run ../lib/shiro/shirotester/main.go functional-tests --verbose phylum_$*/testfixtures/*.yaml
+.PHONY: generate-assets
+generate-assets: channel-artifacts/genesis.block
+
+channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
+	rm -rf ./crypto-config ./channel-artifacts
+	${DOCKER_RUN} -it \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+		-v "${FABRIC_DIR}:${CURDIR}" \
+		-w "${CURDIR}" \
+		-e DOCKER_PROJECT_DIR \
+		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
+			--domain=luther.systems \
+			--cc-name="${CC_NAME}" \
+			${GENERATE_OPTS} --no-template
+
+
+endif

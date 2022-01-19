@@ -7,8 +7,11 @@
 
 PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
-DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
+
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+  include ${PROJECT_REL_DIR}/common.fullnetwork.mk
+endif
 
 GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
 GO_API_PACKAGES=./api/...
@@ -95,36 +98,19 @@ clean: fabricclean
 fabricclean:
 	cd fabric && $(MAKE) clean
 
-.PHONY: storage-up
-storage-up:
-	cd fabric && $(MAKE) up install init
-
-.PHONY: storage-down
-storage-down:
-	-cd fabric && $(MAKE) down
-
-.PHONY: service-up
-service-up: api oracle
-	./${PROJECT}_compose.py local up -d
-
-.PHONY: service-down
-service-down:
-	-./${PROJECT}_compose.py local down
-
 .PHONY: up
-up: all service-down storage-down storage-up service-up
-	@
+up: all mem-down
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+	make full-up
+else
+	$(error Target 'up' is for a full network, not supported in codespaces)
+endif
 
 .PHONY: down
-down: service-down storage-down
-	@
-
-.PHONY: init
-init:
-	-cd fabric && $(MAKE) init
-
-.PHONY: upgrade
-upgrade: all service-down init service-up
+down: mem-down
+ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
+	make full-down
+endif
 	@
 
 .PHONY: mem-up
@@ -137,7 +123,7 @@ mem-down:
 
 # citest runs unit tests and integration tests within containers, like CI.
 .PHONY: citest
-citest: plugin lint gosec unit integrationcitest
+citest: plugin lint gosec unit
 	@
 
 .PHONY: unit
@@ -151,19 +137,6 @@ unit-other: phylumtest
 .PHONY: unit-oracle
 unit-oracle: oraclegotest
 	@echo "service tests passed"
-
-# NOTE:  The `citest` target manages creating/destroying a compose network.  To
-# run tests repeatedly execute the `integration` target directly.
-.PHONY: integrationcitest
-# The `down` wouldn't execute without this syntax
-integrationcitest:
-	$(MAKE) up
-	$(MAKE) integration
-	$(MAKE) down
-
-.PHONY: integration
-integration:
-	cd tests && $(MAKE) test-docker
 
 .PHONY: repl
 repl:

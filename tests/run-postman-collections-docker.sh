@@ -25,13 +25,15 @@ cd "$SOURCE_DIR"
 
 MARTIN_NETWORK=$(make echo:RUN_MARTIN_NETWORK)
 MARTIN=$(make echo:RUN_MARTIN)
+MARTIN_BIND_SOURCE=$(make echo:MARTIN_BIND_SOURCE)
+MARTIN_BIND_DEST=$(make echo:MARTIN_BIND_DEST)
 
 docker network inspect fnb_byfn 1>/dev/null 2>/dev/null
 RESULT="$?"
 if [ $RESULT -eq 0 ]; then
 	echo ${MARTIN_NETWORK}
-	${MARTIN_NETWORK} ${SOURCE_DIR}/run-postman-collections.sh "$@"
+	${MARTIN_NETWORK} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"
 else
 	echo ${MARTIN}
-	${MARTIN} ${SOURCE_DIR}/run-postman-collections.sh "$@"
+	${MARTIN} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"
 fi
