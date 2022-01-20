@@ -68,6 +68,9 @@ ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 		-f ${PROJECT_REL_DIR}/Dockerfile ${PROJECT_REL_DIR}
 	${TOUCH} $@
 
+.PHONY: test
+test: static-checks go-test
+
 .PHONY: static-checks
 static-checks: ${GO_PKG_DUMMY}
 	${TIME_P} ${DOCKER_RUN} \
