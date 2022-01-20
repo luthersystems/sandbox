@@ -42,6 +42,27 @@ Check out the [docs](https://docs.luthersystems.com).
 
 Ensure you have the [build dependencies and system requirements](https://docs.luthersystems.com/luther/application/start/local-system-requirements).
 
+### Codespaces
+
+This repository can be used in the cloud using Github Codespaces. You may fork
+it into your own organization to use your organization's subscription to Github
+and the feature and apply the running costs to your spending limits, or you may
+contact Luther about receiving permission to use our subscription.
+
+Codespaces are initialized ready to use for most purposes, but have some
+limitations: they cannot presently create the full many-container Substrate
+network. However, they can create and run the in-memory network, which is
+sufficient for active development of the platform and the majority of other
+uses.
+
+To use codespaces:
+
+* Select the Code pane on the repository main page, select the Codespaces tab,
+ and select "New codespace".
+* The minimum machine size (2 core, 4GB RAM, 32 GB storage) is preferred.
+* Wait for initialization to complete; this will take less than 5 minutes.
+* Upload a license file to `.luther-license.yaml` in the project root directory.
+
 ### MacOS
 
 On MacOS you can use the commands, using [homebrew](https://brew.sh/):
@@ -80,7 +101,7 @@ See [this](https://dev.luthersystemsapp.com/ubuntu20_04-sandbox-install.sh)
 script for the exact steps to install the dependencies on a fresh Ubuntu 20.04
 instance.
 
-### Build
+## Build On Your Machine
 
 Clone this repo:
 
@@ -122,6 +143,29 @@ make down
 
 Running `docker ps` again will show all the containers have been removed.
 
+## Build in Codespaces
+
+Run `make` to build all the services:
+
+```
+make
+```
+
+Run the sample application with an in-memory instance of the LEIA platform:
+
+```
+make mem-up
+```
+
+You can now
+use `docker ps` to see the containers running (`vsc-sandbox-*` for the codespace
+and `sandbox_oracle` for the in-memory network),
+spot-check the JSON REST api with `curl -v http://localhost:8080/v1/health_check | jq .`,
+and run all tests with `make test`.
+
+When finished, `make mem-down` or `make down` will stop the network and clean up
+the containers.
+
 ## "Hello World" Application
 
 This repo includes a small application for managing account balances. It serves
@@ -152,7 +196,8 @@ compose/:
 	testing. These configurations are used by the existing Make targets
 	and `sandbox_compose.py`.
 fabric/:
-	Configuration and scripts to launch a fabric network locally.
+	Configuration and scripts to launch a fabric network locally. Not used in
+    codespaces.
 oracleserv/sandbox-oracle/:
 	The oracle service responsible for serving the REST/JSON APIs and
 	communicating with other microservices.
