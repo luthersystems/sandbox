@@ -87,7 +87,3 @@ ${GO_PKG_DUMMY}:
 	${DOCKER} volume inspect ${GO_PKG_VOLUME} || ${DOCKER} volume create ${GO_PKG_VOLUME}
 	mkdir -p $(dir $@)
 	touch $@
-
-.PHONY: host-go-env
-host-go-env:
-	@echo export "${HOST_GO_ENV}"
