@@ -23,14 +23,13 @@ POSTMAN_SOURCE_FILES=$(shell find . -name '*.postman_collection.json' -o -name '
 default: all
 
 .PHONY: all
-all:
+all: build
 
 .PHONY: clean
 clean:
 	${RM} -f ${POSTMAN_JSON}
 
 .PHONY: build
-all: build
 build: ${POSTMAN_JSON}
 
 .PHONY: test-docker

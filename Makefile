@@ -49,6 +49,9 @@ tests-api:
 .PHONY: tests-api-clean
 tests-api-clean:
 	cd tests && $(MAKE) clean
+.PHONY: tests-martin
+tests-martin:
+	cd tests && $(MAKE) test-docker
 
 all: api
 .PHONY: api
