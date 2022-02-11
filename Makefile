@@ -76,7 +76,7 @@ phylumpush:
 
 all: oracle
 .PHONY: oracle
-oracle: plugin
+oracle: plugin api
 	cd ${SERVICE_DIR} && $(MAKE)
 clean: oracleclean
 .PHONY: oracleclean
@@ -86,11 +86,11 @@ oracleclean:
 oraclestaticchecks:
 	cd ${SERVICE_DIR} && $(MAKE) static-checks
 .PHONY: oracletest
-oracletest: plugin
+oracletest: plugin api
 	cd ${SERVICE_DIR} && $(MAKE) test
 test: oraclegotest
 .PHONY: oraclegotest
-oraclegotest: plugin
+oraclegotest: plugin api
 	cd ${SERVICE_DIR} && $(MAKE) go-test
 
 .PHONY: fabric
