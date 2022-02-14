@@ -17,6 +17,7 @@ GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
 GO_API_PACKAGES=./api/...
 GO_PACKAGES=${GO_SERVICE_PACKAGES} ${GO_API_PACKAGES}
 
+.DEFAULT_GOAL := all
 .PHONY: default
 default: all
 
