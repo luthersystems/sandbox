@@ -287,6 +287,18 @@ func (orc *Oracle) Transfer(ctx context.Context, in *pb.TransferRequest) (*pb.Tr
 	return orc.phylum.Transfer(ctx, in, sopts...)
 }
 
+// CreateClient is an example private resource creation endpoint.
+func (orc *Oracle) CreateClient(ctx context.Context, in *pb.CreateClientRequest) (*pb.CreateClientResponse, error) {
+	sopts := orc.txConfigs(ctx)
+	return orc.phylum.CreateClient(ctx, in, sopts...)
+}
+
+// GetClient retrieves an encrypted client.
+func (orc *Oracle) GetClient(ctx context.Context, in *pb.GetClientRequest) (*pb.GetClientResponse, error) {
+	sopts := orc.txConfigs(ctx)
+	return orc.phylum.GetClient(ctx, in, sopts...)
+}
+
 // Close blocks the caller until all spawned go routines complete, then closes the phylum
 func (orc *Oracle) Close() error {
 	return orc.phylum.Close()

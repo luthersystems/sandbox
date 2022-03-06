@@ -113,7 +113,7 @@ func createAccount(t *testing.T, server *Oracle, id string, balance int64) bool 
 			CurrentBalance: balance,
 		},
 	})
-	return assert.Nil(t, err) && assert.NotNil(t, resp)
+	return assert.Nil(t, err) && assert.NotNil(t, resp) && assert.Nil(t, resp.Exception)
 }
 
 func getAccount(t *testing.T, server *Oracle, id string, dst **pb.Account) bool {
@@ -223,5 +223,41 @@ func TestTransfer(t *testing.T) {
 		if assert.NotNil(t, resp) {
 			assert.NotNil(t, resp.Exception)
 		}
+	}
+}
+
+func createClient(t *testing.T, server *Oracle, id string, iban string) bool {
+	t.Helper()
+	resp, err := server.CreateClient(context.Background(), &pb.CreateClientRequest{
+		Client: &pb.Client{
+			ClientId: id,
+			Iban:     iban,
+		},
+	})
+	return assert.Nil(t, err) && assert.NotNil(t, resp) && assert.Nil(t, resp.Exception)
+}
+
+func TestCreateClient(t *testing.T) {
+	server, stop := makeTestServer(t)
+	defer stop()
+	if !createClient(t, server, "fnord", "eris001") {
+		return
+	}
+}
+
+func getClient(t *testing.T, server *Oracle, id string) bool {
+	t.Helper()
+	resp, err := server.GetClient(context.Background(), &pb.GetClientRequest{
+		ClientId: id,
+	})
+
+	return assert.Nil(t, err) && assert.NotNil(t, resp) && assert.Nil(t, resp.Exception)
+}
+
+func TestGetClient(t *testing.T) {
+	server, stop := makeTestServer(t)
+	defer stop()
+	if !getClient(t, server, "fnord") {
+		return
 	}
 }

@@ -70,3 +70,27 @@ message Account {
   string account_id = 1;
   int64 current_balance = 2;
 }
+
+message Client {
+  string client_id = 1;
+  string iban = 2;
+}
+
+message CreateClientRequest {
+  Client client = 1;
+}
+
+message CreateClientResponse {
+  common.Exception exception = 1;
+  string client_id = 2;
+  string iban = 3;
+}
+
+message GetClientRequest {
+  string client_id = 1;
+}
+
+message GetClientResponse {
+  common.Exception exception = 1;
+  Client client = 2;
+}

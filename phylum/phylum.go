@@ -4,8 +4,6 @@ package phylum
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 
@@ -14,9 +12,6 @@ import (
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/mock"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/private"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -33,8 +28,9 @@ var defaultConfigs = []func() (Config, error){
 // phylumMethod contains the method name and any special configuration to use
 // instead of the default config.
 type phylumMethod struct {
-	method string
-	config []func() (Config, error)
+	method     string
+	transforms []*private.Transform
+	config     []func() (Config, error)
 }
 
 var (
@@ -46,6 +42,22 @@ var (
 	}
 	phylumTransfer = &phylumMethod{
 		method: "transfer",
+	}
+	phylumCreateClient = &phylumMethod{
+		method: "create_client",
+		transforms: []*private.Transform{
+			&private.Transform{
+				ContextPath: ".client",
+				Header: &private.TransformHeader{
+					ProfilePaths: []string{".client_id"},
+					PrivatePaths: []string{".iban"},
+					Encryptor:    private.EncryptorAES256,
+					Compressor:   private.CompressorZlib,
+				}}},
+	}
+
+	phylumGetClient = &phylumMethod{
+		method: "get_client",
 	}
 )
 
@@ -60,35 +72,6 @@ func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err
 	}
 	copy(conf[nbase:], add)
 	return conf, nil
-}
-
-// cmdParams is a helper to construct positional arguments to pass to a shiro cmd.
-func cmdParams(params ...proto.Message) []interface{} {
-	if len(params) == 0 {
-		return []interface{}{}
-	}
-	m := &protojson.MarshalOptions{UseProtoNames: true}
-	jsparams := make([]interface{}, len(params))
-	for i, p := range params {
-		jsparams[i] = &jsProtoMessage{
-			Message: p,
-			m:       m,
-		}
-	}
-	return jsparams
-}
-
-type jsProtoMessage struct {
-	proto.Message
-	m *protojson.MarshalOptions
-}
-
-func (msg *jsProtoMessage) MarshalJSON() ([]byte, error) {
-	b, err := msg.m.Marshal(msg.Message)
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
 }
 
 // Client is a phylum client.
@@ -143,73 +126,22 @@ func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, er
 	return client, nil
 }
 
-func (s *Client) callMethod(ctx context.Context, m *phylumMethod, params []interface{}, out proto.Message, config []Config) (err error) {
+func (s *Client) callMethod(ctx context.Context, m *phylumMethod, in proto.Message, out proto.Message, clientConfigs []Config) (err error) {
 	configBase := m.config
 	if configBase == nil {
 		configBase = defaultConfigs
 	}
-	config, err = joinConfig(configBase, config)
+	clientConfigs, err = joinConfig(configBase, clientConfigs)
 	if err != nil {
 		return err
 	}
-	err = s.sdkCall(ctx, m.method, params, out, config)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
-// shiroCall is a helper to make RPC calls.
-func (s *Client) sdkCall(ctx context.Context, cmd string, params interface{}, rep proto.Message, clientConfigs []Config) error {
-	configs := make([]Config, 0, len(clientConfigs)+2)
-	configs = append(configs, shiroclient.WithParams(params))
-	configs = append(configs, clientConfigs...)
-	configs = append(configs, shiroclient.WithContext(ctx))
-	resp, err := s.rpc.Call(ctx, cmd, configs...)
+	wrap := private.WrapCall(ctx, s.rpc, m.method, m.transforms...)
+	err = wrap(in, out, clientConfigs...)
 	if err != nil {
-		if shiroclient.IsTimeoutError(err) {
-			s.logEntry(ctx).WithError(err).Errorf("shiroclient timeout")
-			return status.Error(codes.Unavailable, "timeout in blockchain network")
-		}
 		return err
 	}
-	if e := resp.Error(); e != nil {
-		// json-rpc protocol error
-		s.logEntry(ctx).WithFields(logrus.Fields{
-			"cmd":          cmd,
-			"jsonrpc_code": e.Code(),
-			// IMPORTANT: we cannot log this since it may contain PII.
-			//"jsonrpc_data":    string(jsonResp),
-			"jsonrpc_message": e.Message(),
-		}).Errorf("json-rpc error received from phylum")
-		// Attempt to extract an error message string in the JSON
-		// response, and bubble up an error that can be displayed on the
-		// frontend. This allows `route-failure` string responses to be
-		// displayed on the frontend.
-		if ejs := e.DataJSON(); ejs != nil {
-			var errMsg string
-			err := json.Unmarshal(ejs, &errMsg)
-			if err == nil {
-				return errors.New(errMsg)
-			}
-		}
-		// The error data wasn't a JSON string message, revert to a masked
-		// error to avoid potentially leaking senstive/confusing objects to the
-		// frontend.
-		return fmt.Errorf("unknown phylum error")
-	}
-	if rep == nil || len(resp.ResultJSON()) == 0 || string(resp.ResultJSON()) == "null" {
-		// nothing to unmarshal
-		return nil
-	}
-	err = protojson.Unmarshal(resp.ResultJSON(), rep)
-	if err != nil {
-		s.logEntry(ctx).
-			// IMPORTANT: we cannot log this since it may contain PII.
-			//WithField("debug_json", string(resp.ResultJSON())).
-			WithError(err).Errorf("Shiro RPC result could not be decoded")
-		return err
-	}
+
 	return nil
 }
 
@@ -274,7 +206,7 @@ func convertHealthReport(report shiroclient.HealthCheckReport) *pb.HealthCheckRe
 // CreateAccount is an example endpoint to create a resource
 func (s *Client) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest, config ...Config) (*pb.CreateAccountResponse, error) {
 	resp := &pb.CreateAccountResponse{}
-	err := s.callMethod(ctx, phylumCreateAccount, cmdParams(req), resp, config)
+	err := s.callMethod(ctx, phylumCreateAccount, req, resp, config)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +216,7 @@ func (s *Client) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest
 // GetAccount is an example query endpoint
 func (s *Client) GetAccount(ctx context.Context, req *pb.GetAccountRequest, config ...Config) (*pb.GetAccountResponse, error) {
 	resp := &pb.GetAccountResponse{}
-	err := s.callMethod(ctx, phylumGetAccount, cmdParams(req), resp, config)
+	err := s.callMethod(ctx, phylumGetAccount, req, resp, config)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +226,27 @@ func (s *Client) GetAccount(ctx context.Context, req *pb.GetAccountRequest, conf
 // Transfer is an example transaction
 func (s *Client) Transfer(ctx context.Context, req *pb.TransferRequest, config ...Config) (*pb.TransferResponse, error) {
 	resp := &pb.TransferResponse{}
-	err := s.callMethod(ctx, phylumTransfer, cmdParams(req), resp, config)
+	err := s.callMethod(ctx, phylumTransfer, req, resp, config)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// CreateClient creates a new client with private details.
+func (s *Client) CreateClient(ctx context.Context, req *pb.CreateClientRequest, config ...Config) (*pb.CreateClientResponse, error) {
+	resp := &pb.CreateClientResponse{}
+	err := s.callMethod(ctx, phylumCreateClient, req, resp, config)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// GetClient retrieves private client details.
+func (s *Client) GetClient(ctx context.Context, req *pb.GetClientRequest, config ...Config) (*pb.GetClientResponse, error) {
+	resp := &pb.GetClientResponse{}
+	err := s.callMethod(ctx, phylumGetClient, req, resp, config)
 	if err != nil {
 		return nil, err
 	}
