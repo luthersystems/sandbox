@@ -85,3 +85,33 @@
     (if (account-transfer! payer-id payee-id xfer-amount)
       (route-success ())
       (set-exception-business "account does not exist"))))
+
+(set 'mxf-transforms-client-details-header
+     (sorted-map "compressor" "zlib"
+                 "encryptor" "AES-256"
+                 "private_paths" (vector ".iban")
+                 "profile_paths" (vector ".client_id")))
+
+(set 'mxf-transforms-client-details
+     (vector
+       (sorted-map "context_path" "."
+                   "header" mxf-transforms-client-details-header)))
+
+(defun create-client (client)
+  (private:put-mxf (get client "client_id")
+                   client
+                   mxf-transforms-client-details))
+
+(defun get-client (id)
+  (private:get-mxf id))
+
+(defendpoint "create_client" (enc)
+  (let* ([obj (first (private:mxf-decode enc))]
+         [client (get obj "client")])
+    (trace client "client")
+    ; we return the client to test the gdpr decode logic
+    (route-success (create-client client))))
+
+(defendpoint-get "get_client" (req)
+  (let* ([id (get req "client_id")])
+    (route-success (sorted-map "client" (get-client id)))))

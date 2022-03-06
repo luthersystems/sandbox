@@ -570,6 +570,273 @@ func (x *Account) GetCurrentBalance() int64 {
 	return 0
 }
 
+type Client struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ClientId string `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Iban     string `protobuf:"bytes,2,opt,name=iban,proto3" json:"iban,omitempty"`
+}
+
+func (x *Client) Reset() {
+	*x = Client{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pb_v1_oracle_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Client) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Client) ProtoMessage() {}
+
+func (x *Client) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_v1_oracle_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Client.ProtoReflect.Descriptor instead.
+func (*Client) Descriptor() ([]byte, []int) {
+	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Client) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *Client) GetIban() string {
+	if x != nil {
+		return x.Iban
+	}
+	return ""
+}
+
+type CreateClientRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Client *Client `protobuf:"bytes,1,opt,name=client,proto3" json:"client,omitempty"`
+}
+
+func (x *CreateClientRequest) Reset() {
+	*x = CreateClientRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pb_v1_oracle_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateClientRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClientRequest) ProtoMessage() {}
+
+func (x *CreateClientRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_v1_oracle_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateClientRequest.ProtoReflect.Descriptor instead.
+func (*CreateClientRequest) Descriptor() ([]byte, []int) {
+	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *CreateClientRequest) GetClient() *Client {
+	if x != nil {
+		return x.Client
+	}
+	return nil
+}
+
+type CreateClientResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Exception *common.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
+	ClientId  string            `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Iban      string            `protobuf:"bytes,3,opt,name=iban,proto3" json:"iban,omitempty"`
+}
+
+func (x *CreateClientResponse) Reset() {
+	*x = CreateClientResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pb_v1_oracle_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateClientResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClientResponse) ProtoMessage() {}
+
+func (x *CreateClientResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_v1_oracle_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateClientResponse.ProtoReflect.Descriptor instead.
+func (*CreateClientResponse) Descriptor() ([]byte, []int) {
+	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CreateClientResponse) GetException() *common.Exception {
+	if x != nil {
+		return x.Exception
+	}
+	return nil
+}
+
+func (x *CreateClientResponse) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *CreateClientResponse) GetIban() string {
+	if x != nil {
+		return x.Iban
+	}
+	return ""
+}
+
+type GetClientRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ClientId string `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+}
+
+func (x *GetClientRequest) Reset() {
+	*x = GetClientRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pb_v1_oracle_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetClientRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClientRequest) ProtoMessage() {}
+
+func (x *GetClientRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_v1_oracle_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClientRequest.ProtoReflect.Descriptor instead.
+func (*GetClientRequest) Descriptor() ([]byte, []int) {
+	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetClientRequest) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+type GetClientResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Exception *common.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
+	Client    *Client           `protobuf:"bytes,2,opt,name=client,proto3" json:"client,omitempty"`
+}
+
+func (x *GetClientResponse) Reset() {
+	*x = GetClientResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pb_v1_oracle_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetClientResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClientResponse) ProtoMessage() {}
+
+func (x *GetClientResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_v1_oracle_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClientResponse.ProtoReflect.Descriptor instead.
+func (*GetClientResponse) Descriptor() ([]byte, []int) {
+	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetClientResponse) GetException() *common.Exception {
+	if x != nil {
+		return x.Exception
+	}
+	return nil
+}
+
+func (x *GetClientResponse) GetClient() *Client {
+	if x != nil {
+		return x.Client
+	}
+	return nil
+}
+
 var File_pb_v1_oracle_proto protoreflect.FileDescriptor
 
 var file_pb_v1_oracle_proto_rawDesc = []byte{
@@ -632,10 +899,35 @@ var file_pb_v1_oracle_proto_rawDesc = []byte{
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x64,
 	0x12, 0x27, 0x0a, 0x0f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x62, 0x61, 0x6c, 0x61,
 	0x6e, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e, 0x63, 0x75, 0x72, 0x72, 0x65,
-	0x6e, 0x74, 0x42, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x42, 0x2c, 0x5a, 0x2a, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x74, 0x68, 0x65, 0x72, 0x73, 0x79,
-	0x73, 0x74, 0x65, 0x6d, 0x73, 0x2f, 0x73, 0x61, 0x6e, 0x64, 0x62, 0x6f, 0x78, 0x2f, 0x61, 0x70,
-	0x69, 0x2f, 0x70, 0x62, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x74, 0x42, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x22, 0x39, 0x0a, 0x06, 0x43, 0x6c, 0x69,
+	0x65, 0x6e, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64,
+	0x12, 0x12, 0x0a, 0x04, 0x69, 0x62, 0x61, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x69, 0x62, 0x61, 0x6e, 0x22, 0x3c, 0x0a, 0x13, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c,
+	0x69, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x25, 0x0a, 0x06, 0x63,
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x62,
+	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x06, 0x63, 0x6c, 0x69, 0x65,
+	0x6e, 0x74, 0x22, 0x78, 0x0a, 0x14, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x69, 0x65,
+	0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2f, 0x0a, 0x09, 0x65, 0x78,
+	0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e,
+	0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e,
+	0x52, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1b, 0x0a, 0x09, 0x63,
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x69, 0x62, 0x61, 0x6e,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x69, 0x62, 0x61, 0x6e, 0x22, 0x2f, 0x0a, 0x10,
+	0x47, 0x65, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x1b, 0x0a, 0x09, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x6b, 0x0a,
+	0x11, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x2f, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x45,
+	0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x25, 0x0a, 0x06, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x69, 0x65,
+	0x6e, 0x74, 0x52, 0x06, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x42, 0x2c, 0x5a, 0x2a, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x74, 0x68, 0x65, 0x72, 0x73,
+	0x79, 0x73, 0x74, 0x65, 0x6d, 0x73, 0x2f, 0x73, 0x61, 0x6e, 0x64, 0x62, 0x6f, 0x78, 0x2f, 0x61,
+	0x70, 0x69, 0x2f, 0x70, 0x62, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -650,7 +942,7 @@ func file_pb_v1_oracle_proto_rawDescGZIP() []byte {
 	return file_pb_v1_oracle_proto_rawDescData
 }
 
-var file_pb_v1_oracle_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_pb_v1_oracle_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_pb_v1_oracle_proto_goTypes = []interface{}{
 	(*HealthCheckRequest)(nil),    // 0: pb.v1.HealthCheckRequest
 	(*HealthCheckResponse)(nil),   // 1: pb.v1.HealthCheckResponse
@@ -662,21 +954,30 @@ var file_pb_v1_oracle_proto_goTypes = []interface{}{
 	(*TransferRequest)(nil),       // 7: pb.v1.TransferRequest
 	(*TransferResponse)(nil),      // 8: pb.v1.TransferResponse
 	(*Account)(nil),               // 9: pb.v1.Account
-	(*common.Exception)(nil),      // 10: common.Exception
+	(*Client)(nil),                // 10: pb.v1.Client
+	(*CreateClientRequest)(nil),   // 11: pb.v1.CreateClientRequest
+	(*CreateClientResponse)(nil),  // 12: pb.v1.CreateClientResponse
+	(*GetClientRequest)(nil),      // 13: pb.v1.GetClientRequest
+	(*GetClientResponse)(nil),     // 14: pb.v1.GetClientResponse
+	(*common.Exception)(nil),      // 15: common.Exception
 }
 var file_pb_v1_oracle_proto_depIdxs = []int32{
 	2,  // 0: pb.v1.HealthCheckResponse.reports:type_name -> pb.v1.HealthCheckReport
-	10, // 1: pb.v1.HealthCheckResponse.exception:type_name -> common.Exception
+	15, // 1: pb.v1.HealthCheckResponse.exception:type_name -> common.Exception
 	9,  // 2: pb.v1.CreateAccountRequest.account:type_name -> pb.v1.Account
-	10, // 3: pb.v1.CreateAccountResponse.exception:type_name -> common.Exception
-	10, // 4: pb.v1.GetAccountResponse.exception:type_name -> common.Exception
+	15, // 3: pb.v1.CreateAccountResponse.exception:type_name -> common.Exception
+	15, // 4: pb.v1.GetAccountResponse.exception:type_name -> common.Exception
 	9,  // 5: pb.v1.GetAccountResponse.account:type_name -> pb.v1.Account
-	10, // 6: pb.v1.TransferResponse.exception:type_name -> common.Exception
-	7,  // [7:7] is the sub-list for method output_type
-	7,  // [7:7] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	15, // 6: pb.v1.TransferResponse.exception:type_name -> common.Exception
+	10, // 7: pb.v1.CreateClientRequest.client:type_name -> pb.v1.Client
+	15, // 8: pb.v1.CreateClientResponse.exception:type_name -> common.Exception
+	15, // 9: pb.v1.GetClientResponse.exception:type_name -> common.Exception
+	10, // 10: pb.v1.GetClientResponse.client:type_name -> pb.v1.Client
+	11, // [11:11] is the sub-list for method output_type
+	11, // [11:11] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_pb_v1_oracle_proto_init() }
@@ -805,6 +1106,66 @@ func file_pb_v1_oracle_proto_init() {
 				return nil
 			}
 		}
+		file_pb_v1_oracle_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Client); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pb_v1_oracle_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateClientRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pb_v1_oracle_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateClientResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pb_v1_oracle_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetClientRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pb_v1_oracle_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetClientResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -812,7 +1173,7 @@ func file_pb_v1_oracle_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pb_v1_oracle_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

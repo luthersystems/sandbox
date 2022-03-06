@@ -24,6 +24,8 @@ type SandboxServiceClient interface {
 	CreateAccount(ctx context.Context, in *v1.CreateAccountRequest, opts ...grpc.CallOption) (*v1.CreateAccountResponse, error)
 	GetAccount(ctx context.Context, in *v1.GetAccountRequest, opts ...grpc.CallOption) (*v1.GetAccountResponse, error)
 	Transfer(ctx context.Context, in *v1.TransferRequest, opts ...grpc.CallOption) (*v1.TransferResponse, error)
+	CreateClient(ctx context.Context, in *v1.CreateClientRequest, opts ...grpc.CallOption) (*v1.CreateClientResponse, error)
+	GetClient(ctx context.Context, in *v1.GetClientRequest, opts ...grpc.CallOption) (*v1.GetClientResponse, error)
 }
 
 type sandboxServiceClient struct {
@@ -70,6 +72,24 @@ func (c *sandboxServiceClient) Transfer(ctx context.Context, in *v1.TransferRequ
 	return out, nil
 }
 
+func (c *sandboxServiceClient) CreateClient(ctx context.Context, in *v1.CreateClientRequest, opts ...grpc.CallOption) (*v1.CreateClientResponse, error) {
+	out := new(v1.CreateClientResponse)
+	err := c.cc.Invoke(ctx, "/srvpb.v1.SandboxService/CreateClient", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sandboxServiceClient) GetClient(ctx context.Context, in *v1.GetClientRequest, opts ...grpc.CallOption) (*v1.GetClientResponse, error) {
+	out := new(v1.GetClientResponse)
+	err := c.cc.Invoke(ctx, "/srvpb.v1.SandboxService/GetClient", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SandboxServiceServer is the server API for SandboxService service.
 // All implementations must embed UnimplementedSandboxServiceServer
 // for forward compatibility
@@ -79,6 +99,8 @@ type SandboxServiceServer interface {
 	CreateAccount(context.Context, *v1.CreateAccountRequest) (*v1.CreateAccountResponse, error)
 	GetAccount(context.Context, *v1.GetAccountRequest) (*v1.GetAccountResponse, error)
 	Transfer(context.Context, *v1.TransferRequest) (*v1.TransferResponse, error)
+	CreateClient(context.Context, *v1.CreateClientRequest) (*v1.CreateClientResponse, error)
+	GetClient(context.Context, *v1.GetClientRequest) (*v1.GetClientResponse, error)
 	mustEmbedUnimplementedSandboxServiceServer()
 }
 
@@ -97,6 +119,12 @@ func (UnimplementedSandboxServiceServer) GetAccount(context.Context, *v1.GetAcco
 }
 func (UnimplementedSandboxServiceServer) Transfer(context.Context, *v1.TransferRequest) (*v1.TransferResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Transfer not implemented")
+}
+func (UnimplementedSandboxServiceServer) CreateClient(context.Context, *v1.CreateClientRequest) (*v1.CreateClientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateClient not implemented")
+}
+func (UnimplementedSandboxServiceServer) GetClient(context.Context, *v1.GetClientRequest) (*v1.GetClientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClient not implemented")
 }
 func (UnimplementedSandboxServiceServer) mustEmbedUnimplementedSandboxServiceServer() {}
 
@@ -183,6 +211,42 @@ func _SandboxService_Transfer_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SandboxService_CreateClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.CreateClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).CreateClient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/srvpb.v1.SandboxService/CreateClient",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).CreateClient(ctx, req.(*v1.CreateClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SandboxService_GetClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).GetClient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/srvpb.v1.SandboxService/GetClient",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).GetClient(ctx, req.(*v1.GetClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SandboxService_ServiceDesc is the grpc.ServiceDesc for SandboxService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -205,6 +269,14 @@ var SandboxService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Transfer",
 			Handler:    _SandboxService_Transfer_Handler,
+		},
+		{
+			MethodName: "CreateClient",
+			Handler:    _SandboxService_CreateClient_Handler,
+		},
+		{
+			MethodName: "GetClient",
+			Handler:    _SandboxService_GetClient_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

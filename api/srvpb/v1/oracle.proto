@@ -146,4 +146,21 @@ service SandboxService {
       tags: "Service"
     };
   }
+  rpc CreateClient(pb.v1.CreateClientRequest) returns (pb.v1.CreateClientResponse) {
+    option (google.api.http) = {
+      post: "/v1/clients/{client.client_id}"
+      body: "client"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
+  rpc GetClient(pb.v1.GetClientRequest) returns (pb.v1.GetClientResponse) {
+    option (google.api.http) = {
+      get: "/v1/clients/{client_id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Service"
+    };
+  }
 }

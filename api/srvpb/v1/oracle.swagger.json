@@ -173,6 +173,160 @@
         ]
       }
     },
+    "/v1/clients/{client.clientId}": {
+      "post": {
+        "operationId": "SandboxService_CreateClient",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateClientResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "client.clientId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1Client"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
+    "/v1/clients/{clientId}": {
+      "get": {
+        "operationId": "SandboxService_GetClient",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetClientResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/commonExceptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/v1/health_check": {
       "get": {
         "summary": "Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.",
@@ -416,11 +570,36 @@
         }
       }
     },
+    "v1Client": {
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string"
+        },
+        "iban": {
+          "type": "string"
+        }
+      }
+    },
     "v1CreateAccountResponse": {
       "type": "object",
       "properties": {
         "exception": {
           "$ref": "#/definitions/commonException"
+        }
+      }
+    },
+    "v1CreateClientResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "iban": {
+          "type": "string"
         }
       }
     },
@@ -432,6 +611,17 @@
         },
         "account": {
           "$ref": "#/definitions/v1Account"
+        }
+      }
+    },
+    "v1GetClientResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        },
+        "client": {
+          "$ref": "#/definitions/v1Client"
         }
       }
     },
