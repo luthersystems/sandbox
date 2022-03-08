@@ -1,2 +1,3 @@
 *.pb.*go -diff
 *.swagger.json -diff
+*.postman_collection.json -diff

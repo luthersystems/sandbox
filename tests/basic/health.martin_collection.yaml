@@ -1,0 +1,23 @@
+name: "Sandbox Example:  Basic Checks"
+headers:
+    - key: Content-Type
+      value: application/json
+tests:
+    - name: "Health Check"
+      method: GET
+      path: "v1/health_check"
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("exception");
+              pm.expect(data).to.have.property("reports");
+              pm.expect(data.reports).to.have.lengthOf(2);
+              pm.expect(data.reports[0]).to.have.property("status");
+              pm.expect(data.reports[0]).to.have.property("service_name");
+              pm.expect(data.reports[0].status).to.equal("UP");
+              pm.expect(data.reports[1]).to.have.property("status");
+              pm.expect(data.reports[1]).to.have.property("service_name");
+              pm.expect(data.reports[1].status).to.equal("UP");
+          });

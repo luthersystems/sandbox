@@ -1,0 +1,36 @@
+name: "Sandbox Example:  Managing Clients"
+headers:
+    - key: Content-Type
+      value: application/json
+tests:
+    - name: "Create Client"
+      method: POST
+      path: "v1/clients/{{CLIENTID}}"
+      body: |
+          {
+            "iban": "something-irrelevant"
+          }
+      setup_script: |
+          const uuidv4 = require('uuid');
+          pm.environment.set("CLIENTID", "xyz-" + uuidv4());
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("exception");
+          });
+    - name: "Get Client"
+      method: GET
+      path: "v1/clients/{{CLIENTID}}"
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("exception");
+              pm.expect(data).to.have.property("client");
+              pm.expect(data.client).to.have.property("iban");
+              pm.expect(data.client).to.have.property("client_id");
+              pm.expect(data.client.client_id).to.equal(pm.environment.get("CLIENTID"));
+          });
