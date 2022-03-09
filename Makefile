@@ -124,7 +124,7 @@ mem-down:
 
 # citest runs unit tests and integration tests within containers, like CI.
 .PHONY: citest
-citest: plugin lint gosec unit
+citest: plugin unit
 	@
 
 .PHONY: unit
