@@ -62,7 +62,7 @@ func DefaultConfig() *Config {
 		// IMPORTANT: Phylum bootstrap expects ListenAddress on :8080 for
 		// FakeAuth IDP. Only change this if you know what you're doing!
 		ListenAddress:   ":8080",
-		PhylumVersion:   "test", // FIXME DELETEME
+		PhylumVersion:   "latest",
 		PhylumPath:      "./phylum",
 		GatewayEndpoint: "http://shiroclient_gateway:8082",
 	}
@@ -213,6 +213,7 @@ func phylumHealthCheck(ctx context.Context, orc *Oracle) []*pb.HealthCheckReport
 	sopts := orc.txConfigs(ctx)
 	ccHealth, err := orc.phylum.HealthCheck(ctx, []string{"phylum"}, sopts...)
 	if err != nil && !errors.Is(err, context.Canceled) {
+		orc.log(ctx).WithError(err).Errorf("phylum healthcheck failed")
 		return []*pb.HealthCheckReport{&pb.HealthCheckReport{
 			ServiceName:    phylumServiceName,
 			ServiceVersion: "",
