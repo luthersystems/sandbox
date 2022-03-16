@@ -5,5 +5,7 @@ FABRIC_CA_IMAGE_TAG=amd64-1.5.0
 BASE_IMAGE_TAG=amd64-0.4.20
 CC_VERSION=${SUBSTRATE_VERSION}
 
+.DEFAULT_GOAL := default
+
 PROJECT_REL_DIR=..
 include ${PROJECT_REL_DIR}/fabric/common.fabric.mk

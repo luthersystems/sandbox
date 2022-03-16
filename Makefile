@@ -17,7 +17,7 @@ GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
 GO_API_PACKAGES=./api/...
 GO_PACKAGES=${GO_SERVICE_PACKAGES} ${GO_API_PACKAGES}
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := default
 .PHONY: default
 default: all
 
@@ -151,6 +151,7 @@ pre-push:
 	$(MAKE) tests-api format
 	cd api && $(MAKE)
 
+.PHONY:
 download: ${SUBSTRATE_PLUGIN}
 	cd fabric && $(MAKE) download
 

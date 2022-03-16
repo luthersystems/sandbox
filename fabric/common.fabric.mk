@@ -9,10 +9,10 @@
 .PHONY: clean
 clean:
 	rm -rf build
-	rm -rf chaincodes/*.tar.gz
 
 .PHONY: pristine
 pristine: clean clean-generated
+	rm -rf chaincodes/*.tar.gz
 
 .PHONY: clean-generated
 clean-generated:
@@ -91,7 +91,6 @@ clean: fabric-clean
 .PHONY: fabric-clean
 fabric-clean:
 	rm -rf build
-	rm -rf chaincodes/*.tar.gz
 
 .PHONY: pristine
 pristine: clean clean-generated
@@ -338,6 +337,7 @@ ${CC_PATH}: ${PRESIGNED_PATH}
 	${PROJECT_REL_DIR}/scripts/obtain-cc.sh
 	touch $@
 
+.PHONY:
 download: ${CC_PATH}
 	@
 
