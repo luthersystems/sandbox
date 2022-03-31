@@ -368,7 +368,7 @@ fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 		-e DOCKER_PROJECT_DIR \
 		-e FABRIC_LOGGING_SPEC \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" extend \
-			--domain-name=luther.systems
+			--domain-name=${FABRIC_DOMAIN}
 
 .PHONY: fnb-shell
 fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
@@ -379,7 +379,7 @@ fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 		-e DOCKER_PROJECT_DIR \
 		-e FABRIC_LOGGING_SPEC \
 		-e CHANNEL=${CHANNEL} \
-		-e FABRIC_DOMAIN=luther.systems \
+		-e FABRIC_DOMAIN=${FABRIC_DOMAIN} \
 		-e FABRIC_DBMODE="${DBMODE}" \
 		--entrypoint bash \
 		${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
@@ -406,7 +406,7 @@ channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
 		-w "${CURDIR}" \
 		-e DOCKER_PROJECT_DIR \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force generate \
-			--domain=luther.systems \
+			--domain=${FABRIC_DOMAIN} \
 			--cc-name="${CC_NAME}" \
 			${GENERATE_OPTS} --no-template
 

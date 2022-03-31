@@ -13,16 +13,16 @@ SERVICE_DIR=oracleserv/sandbox-oracle
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=0.0.45
+BUILDENV_TAG=0.0.49
 
 # These variables control the version numbers for parts of the LEIA platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=2.167.0-fabric2
+SUBSTRATE_VERSION=2.170.0-fabric2
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${SUBSTRATE_VERSION}
-NETWORK_BUILDER_VERSION=${SUBSTRATE_VERSION}
+NETWORK_BUILDER_VERSION=2.170.0-fabric2
 MARTIN_VERSION=0.1.0-SNAPSHOT
 
 # A golang module proxy server can greatly help speed up docker builds but the
