@@ -67,9 +67,6 @@ clean: phylumclean
 .PHONY: phylumclean
 phylumclean:
 	cd phylum && $(MAKE) clean
-push: phylumpush
-phylumpush:
-	cd phylum && $(MAKE) s3
 
 all: oracle
 .PHONY: oracle
