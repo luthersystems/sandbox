@@ -53,7 +53,7 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/ca.crt
       - CORE_PEER_MSPCONFIGPATH=/crypto-config/peerOrganizations/org1.luther.systems/users/Admin@org1.luther.systems/msp
-      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
       - CORE_PEER_TLS_CLIENTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.crt
       - CORE_PEER_TLS_CLIENTKEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
       - DOCKER_PROJECT_DIR
