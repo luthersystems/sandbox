@@ -67,7 +67,7 @@ setGlobals() {
     export CORE_PEER_TLS_ROOTCERT_FILE="$(peerRootCert "$PEER" "$ORG")"
     export CORE_PEER_TLS_CLIENTCERT_FILE="${CORE_PEER_TLS_CERT_FILE}"
     export CORE_PEER_TLS_CLIENTKEY_FILE="${CORE_PEER_TLS_KEY_FILE}"
-    export CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+    export CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
 
     env |grep CORE >&2
 }
