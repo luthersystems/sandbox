@@ -1,0 +1,48 @@
+{
+	"name": "sandbox-test-network",
+	"version": "1.0.0",
+	"client": {
+		"tlsEnable": false,
+		"adminCredential": {
+			"id": "admin",
+			"password": "adminpw"
+		},
+		"enableAuthentication": true,
+		"organization": "Org1MSP",
+		"connection": {
+			"timeout": {
+				"peer": {
+					"endorser": "300"
+				},
+				"orderer": "300"
+			}
+		}
+	},
+	"channels": {
+		"luther": {
+			"peers": {
+				"peer0.org1.luther.systems": {}
+			}
+		}
+	},
+	"organizations": {
+		"Org1MSP": {
+			"mspid": "Org1MSP",
+			"adminPrivateKey": {
+				"path": "/tmp/crypto/peerOrganizations/org1.luther.systems/users/User1@org1.luther.systems/msp/keystore/priv_sk"
+			},
+			"peers": ["peer0.org1.luther.systems"],
+			"signedCert": {
+				"path": "/tmp/crypto/peerOrganizations/org1.luther.systems/users/User1@org1.luther.systems/msp/signcerts/User1@org1.luther.systems-cert.pem"
+			}
+		}
+	},
+	"peers": {
+		"peer0.org1.luther.systems": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/ca.crt"
+			},
+			"url": "grpcs://peer0.org1.luther.systems:7051"
+		}
+	}
+}
