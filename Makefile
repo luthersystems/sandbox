@@ -95,7 +95,26 @@ ifdef LOCAL_WORKSPACE_FOLDER # if in codespace
 endif
 
 .PHONY: down
-down: mem-down
+down: mem-down explorer-down
+
+.PHONY: explorer
+explorer: explorer-up
+
+.PHONY: explorer-up
+explorer-up:
+	cd ${PROJECT_REL_DIR}/explorer && make up
+
+.PHONY: explorer-down
+explorer-down:
+	cd ${PROJECT_REL_DIR}/explorer && make down
+
+.PHONY: explorer-clean
+explorer-clean:
+	cd ${PROJECT_REL_DIR}/explorer && make down-clean
+
+.PHONY: explorer-watch
+explorer-watch:
+	cd ${PROJECT_REL_DIR}/explorer && make watch
 
 .PHONY: mem-up
 mem-up: all mem-down
