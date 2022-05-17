@@ -1,4 +1,4 @@
-#! bash
+#!/usr/bin/env bash
 
 PEERS_EXTANT=$(docker ps -a --format '{{.Names}}' -f "name=^peer[0-9]+\.org[0-9]+")
 if [ -z "$PEERS_EXTANT" ]; then

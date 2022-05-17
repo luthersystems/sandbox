@@ -4,7 +4,7 @@
 
 .PHONY: up
 up: down
-	bash ./check_for_peers.sh
+	./check_for_peers.sh
 	docker-compose up -d
 
 .PHONY: watch
@@ -18,7 +18,7 @@ up-clean: down-clean
 
 .PHONY: down
 down:
-	docker-compose down
+	- docker-compose down
 
 .PHONY: down-clean
 down-clean:
