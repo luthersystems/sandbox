@@ -6,7 +6,8 @@ PROJECT_REL_DIR ?= ..
 
 .PHONY: up
 up: down
-	${PROJECT_REL_DIR}/explorer/create_explorer.sh
+	${PROJECT_REL_DIR}/explorer/check_for_peers.sh
+	docker-compose up -d
 
 .PHONY: watch
 watch: up
@@ -15,7 +16,8 @@ watch: up
 
 .PHONY: up-clean
 up-clean: down-clean
-	${PROJECT_REL_DIR}/explorer/create_explorer.sh
+	${PROJECT_REL_DIR}/explorer/check_for_peers.sh
+	docker-compose up -d
 
 .PHONY: down
 down:
