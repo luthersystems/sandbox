@@ -13,12 +13,13 @@ watch: up
 	docker logs explorer.luther.systems
 
 .PHONY: up-clean
-up-clean: down-clean
+up-clean: #needs to be recipe for ordering
+	make down-clean
 	make up
 
 .PHONY: down
 down:
-	- docker-compose down
+	docker-compose down
 
 .PHONY: down-clean
 down-clean:

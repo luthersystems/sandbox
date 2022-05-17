@@ -8,7 +8,8 @@ volumes:
 
 networks:
   luther.systems:
-    name: fnb_byfn
+    external:
+      name: fnb_byfn
 
 services:
 
