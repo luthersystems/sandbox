@@ -13,7 +13,7 @@ networks:
 services:
 
   explorerdb.luther.systems:
-    image: luthersystems/hyperledger-explorer-db:latest
+    image: luthersystems/blockexplorer-db:latest
     container_name: explorerdb.luther.systems
     hostname: explorerdb.luther.systems
     environment:
@@ -31,7 +31,7 @@ services:
       - luther.systems
 
   explorer.luther.systems:
-    image: luthersystems/hyperledger-explorer:latest
+    image: luthersystems/blockexplorer:latest
     container_name: explorer.luther.systems
     hostname: explorer.luther.systems
     environment:
