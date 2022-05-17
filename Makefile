@@ -104,12 +104,27 @@ else
 	$(error Target 'up' is for a full network, not supported in codespaces)
 endif
 
+.PHONY: explorer
+explorer: explorer-up
+
+.PHONY: explorer-up
+explorer-up:
+	cd ${PROJECT_REL_DIR}/explorer && make up
+
 .PHONY: down
-down: mem-down
+down: mem-down explorer-down
 ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
 	make full-down
 endif
 	@
+
+.PHONY: explorer-down
+explorer-down:
+	cd ${PROJECT_REL_DIR}/explorer && make down
+
+.PHONY: explorer-clean
+explorer-clean:
+	cd ${PROJECT_REL_DIR}/explorer && make down-clean
 
 .PHONY: mem-up
 mem-up: all mem-down
