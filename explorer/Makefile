@@ -1,21 +1,21 @@
 # Copyright © 2022 Luther Systems, Ltd. All right reserved.
 
-PROJECT_REL_DIR=..
+PROJECT_REL_DIR ?= ..
 
 .DEFAULT_GOAL := up-clean
 
 .PHONY: up
 up: down
-	docker-compose up -d
+	${PROJECT_REL_DIR}/explorer/create_explorer.sh
 
 .PHONY: watch
 watch: up
 	docker logs explorerdb.luther.systems
-	docker logs --follow explorer.luther.systems
+	docker logs explorer.luther.systems
 
 .PHONY: up-clean
 up-clean: down-clean
-	docker-compose up -d
+	${PROJECT_REL_DIR}/explorer/create_explorer.sh
 
 .PHONY: down
 down:
