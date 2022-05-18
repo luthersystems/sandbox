@@ -21,18 +21,10 @@ GO_PACKAGES=${GO_SERVICE_PACKAGES} ${GO_API_PACKAGES}
 .PHONY: default
 default: all
 
-.PHONY: ci-checks
-ci-checks:
-	bash ${PROJECT_REL_DIR}/scripts/ci-checks.sh
-
 .PHONY: all push clean test
 
 clean:
 	rm -rf build
-
-.PHONY: format
-format:
-	cd phylum && $(MAKE) format
 
 all: plugin
 .PHONY: plugin plugin-linux plugin-darwin
@@ -142,10 +134,10 @@ repl:
 
 # this target is called by git-hooks/pre-push. It's separated into its own target
 # to allow us to update the git-hooks without having to reinstall the hook
-# It generates postman artifacts, protobuf artifacts and formats lisp code
+# It generates postman artifacts and protobuf artifacts.
 .PHONY: pre-push
 pre-push:
-	$(MAKE) tests-api format
+	$(MAKE) tests-api
 	cd api && $(MAKE)
 
 .PHONY:
