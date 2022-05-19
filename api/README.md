@@ -24,15 +24,13 @@ srvpb:
 swagger:
 	Generated swagger JSON and a Go package that serves the json to frontend
 	clients.
-third_party:
-	3rd party protobuf definitions.
 ```
 
 ## Generating gRPC service code and Swagger/OpenAPI documentation
 
 The generated gRPC service code, gateway code, and the swagger file are checked
 into git. After every change you should regenerate these files and check them
-in.  Run `make` in the api directory to regenerate these files. 
+in.  Run `make` in the api directory to regenerate these files.
 
 ```
 make

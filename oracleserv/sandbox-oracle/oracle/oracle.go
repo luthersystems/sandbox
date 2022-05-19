@@ -11,7 +11,8 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/luthersystems/sandbox/api/pb"
+	pb "github.com/luthersystems/sandbox/api/pb/v1"
+	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/sandbox/phylum"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
@@ -105,6 +106,8 @@ func (c *Config) Valid() error {
 
 // Oracle provides services.
 type Oracle struct {
+	srv.UnimplementedSandboxServiceServer
+
 	// log provides logging.
 	logBase *logrus.Entry
 
@@ -232,7 +235,7 @@ func phylumHealthCheck(ctx context.Context, orc *Oracle) []*pb.HealthCheckReport
 
 // HealthCheck checks this service and all dependent services to construct a
 // health report. Returns a grpc error code if a service is down.
-func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.GetHealthCheckRequest) (*pb.GetHealthCheckResponse, error) {
+func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
 	// No ACL: Open to everyone
 	healthy := true
 	var reports []*pb.HealthCheckReport
@@ -251,7 +254,7 @@ func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.GetHealthCheckReques
 		Timestamp:      time.Now().Format(TimestampFormat),
 		Status:         "UP",
 	})
-	resp := &pb.GetHealthCheckResponse{
+	resp := &pb.HealthCheckResponse{
 		Reports: reports,
 	}
 	if !healthy {

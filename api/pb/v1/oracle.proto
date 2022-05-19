@@ -1,29 +1,25 @@
 // Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
+// API Models and Documentation.
+
 syntax = "proto3";
 
-package cdm;
+package pb.v1;
 
-option csharp_namespace = "Cdm";
-option go_package = "cdmpb";
-option java_multiple_files = true;
-option java_outer_classname = "OracleProto";
-option java_package = "com.cdm";
-option objc_class_prefix = "CXX";
-option php_namespace = "Cdm";
+import "common/exception.proto";
 
-import "protos-main/common/exception.proto";
+option go_package = "github.com/luthersystems/sandbox/api/pb/v1";
 
 //import "google/protobuf/wrappers.proto";
 
 // Get health status of services.
-message GetHealthCheckRequest {
+message HealthCheckRequest {
   // Skip the chaincode healthcheck
   bool oracle_only = 1;
 }
 
 // Health status of services.
-message GetHealthCheckResponse {
+message HealthCheckResponse {
   // The status of the relevant sub services.
   repeated HealthCheckReport reports = 1;
   // An exception if an error occurred during processing request.

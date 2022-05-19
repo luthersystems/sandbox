@@ -4,9 +4,14 @@
 
 syntax = "proto3";
 
-package srv;
+package srvpb.v1;
 
-option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+import "google/api/annotations.proto";
+import "pb/v1/oracle.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/luthersystems/sandbox/api/srv";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Sandbox API"
     version: "1.0"
@@ -103,52 +108,41 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
     }
   }
 };
-option csharp_namespace = "Srv";
-option go_package = "srvpb";
-option java_multiple_files = true;
-option java_outer_classname = "OracleProto";
-option java_package = "com.srv";
-option objc_class_prefix = "SXX";
-option php_namespace = "Srv";
-
-import "github.com/luthersystems/sandbox/api/pb/oracle.proto";
-import "google/api/annotations.proto";
-import "protoc-gen-swagger/options/annotations.proto";
 
 // REST-JSON API Docs for the scaffold project.
-service SandboxProcessor {
+service SandboxService {
   // Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.
-  rpc HealthCheck(cdm.GetHealthCheckRequest) returns (cdm.GetHealthCheckResponse) {
+  rpc HealthCheck(pb.v1.HealthCheckRequest) returns (pb.v1.HealthCheckResponse) {
     option (google.api.http) = {
       get: "/v1/health_check"
     };
-    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       tags: "Service"
     };
   }
-  rpc CreateAccount(cdm.CreateAccountRequest) returns (cdm.CreateAccountResponse) {
+  rpc CreateAccount(pb.v1.CreateAccountRequest) returns (pb.v1.CreateAccountResponse) {
     option (google.api.http) = {
       post: "/v1/accounts/{account.account_id}"
       body: "account"
     };
-    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       tags: "Service"
     };
   }
-  rpc GetAccount(cdm.GetAccountRequest) returns (cdm.GetAccountResponse) {
+  rpc GetAccount(pb.v1.GetAccountRequest) returns (pb.v1.GetAccountResponse) {
     option (google.api.http) = {
       get: "/v1/accounts/{account_id}"
     };
-    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       tags: "Service"
     };
   }
-  rpc Transfer(cdm.TransferRequest) returns (cdm.TransferResponse) {
+  rpc Transfer(pb.v1.TransferRequest) returns (pb.v1.TransferResponse) {
     option (google.api.http) = {
       post: "/v1/transfer"
       body: "*"
     };
-    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       tags: "Service"
     };
   }

@@ -14,7 +14,7 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
 	"github.com/golang/protobuf/proto"
-	pb "github.com/luthersystems/sandbox/api/pb"
+	pb "github.com/luthersystems/sandbox/api/pb/v1"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/mock"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/private"
@@ -249,7 +249,7 @@ func (s *Client) logEntry(ctx context.Context) *logrus.Entry {
 }
 
 // HealthCheck performs health check on phylum.
-func (s *Client) HealthCheck(ctx context.Context, services []string, config ...Config) (*pb.GetHealthCheckResponse, error) {
+func (s *Client) HealthCheck(ctx context.Context, services []string, config ...Config) (*pb.HealthCheckResponse, error) {
 	resp, err := shiroclient.RemoteHealthCheck(ctx, s.rpc, services, config...)
 	if err != nil {
 		return nil, err
@@ -257,9 +257,9 @@ func (s *Client) HealthCheck(ctx context.Context, services []string, config ...C
 	return convertHealthResponse(resp), nil
 }
 
-func convertHealthResponse(health shiroclient.HealthCheck) *pb.GetHealthCheckResponse {
+func convertHealthResponse(health shiroclient.HealthCheck) *pb.HealthCheckResponse {
 	reports := health.Reports()
-	healthpb := &pb.GetHealthCheckResponse{
+	healthpb := &pb.HealthCheckResponse{
 		Reports: make([]*pb.HealthCheckReport, len(reports)),
 	}
 	for i, report := range reports {

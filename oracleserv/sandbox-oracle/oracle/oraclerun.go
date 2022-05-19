@@ -14,9 +14,9 @@ import (
 	"github.com/NYTimes/gziphandler"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	srv "github.com/luthersystems/sandbox/api/srvpb"
-	"github.com/luthersystems/sandbox/api/swagger"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	swagger "github.com/luthersystems/sandbox/api"
+	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/grpclogging"
 	"github.com/luthersystems/svc/logmon"
@@ -27,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // gatewayForwardedHeaders are HTTP headers which the grpc-gateway will encode
@@ -141,7 +142,7 @@ func Run(config *Config) error {
 				grpclogging.UpperBoundTimer(time.Millisecond),
 				grpclogging.RealTime()),
 			svcerr.AppErrorUnaryInterceptor(oracle.log))))
-	srv.RegisterSandboxProcessorServer(grpcServer, oracle)
+	srv.RegisterSandboxServiceServer(grpcServer, oracle)
 	listener, err := net.Listen("unix", grpcAddr)
 	if err != nil {
 		return fmt.Errorf("grpc listen: %w", err)
@@ -160,7 +161,7 @@ func Run(config *Config) error {
 	if err != nil {
 		return fmt.Errorf("grpc dial: %w", err)
 	}
-	grpcSandboxProcessorClient := srv.NewSandboxProcessorClient(grpcConn)
+	grpcSandboxProcessorClient := srv.NewSandboxServiceClient(grpcConn)
 
 	// Create a grpc-gateway handler which talks to the oracle through the grpc
 	// client.  Wrap the grpc-gateway with middleware to produce complete
@@ -170,7 +171,7 @@ func Run(config *Config) error {
 	if err != nil {
 		return err
 	}
-	swaggerHandler, err := swagger.HTTPHandler("oracle")
+	swaggerHandler, err := swagger.HTTPHandler("v1/oracle")
 	if err != nil {
 		return fmt.Errorf("swagger definition error: %v", err)
 	}
@@ -225,18 +226,24 @@ func Run(config *Config) error {
 // grpcGatewayInit performs global configuration that only needs to be done
 // once per process.
 func grpcGatewayInit(log func(ctx context.Context) *logrus.Entry) {
-	runtime.HTTPError = svcerr.ErrIntercept(log)
-	runtime.DisallowUnknownFields()
+	runtime.WithErrorHandler(svcerr.ErrIntercept(log))
 }
 
 // grpcGateway constructs a new grpc-gateway to serve the application's JSON API.
-func grpcGateway(ctx context.Context, client srv.SandboxProcessorClient) (*runtime.ServeMux, error) {
+func grpcGateway(ctx context.Context, client srv.SandboxServiceClient) (*runtime.ServeMux, error) {
 	opts := []runtime.ServeMuxOption{
 		runtime.WithIncomingHeaderMatcher(incomingHeaderMatcher),
-		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true}),
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				UseProtoNames: true,
+			},
+			UnmarshalOptions: protojson.UnmarshalOptions{
+				DiscardUnknown: false,
+			},
+		}),
 	}
 	mux := runtime.NewServeMux(opts...)
-	err := srv.RegisterSandboxProcessorHandlerClient(ctx, mux, client)
+	err := srv.RegisterSandboxServiceHandlerClient(ctx, mux, client)
 	if err != nil {
 		return nil, err
 	}

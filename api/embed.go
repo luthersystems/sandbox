@@ -1,6 +1,6 @@
 // Copyright © 2021 Luther Systems, Ltd. All right reserved.
 
-package swagger
+package api
 
 import (
 	"bytes"
@@ -14,13 +14,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:embed *.swagger.json
+//go:embed srvpb/*/*.swagger.json
 var swaggerJSON embed.FS
 
 // HTTPHandler returns an endpoint handler that writes the specified swagger
 // service definition to w.
 func HTTPHandler(svc string) (http.Handler, error) {
-	b, err := fs.ReadFile(swaggerJSON, string(svc+".swagger.json"))
+	b, err := fs.ReadFile(swaggerJSON, string("srvpb/"+svc+".swagger.json"))
 	if err != nil {
 		return nil, err
 	}

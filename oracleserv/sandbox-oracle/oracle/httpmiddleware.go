@@ -26,8 +26,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
-	pb "github.com/luthersystems/sandbox/api/pb"
-	srv "github.com/luthersystems/sandbox/api/srvpb"
+	pb "github.com/luthersystems/sandbox/api/pb/v1"
+	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/midware"
 	"github.com/luthersystems/svc/svcerr"
@@ -49,21 +49,21 @@ func addServerHeader() midware.Middleware {
 
 // healthCheckHandler intercepts the healthcheck endpoint to return 503 on
 // error.
-func healthCheckHandler(oracle *Oracle, client srv.SandboxProcessorClient) http.Handler {
+func healthCheckHandler(oracle *Oracle, client srv.SandboxServiceClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		sendResponse := func(resp *pb.GetHealthCheckResponse, responseCode int) {
+		sendResponse := func(resp *pb.HealthCheckResponse, responseCode int) {
 			err := writeProtoHTTP(w, responseCode, resp)
 			if err != nil {
 				oracle.log(ctx).WithError(err).Errorf("health handler response error")
 			}
 		}
-		exceptionf := func(format string, v ...interface{}) *pb.GetHealthCheckResponse {
+		exceptionf := func(format string, v ...interface{}) *pb.HealthCheckResponse {
 			ex := svcerr.BusinessException(ctx, fmt.Sprintf(format, v...))
-			return &pb.GetHealthCheckResponse{Exception: ex}
+			return &pb.HealthCheckResponse{Exception: ex}
 		}
 
-		reqProto := &pb.GetHealthCheckRequest{}
+		reqProto := &pb.HealthCheckRequest{}
 		if err := r.ParseForm(); err != nil {
 			sendResponse(exceptionf("invalid request: %s", err), http.StatusBadRequest)
 			return
@@ -86,7 +86,7 @@ func healthCheckHandler(oracle *Oracle, client srv.SandboxProcessorClient) http.
 			default:
 				oracle.log(ctx).WithError(err).Errorf("missing processor client healthcheck response")
 			}
-			resp = &pb.GetHealthCheckResponse{
+			resp = &pb.HealthCheckResponse{
 				Reports: []*pb.HealthCheckReport{
 					&pb.HealthCheckReport{
 						ServiceName:    oracleServiceName,
