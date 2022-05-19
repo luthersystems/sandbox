@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/DataDog/datadog-api-client-go/api/v2/datadog"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/mock"
@@ -48,6 +49,33 @@ var (
 		method: "transfer",
 	}
 )
+
+func addDataDogCtx(ctx context.Context) context.Context {
+	return context.WithValue(
+		ctx,
+		datadog.ContextAPIKeys,
+		map[string]datadog.APIKey{
+			"apiKeyAuth": {
+				Key: os.Getenv("DD_CLIENT_API_KEY"),
+			},
+			"appKeyAuth": {
+				Key: os.Getenv("DD_CLIENT_APP_KEY"),
+			},
+		},
+	)
+}
+
+func isDatadogSetUp(ctx context.Context) bool {
+	if v := ctx.Value(datadog.ContextAPIKeys); v != nil {
+		if keyObj, ok := v["apiKeyAuth"]; ok && keyObj.Key != "" {
+			return true
+		}
+		if keyObj, ok := v["appKeyAuth"]; ok && keyObj.Key != "" {
+			return true
+		}
+	}
+	return false
+}
 
 func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err error) {
 	nbase := len(base)
@@ -144,6 +172,9 @@ func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, er
 }
 
 func (s *Client) callMethod(ctx context.Context, m *phylumMethod, params []interface{}, out proto.Message, config []Config) (err error) {
+	if !isDatadogSetUp(ctx) {
+		ctx = addDataDogCtx(ctx)
+	}
 	configBase := m.config
 	if configBase == nil {
 		configBase = defaultConfigs
