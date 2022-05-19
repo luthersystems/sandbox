@@ -38,7 +38,14 @@ Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project root directory. (This is a change from previous versions, in order to support parallel Docker containers.)
+*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project root directory (This is a change from previous versions, in order to support parallel Docker containers.). If you receive a **403 forbidden Error** while authenticating, ensure that `.luther-license.yaml` is in the ***project root directory***. If that doesn't fix it run 
+ ```
+ make clean
+ ```
+ then run 
+ ```
+ make
+ ```
 
 Ensure you have the [build dependencies and system requirements](https://docs.luthersystems.com/luther/application/start/local-system-requirements).
 
