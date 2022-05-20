@@ -77,6 +77,22 @@ func isDatadogSetUp(ctx context.Context) bool {
 	return false
 }
 
+type datadogSetup struct {
+	Config *datadog.Configuration
+	Client *datadog.APIClient
+}
+
+var defaultDatadogSetup datadogSetup
+
+func createDatadogSetup(ctx context.Context, email string) {
+	if !isDatadogSetUp(ctx) {
+		ctx = addDataDogCtx(ctx)
+	}
+	defaultDatadogSetup.Config = datadog.NewdefaultDatadogSetup.Config()
+	defaultDatadogSetup.Config = datadog.NewConfiguration()
+	defaultDatadogSetup.Client = datadog.NewAPIClient(defaultDatadogSetup.Config)
+}
+
 func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err error) {
 	nbase := len(base)
 	conf = make([]Config, nbase+len(add))
