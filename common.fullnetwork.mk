@@ -6,7 +6,7 @@
 # not in the in-memory network. Not used within Codespaces.
 
 .PHONY: storage-up
-storage-up:
+storage-up: storage-down
 	cd fabric && $(MAKE) up install init
 
 .PHONY: storage-down
@@ -14,7 +14,7 @@ storage-down:
 	-cd fabric && $(MAKE) down
 
 .PHONY: service-up
-service-up: api oracle
+service-up: api oracle service-down
 	./${PROJECT}_compose.py local up -d
 
 .PHONY: service-down
@@ -25,7 +25,7 @@ service-down:
 up: full-down full-up
 
 .PHONY: full-up
-full-up: all service-down storage-down storage-up service-up
+full-up: all storage-up service-up
 	@
 
 .PHONY: down
