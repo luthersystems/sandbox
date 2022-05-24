@@ -18,6 +18,4 @@ services:
     networks:
     - byfn
 networks:
-  fnb_byfn:
-    external: true
   byfn:
