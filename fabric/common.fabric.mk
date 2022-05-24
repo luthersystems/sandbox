@@ -168,8 +168,8 @@ notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp bu
 			--chaincode.version ${CC_VERSION}_${ccname} \
 			notify -g http://${name}:8082 "$(shell cat ${PHYLUM_VERSION_FILE})"
 
-# oracle-up and oracle-down are declared as phony targets so they can be used
-# as dependencies and ordered correctly when processing other phony targets.
+# oracle-up and oracle-down are declared as phony targets so they can be used as
+# dependencies and ordered correctly when processing other phony targets.
 .PHONY: oracle-up
 .PHONY: oracle-down
 

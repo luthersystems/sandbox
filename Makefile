@@ -97,7 +97,7 @@ fabricclean:
 	cd fabric && $(MAKE) clean
 
 .PHONY: up
-up: all mem-down
+up: all
 ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
 	make full-up
 else
@@ -106,10 +106,6 @@ endif
 
 .PHONY: down
 down: mem-down
-ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
-	make full-down
-endif
-	@
 
 .PHONY: mem-up
 mem-up: all mem-down

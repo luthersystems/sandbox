@@ -21,6 +21,9 @@ service-up: api oracle storage-up
 service-down:
 	-./${PROJECT}_compose.py local down
 
+.PHONY: up
+up: full-up
+
 .PHONY: full-up
 full-up: all storage-up service-up
 	@
