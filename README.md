@@ -2,6 +2,9 @@
 
 This repository contains an example backend app (oracle, API, and chaincode).
 
+[![CircleCI](https://circleci.com/gh/luthersystems/sandbox.svg?style=svg)](https://circleci.com/gh/luthersystems/sandbox)
+
+
 ```
                      FE Portal
                         +
