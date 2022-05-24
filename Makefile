@@ -98,10 +98,8 @@ fabricclean:
 
 .PHONY: up
 up: all
-ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
-	make full-up
-else
-	$(error Target 'up' is for a full network, not supported in codespaces)
+ifdef LOCAL_WORKSPACE_FOLDER # if in codespace
+	$(error Target 'up' is for a full network, not supported in codespaces. Run 'mem-up' instead.)
 endif
 
 .PHONY: down
