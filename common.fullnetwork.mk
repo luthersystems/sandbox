@@ -14,7 +14,7 @@ storage-down:
 	-cd fabric && $(MAKE) down
 
 .PHONY: service-up
-service-up: api oracle
+service-up: api oracle storage-up
 	./${PROJECT}_compose.py local up -d
 
 .PHONY: service-down
@@ -22,14 +22,14 @@ service-down:
 	-./${PROJECT}_compose.py local down
 
 .PHONY: up
-up: full-down full-up
+up: full-up
 
 .PHONY: full-up
-full-up: all service-down storage-down storage-up service-up
+full-up: all storage-up service-up
 	@
 
 .PHONY: down
-up: full-down
+down: full-down
 
 .PHONY: full-down
 full-down: service-down storage-down

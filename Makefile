@@ -89,19 +89,13 @@ fabricclean:
 	cd fabric && $(MAKE) clean
 
 .PHONY: up
-up: all mem-down
-ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
-	make full-up
-else
-	$(error Target 'up' is for a full network, not supported in codespaces)
+up: all
+ifdef LOCAL_WORKSPACE_FOLDER # if in codespace
+	$(error Target 'up' is for a full network, not supported in codespaces. Run 'mem-up' instead.)
 endif
 
 .PHONY: down
 down: mem-down
-ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
-	make full-down
-endif
-	@
 
 .PHONY: mem-up
 mem-up: all mem-down
