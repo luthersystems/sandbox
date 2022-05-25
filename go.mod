@@ -8,7 +8,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.2
 	github.com/luthersystems/protos v0.1.2
 	github.com/luthersystems/shiroclient-sdk-go v0.3.0
 	github.com/luthersystems/svc v0.2.1
