@@ -20,7 +20,9 @@ import (
 	"strings"
 	"time"
 
+	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
 	"github.com/golang/protobuf/jsonpb"
+	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
