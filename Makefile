@@ -138,7 +138,7 @@ unit-other: phylumtest
 	@echo "phylum tests passed"
 
 .PHONY: unit-oracle
-unit-oracle: oraclegotest
+unit-oracle: oracletest
 	@echo "service tests passed"
 
 .PHONY: repl

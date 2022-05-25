@@ -24,14 +24,14 @@ PRESIGNED_PATH=${PROJECT_REL_DIR}/build/presigned.json
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
 
-BUILD_IMAGE_GO_ALPINE=luthersystems/build-go-alpine:${BUILDENV_TAG}
-SERVICE_BASE_IMAGE_ALPINE=luthersystems/service-base-alpine:${BUILDENV_TAG}
-BUILD_IMAGE_API=luthersystems/build-api:${BUILDENV_TAG}
+BUILD_IMAGE_GO_ALPINE=luthersystems/build-go-alpine
+SERVICE_BASE_IMAGE_ALPINE=luthersystems/service-base-alpine
+BUILD_IMAGE_API=luthersystems/build-api
 
 SHIROCLIENT_IMAGE=luthersystems/shiroclient
 NETWORK_BUILDER_IMAGE=luthersystems/fabric-network-builder
-SHIROTESTER_IMAGE=luthersystems/shirotester:${SHIROTESTER_VERSION}
-MARTIN_IMAGE=luthersystems/martin:${MARTIN_VERSION}
+SHIROTESTER_IMAGE=luthersystems/shirotester
+MARTIN_IMAGE=luthersystems/martin
 
 UNAME := $(shell uname)
 SUBSTRATE_PLUGIN_OS=${PROJECT_REL_DIR}/build/substratehcp-$(1)-amd64-${SUBSTRATE_VERSION}

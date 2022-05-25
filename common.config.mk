@@ -5,7 +5,7 @@
 # General project configuration that configures make targets and tracks
 # dependency versions.
 
-# PROEJECT and VERSION are attached to docker images and phylum deployment
+# PROJECT and VERSION are attached to docker images and phylum deployment
 # artifacts created during the build process.
 PROJECT=sandbox
 VERSION=0.1.0-SNAPSHOT
@@ -22,7 +22,7 @@ SUBSTRATE_VERSION=2.170.0-fabric2
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${SUBSTRATE_VERSION}
-NETWORK_BUILDER_VERSION=2.170.0-fabric2
+NETWORK_BUILDER_VERSION=${SUBSTRATE_VERSION}
 MARTIN_VERSION=0.1.0-SNAPSHOT
 
 # A golang module proxy server can greatly help speed up docker builds but the

@@ -13,7 +13,7 @@ SOURCE_FILES=$(shell find . -name "*.lisp" | grep -v '/build')
 PHYLUM_NAME ?= ${PROJECT}.zip
 PHYLUM_PATH=build/${PROJECT}-${BUILD_VERSION}/${PHYLUM_NAME}
 
-SHIRO_TEST=${DOCKER_RUN} -v ${PHYLUMDIR}:/tmp -w /tmp ${SHIROTESTER_IMAGE} unit-tests --verbose .
+SHIRO_TEST=${DOCKER_RUN} -it -v ${PHYLUMDIR}:/tmp -w /tmp ${SHIROTESTER_IMAGE}:${SHIROTESTER_VERSION}
 
 # This is an unfortunate hack to get around DnD mounts which must
 # be relative to the host machine.
@@ -40,15 +40,11 @@ go-test:
 
 .PHONY: shiro-test
 shiro-test: build
-	${SHIRO_TEST}
+	${SHIRO_TEST} unit-tests --verbose .
 
 .PHONY: repl
 repl:
-	${DOCKER_RUN} -it \
-		-v ${PHYLUMDIR}:/tmp \
-		-w /tmp \
-		${SHIROTESTER_IMAGE} \
-		repl --in-package ${PHYLUM_PACKAGE} .
+	${SHIRO_TEST} repl --in-package ${PHYLUM_PACKAGE} .
 
 ${PHYLUM_PATH}: ${SOURCE_FILES}
 	mkdir -p $(dir $@)

@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"io"
 
+	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
 	"github.com/golang/protobuf/jsonpb"
+	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
 	"github.com/golang/protobuf/proto"
 	pb "github.com/luthersystems/sandbox/api/pb"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
@@ -39,9 +41,6 @@ type phylumMethod struct {
 }
 
 var (
-	phylumHealthCheck = &phylumMethod{
-		method: "healthcheck",
-	}
 	phylumCreateAccount = &phylumMethod{
 		method: "create_account",
 	}

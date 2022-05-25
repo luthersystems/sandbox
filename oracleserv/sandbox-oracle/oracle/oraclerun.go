@@ -26,6 +26,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // gatewayForwardedHeaders are HTTP headers which the grpc-gateway will encode
@@ -153,7 +154,7 @@ func Run(config *Config) error {
 	dialctx, dialcancel := context.WithDeadline(ctx, time.Now().Add(time.Second))
 	defer dialcancel()
 	grpcConn, err := grpc.DialContext(dialctx, "unix://"+grpcAddr,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(
 			grpc_prometheus.UnaryClientInterceptor)))
 	if err != nil {
