@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"time"
 
 	"github.com/DataDog/datadog-api-client-go/api/v2/datadog"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
@@ -55,8 +57,9 @@ func addDataDogCtx(ctx context.Context) context.Context {
 }
 
 type datadogSetup struct {
-	Config *datadog.Configuration
-	Client *datadog.APIClient
+	Config      *datadog.Configuration
+	Client      *datadog.APIClient
+	initialized bool
 }
 
 var defaultDatadogSetup datadogSetup
@@ -64,7 +67,22 @@ var defaultDatadogSetup datadogSetup
 func createDatadogSetup(ctx context.Context) context.Context {
 	defaultDatadogSetup.Config = datadog.NewConfiguration()
 	defaultDatadogSetup.Client = datadog.NewAPIClient(defaultDatadogSetup.Config)
+	defaultDatadogSetup.initialized = true
 	return addDataDogCtx(ctx)
+}
+
+func sendDatadogPayload(ctx context.Context, body datadog.MetricPayload) error {
+	resp, r, err := defaultDatadogSetup.Client.MetricsApi.SubmitMetrics(ctx, body, *datadog.NewSubmitMetricsOptionalParameters())
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `MetricsApi.SubmitMetrics`: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+		return err
+	}
+
+	responseContent, _ := json.MarshalIndent(resp, "", "  ")
+	fmt.Fprintf(os.Stdout, "Response from `MetricsApi.SubmitMetrics`:\n%s\n", responseContent)
+	return nil
 }
 
 func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err error) {
@@ -162,7 +180,28 @@ func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, er
 }
 
 func (s *Client) callMethod(ctx context.Context, m *phylumMethod, params []interface{}, out proto.Message, config []Config) (err error) {
-	ctx = addDataDogCtx(ctx)
+	if !defaultDatadogSetup.initialized {
+		ctx = createDatadogSetup(ctx)
+	}
+	defer func() {
+		method_tag := fmt.Sprintf("method:%s", m.method)
+		body := datadog.MetricPayload{
+			Series: []datadog.MetricSeries{
+				{
+					Metric: "clientmethod.call",
+					Type:   datadog.METRICINTAKETYPE_COUNT.Ptr(),
+					Points: []datadog.MetricPoint{
+						{
+							Timestamp: datadog.PtrInt64(time.Now().Unix()),
+							Value:     datadog.PtrFloat64(1),
+						},
+					},
+					Tags: []string{method_tag},
+				},
+			},
+		}
+		sendDatadogPayload(addDataDogCtx(ctx), body)
+	}()
 	configBase := m.config
 	if configBase == nil {
 		configBase = defaultConfigs
