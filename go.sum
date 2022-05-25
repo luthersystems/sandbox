@@ -179,6 +179,8 @@ github.com/luthersystems/shiroclient-sdk-go v0.0.0-20220309193336-ec179ca87d83 h
 github.com/luthersystems/shiroclient-sdk-go v0.0.0-20220309193336-ec179ca87d83/go.mod h1:+zGrISftOmZh+aefpcvoG4PJurzHFTYQyJ0Yr2BqQ4E=
 github.com/luthersystems/shiroclient-sdk-go v0.0.0-20220329000816-ac2085246995 h1:RotBljRkBLDdYk58fDlOUF/3ZUVQE56Hmc2R0V5j6Ps=
 github.com/luthersystems/shiroclient-sdk-go v0.0.0-20220329000816-ac2085246995/go.mod h1:+zGrISftOmZh+aefpcvoG4PJurzHFTYQyJ0Yr2BqQ4E=
+github.com/luthersystems/shiroclient-sdk-go v0.2.0 h1:ix7EvpPEnw4HerZZkEVhpMjc+YQi5KBQpuzZ1H/gWuo=
+github.com/luthersystems/shiroclient-sdk-go v0.2.0/go.mod h1:+zGrISftOmZh+aefpcvoG4PJurzHFTYQyJ0Yr2BqQ4E=
 github.com/luthersystems/substratecommon v0.0.0-20211013221307-27cb9c7eca39 h1:TGf3+ptS9Aojo7SmH5sYOHMvts2mq21rdx2XF0+CmqE=
 github.com/luthersystems/substratecommon v0.0.0-20211013221307-27cb9c7eca39/go.mod h1:vm9UFeHKURJ+LECCTkeBqIGLo+DRZ1Q9ms1h4NB4MzI=
 github.com/luthersystems/svc v0.2.1 h1:7kUhFKn/RDXUqIBZhBg6z5hG2p4VBLReIX/CtjefNa0=

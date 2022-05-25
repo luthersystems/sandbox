@@ -206,10 +206,9 @@ func txConfigs() func(context.Context, ...shiroclient.Config) []shiroclient.Conf
 	}
 }
 
-// FIXME is this doing anything?
 func phylumHealthCheck(ctx context.Context, orc *Oracle) []*pb.HealthCheckReport {
 	sopts := orc.txConfigs(ctx)
-	ccHealth, err := orc.phylum.HealthCheck(ctx, sopts...)
+	ccHealth, err := orc.phylum.HealthCheck(ctx, []string{"phylum"}, sopts...)
 	if err != nil && !errors.Is(err, context.Canceled) {
 		return []*pb.HealthCheckReport{&pb.HealthCheckReport{
 			ServiceName:    phylumServiceName,
