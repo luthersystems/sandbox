@@ -1,4 +1,4 @@
-# Sandbox: Example Application
+# Sandbox: Example Luther Application
 
 This repository contains an example backend app (oracle, API, and chaincode).
 
@@ -41,22 +41,31 @@ Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project root directory (This is a change from previous versions, in order to support parallel Docker containers.). If you receive a **403 forbidden Error** while connecting, ensure that `.luther-license.yaml` is in the ***project root directory***. If that doesn't fix it run 
+*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project
+root directory (This is a change from previous versions, in order to support
+parallel Docker containers.).
+
+If you receive a **403 forbidden Error** while connecting, ensure that
+`.luther-license.yaml` is in the ***project root directory***.
+
+If that doesn't fix it run
  ```
  make clean
  ```
- then run 
+ then run
  ```
  make
  ```
 
-For devs using hardware that utilizes the Apple M1 chip, you may encounter an issue getting the sandbox environment up and running.
-To resolve this, ensure you have [Rosetta 2](https://support.apple.com/en-us/HT211861) installed on your computer. 
-This can be done either running this command here: 
+For devs using hardware that utilizes the Apple M1 chip, you may encounter an
+issue getting the sandbox environment up and running.
+To resolve this, ensure you have [Rosetta 2](https://support.apple.com/en-us/HT211861)
+installed on your computer.
+This can be done either running this command here:
 ```
 softwareupdate --install-rosetta
 ```
-or by installing any software that won't naturally run on the M1 chip (e.g. Zoom) and should appear 
+or by installing any software that won't naturally run on the M1 chip (e.g. Zoom) and should appear
 as an additional prompt during the installation process.
 
 Ensure you have the [build dependencies and system requirements](https://docs.luthersystems.com/luther/application/start/local-system-requirements).
@@ -114,7 +123,8 @@ Install docker-compose:
 sudo pip3 install docker-compose
 ```
 
-Make sure your [user has permissions](https://docs.docker.com/engine/install/linux-postinstall/) to run docker.
+Make sure your [user has permissions](https://docs.docker.com/engine/install/linux-postinstall/)
+to run docker.
 
 See [this](https://dev.luthersystemsapp.com/ubuntu20_04-sandbox-install.sh)
 script for the exact steps to install the dependencies on a fresh Ubuntu 20.04
@@ -203,7 +213,7 @@ a JSON API that provides endpoints to:
 
 Overview of the directory structure
 
-```	
+```
 build/:
 	Temporary build artifacts (do not check into git).
 common.config.mk:

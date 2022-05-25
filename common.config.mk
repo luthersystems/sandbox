@@ -5,7 +5,7 @@
 # General project configuration that configures make targets and tracks
 # dependency versions.
 
-# PROEJECT and VERSION are attached to docker images and phylum deployment
+# PROJECT and VERSION are attached to docker images and phylum deployment
 # artifacts created during the build process.
 PROJECT=sandbox
 VERSION=0.1.0-SNAPSHOT
