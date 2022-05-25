@@ -51,30 +51,7 @@ var (
 )
 
 func addDataDogCtx(ctx context.Context) context.Context {
-	return context.WithValue(
-		ctx,
-		datadog.ContextAPIKeys,
-		map[string]datadog.APIKey{
-			"apiKeyAuth": {
-				Key: os.Getenv("DD_CLIENT_API_KEY"),
-			},
-			"appKeyAuth": {
-				Key: os.Getenv("DD_CLIENT_APP_KEY"),
-			},
-		},
-	)
-}
-
-func isDatadogSetUp(ctx context.Context) bool {
-	if v := ctx.Value(datadog.ContextAPIKeys); v != nil {
-		if keyObj, ok := v["apiKeyAuth"]; ok && keyObj.Key != "" {
-			return true
-		}
-		if keyObj, ok := v["appKeyAuth"]; ok && keyObj.Key != "" {
-			return true
-		}
-	}
-	return false
+	return datadog.NewDefaultContext(ctx)
 }
 
 type datadogSetup struct {
@@ -84,13 +61,10 @@ type datadogSetup struct {
 
 var defaultDatadogSetup datadogSetup
 
-func createDatadogSetup(ctx context.Context, email string) {
-	if !isDatadogSetUp(ctx) {
-		ctx = addDataDogCtx(ctx)
-	}
-	defaultDatadogSetup.Config = datadog.NewdefaultDatadogSetup.Config()
+func createDatadogSetup(ctx context.Context) context.Context {
 	defaultDatadogSetup.Config = datadog.NewConfiguration()
 	defaultDatadogSetup.Client = datadog.NewAPIClient(defaultDatadogSetup.Config)
+	return addDataDogCtx(ctx)
 }
 
 func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err error) {
@@ -188,9 +162,7 @@ func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, er
 }
 
 func (s *Client) callMethod(ctx context.Context, m *phylumMethod, params []interface{}, out proto.Message, config []Config) (err error) {
-	if !isDatadogSetUp(ctx) {
-		ctx = addDataDogCtx(ctx)
-	}
+	ctx = addDataDogCtx(ctx)
 	configBase := m.config
 	if configBase == nil {
 		configBase = defaultConfigs
