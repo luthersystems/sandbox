@@ -85,19 +85,6 @@ default: ${CC_PATH}
 images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
-.PHONY: clean
-clean: fabric-clean
-
-.PHONY: fabric-clean
-fabric-clean:
-	rm -rf build
-
-.PHONY: pristine
-pristine: clean clean-generated
-
-.PHONY: clean-generated
-clean-generated: fabric-clean
-
 .PHONY: install
 all: install
 install: ${NETWORK_BUILDER_TARGET} ${CC_PATH}
