@@ -250,13 +250,32 @@ func (s *Client) logEntry(ctx context.Context) *logrus.Entry {
 }
 
 // HealthCheck performs health check on phylum.
-func (s *Client) HealthCheck(ctx context.Context, config ...Config) (*pb.GetHealthCheckResponse, error) {
-	resp := &pb.GetHealthCheckResponse{}
-	err := s.callMethod(ctx, phylumHealthCheck, nil, resp, config)
+func (s *Client) HealthCheck(ctx context.Context, services []string, config ...Config) (*pb.GetHealthCheckResponse, error) {
+	resp, err := shiroclient.RemoteHealthCheck(ctx, s.rpc, services, config...)
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	return convertHealthResponse(resp), nil
+}
+
+func convertHealthResponse(health shiroclient.HealthCheck) *pb.GetHealthCheckResponse {
+	reports := health.Reports()
+	healthpb := &pb.GetHealthCheckResponse{
+		Reports: make([]*pb.HealthCheckReport, len(reports)),
+	}
+	for i, report := range reports {
+		healthpb.Reports[i] = convertHealthReport(report)
+	}
+	return healthpb
+}
+
+func convertHealthReport(report shiroclient.HealthCheckReport) *pb.HealthCheckReport {
+	return &pb.HealthCheckReport{
+		Timestamp:      report.Timestamp(),
+		Status:         report.Status(),
+		ServiceName:    report.ServiceName(),
+		ServiceVersion: report.ServiceVersion(),
+	}
 }
 
 // CreateAccount is an example endpoint to create a resource
