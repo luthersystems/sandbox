@@ -41,7 +41,14 @@ Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project root directory. (This is a change from previous versions, in order to support parallel Docker containers.)
+*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project root directory (This is a change from previous versions, in order to support parallel Docker containers.). If you receive a **403 forbidden Error** while connecting, ensure that `.luther-license.yaml` is in the ***project root directory***. If that doesn't fix it run 
+ ```
+ make clean
+ ```
+ then run 
+ ```
+ make
+ ```
 
 For devs using hardware that utilizes the Apple M1 chip, you may encounter an issue getting the sandbox environment up and running.
 To resolve this, ensure you have [Rosetta 2](https://support.apple.com/en-us/HT211861) installed on your computer. 
