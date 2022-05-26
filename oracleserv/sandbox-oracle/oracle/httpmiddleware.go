@@ -20,10 +20,6 @@ import (
 	"strings"
 	"time"
 
-	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
-	"github.com/golang/protobuf/jsonpb"
-	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
-	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
@@ -31,6 +27,8 @@ import (
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/midware"
 	"github.com/luthersystems/svc/svcerr"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // addServerHeader includes the version of the oracle within the Server HTTP
@@ -112,16 +110,15 @@ func healthCheckHandler(oracle *Oracle, client srv.SandboxServiceClient) http.Ha
 }
 
 func writeProtoHTTP(w http.ResponseWriter, code int, msg proto.Message) error {
-	var b bytes.Buffer
-	marshaler := &jsonpb.Marshaler{OrigName: true}
-	err := marshaler.Marshal(&b, msg)
+	marshaler := &protojson.MarshalOptions{UseProtoNames: true}
+	b, err := marshaler.Marshal(msg)
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return fmt.Errorf("protobuf marshal: %w", err)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_, err = io.Copy(w, &b)
+	_, err = io.Copy(w, bytes.NewBuffer(b))
 	if err != nil {
 		return fmt.Errorf("write response: %w", err)
 	}

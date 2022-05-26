@@ -3,17 +3,12 @@
 package phylum
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 
-	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
-	"github.com/golang/protobuf/jsonpb"
-	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
-	"github.com/golang/protobuf/proto"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/mock"
@@ -21,6 +16,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // Config is an alias (not a distinct type)
@@ -70,9 +67,7 @@ func cmdParams(params ...proto.Message) []interface{} {
 	if len(params) == 0 {
 		return []interface{}{}
 	}
-	m := &jsonpb.Marshaler{
-		OrigName: true,
-	}
+	m := &protojson.MarshalOptions{UseProtoNames: true}
 	jsparams := make([]interface{}, len(params))
 	for i, p := range params {
 		jsparams[i] = &jsProtoMessage{
@@ -85,16 +80,15 @@ func cmdParams(params ...proto.Message) []interface{} {
 
 type jsProtoMessage struct {
 	proto.Message
-	m *jsonpb.Marshaler
+	m *protojson.MarshalOptions
 }
 
 func (msg *jsProtoMessage) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	err := msg.m.Marshal(&buf, msg.Message)
+	b, err := msg.m.Marshal(msg.Message)
 	if err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), nil
+	return b, nil
 }
 
 // Client is a phylum client.
@@ -208,7 +202,7 @@ func (s *Client) sdkCall(ctx context.Context, cmd string, params interface{}, re
 		// nothing to unmarshal
 		return nil
 	}
-	err = jsonpb.Unmarshal(bytes.NewReader(resp.ResultJSON()), rep)
+	err = protojson.Unmarshal(resp.ResultJSON(), rep)
 	if err != nil {
 		s.logEntry(ctx).
 			// IMPORTANT: we cannot log this since it may contain PII.

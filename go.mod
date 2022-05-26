@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
