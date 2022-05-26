@@ -24,7 +24,7 @@ GO_SOURCE_FILES=$(shell find ${PROJECT_REL_DIR} -name '*.go' | grep -v '/vendor/
 GO_PKG_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,pkg,${GO_PKG_VOLUME})
 GO_PKG_VOLUME_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,volume,${GO_PKG_VOLUME})
 
-GO_BUILD_TAGS ?= osusergo,netgo,cgo
+GO_BUILD_TAGS ?= osusergo,netgo,cgo,timetzdata
 GO_BUILD_FLAGS="-installsuffix ${GO_BUILD_TAGS} -tags ${GO_BUILD_TAGS}"
 GO_TEST_FLAGS ?= -cover
 

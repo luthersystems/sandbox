@@ -10,7 +10,7 @@ import (
 	"io"
 	"testing"
 
-	pb "github.com/luthersystems/sandbox/api/pb"
+	pb "github.com/luthersystems/sandbox/api/pb/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,7 +97,7 @@ func TestSnapshot(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		server, stop = newTestOracleFrom(t, snap)
 		defer stop()
-		req := &pb.GetHealthCheckRequest{}
+		req := &pb.HealthCheckRequest{}
 		ctx := context.Background()
 		resp, err := server.HealthCheck(ctx, req)
 		require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestHealthCheck(t *testing.T) {
 	server, stop := makeTestServer(t)
 	defer stop()
 	ctx := context.Background()
-	resp, err := server.HealthCheck(ctx, &pb.GetHealthCheckRequest{})
+	resp, err := server.HealthCheck(ctx, &pb.HealthCheckRequest{})
 	require.NoError(t, err)
 	require.Equal(t, 2, len(resp.GetReports()))
 }

@@ -20,17 +20,15 @@ import (
 	"strings"
 	"time"
 
-	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
-	"github.com/golang/protobuf/jsonpb"
-	//lint:ignore SA1019 we are not ready to upgrade proto lib yet
-	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
-	pb "github.com/luthersystems/sandbox/api/pb"
-	srv "github.com/luthersystems/sandbox/api/srvpb"
+	pb "github.com/luthersystems/sandbox/api/pb/v1"
+	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/midware"
 	"github.com/luthersystems/svc/svcerr"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // addServerHeader includes the version of the oracle within the Server HTTP
@@ -49,21 +47,21 @@ func addServerHeader() midware.Middleware {
 
 // healthCheckHandler intercepts the healthcheck endpoint to return 503 on
 // error.
-func healthCheckHandler(oracle *Oracle, client srv.SandboxProcessorClient) http.Handler {
+func healthCheckHandler(oracle *Oracle, client srv.SandboxServiceClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		sendResponse := func(resp *pb.GetHealthCheckResponse, responseCode int) {
+		sendResponse := func(resp *pb.HealthCheckResponse, responseCode int) {
 			err := writeProtoHTTP(w, responseCode, resp)
 			if err != nil {
 				oracle.log(ctx).WithError(err).Errorf("health handler response error")
 			}
 		}
-		exceptionf := func(format string, v ...interface{}) *pb.GetHealthCheckResponse {
+		exceptionf := func(format string, v ...interface{}) *pb.HealthCheckResponse {
 			ex := svcerr.BusinessException(ctx, fmt.Sprintf(format, v...))
-			return &pb.GetHealthCheckResponse{Exception: ex}
+			return &pb.HealthCheckResponse{Exception: ex}
 		}
 
-		reqProto := &pb.GetHealthCheckRequest{}
+		reqProto := &pb.HealthCheckRequest{}
 		if err := r.ParseForm(); err != nil {
 			sendResponse(exceptionf("invalid request: %s", err), http.StatusBadRequest)
 			return
@@ -86,7 +84,7 @@ func healthCheckHandler(oracle *Oracle, client srv.SandboxProcessorClient) http.
 			default:
 				oracle.log(ctx).WithError(err).Errorf("missing processor client healthcheck response")
 			}
-			resp = &pb.GetHealthCheckResponse{
+			resp = &pb.HealthCheckResponse{
 				Reports: []*pb.HealthCheckReport{
 					&pb.HealthCheckReport{
 						ServiceName:    oracleServiceName,
@@ -112,16 +110,15 @@ func healthCheckHandler(oracle *Oracle, client srv.SandboxProcessorClient) http.
 }
 
 func writeProtoHTTP(w http.ResponseWriter, code int, msg proto.Message) error {
-	var b bytes.Buffer
-	marshaler := &jsonpb.Marshaler{OrigName: true}
-	err := marshaler.Marshal(&b, msg)
+	marshaler := &protojson.MarshalOptions{UseProtoNames: true}
+	b, err := marshaler.Marshal(msg)
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return fmt.Errorf("protobuf marshal: %w", err)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_, err = io.Copy(w, &b)
+	_, err = io.Copy(w, bytes.NewBuffer(b))
 	if err != nil {
 		return fmt.Errorf("write response: %w", err)
 	}

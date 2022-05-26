@@ -5,16 +5,19 @@ include ${PROJECT_REL_DIR}common.mk
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 
 BUILD_IMAGE=${BUILD_IMAGE_API}:${BUILDENV_TAG}
-PROTO_SOURCE_FILES=$(wildcard pb/*.proto) $(wildcard srvpb/*.proto)
+PROTO_SOURCE_FILES=$(wildcard pb/*/*.proto) $(wildcard srvpb/*/*.proto) $(wildcard common/*.proto)
 
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 BUILD_WORKDIR=${BUILD_IMAGE_PROJECT_DIR}/api
 
-SWAGGER_JSON=swagger/oracle.swagger.json
+SWAGGER_JSON=swagger/srvpb/oracle.swagger.json
 
-GW_FILES=srvpb/oracle.pb.gw.go
-PROTO_FILES=$(patsubst %.proto,%.pb.go,$(PROTO_SOURCE_FILES)) ${GW_FILES}
-ARTIFACTS=${PROTO_FILES} ${SWAGGER_JSON}
+GW_FILES=$(patsubst %.proto,%.pb.gw.go,$(wildcard srvpb/*/*.proto))
+GRPC_FILES=$(patsubst %.proto,%_grpc.pb.go,$(wildcard srvpb/*/*.proto))
+PROTO_FILES=$(patsubst %.proto,%.pb.go,$(PROTO_SOURCE_FILES))
+SWAGGER_FILES=$(patsubst %.proto,%.swagger.json,$(PROTO_SOURCE_FILES))
+
+ARTIFACTS=${PROTO_FILES} ${GW_FILES} ${GRPC_FILES} ${SWAGGER_FILES}
 
 .PHONY: default
 default: all
@@ -24,19 +27,18 @@ all: ${ARTIFACTS}
 
 .PHONY: clean
 clean:
-	${RM} -f ${ARTIFACTS} ${SWAGGER_JSON} build
+	${RM} -f ${ARTIFACTS}
 
 ${ARTIFACTS}: ${PROTO_SOURCE_FILES}
 	@echo "Building api"
 	${DOCKER_RUN} \
 		-u ${DOCKER_USER} \
 		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
+		--mount type=tmpfs,destination=/.cache \
 		-e PROJECT_PATH="${PROJECT_PATH}" \
 		-e VERSION="${VERSION}" \
 		-w ${BUILD_WORKDIR} \
-		--init \
-		--entrypoint make \
-		${BUILD_IMAGE} -f /opt/Dockerfile.api.mk ${ARTIFACTS} ${SWAGGER_ARTIFACTS}
+		${BUILD_IMAGE}
 
 .PHONY: unit
 unit:

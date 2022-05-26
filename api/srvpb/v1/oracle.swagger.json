@@ -2,8 +2,13 @@
   "swagger": "2.0",
   "info": {
     "title": "Sandbox API",
-    "version": "0.1.0-SNAPSHOT"
+    "version": "1.0"
   },
+  "tags": [
+    {
+      "name": "SandboxService"
+    }
+  ],
   "schemes": [
     "https"
   ],
@@ -14,14 +19,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/accounts/{account.account_id}": {
+    "/v1/accounts/{account.accountId}": {
       "post": {
-        "operationId": "CreateAccount",
+        "operationId": "SandboxService_CreateAccount",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/cdmCreateAccountResponse"
+              "$ref": "#/definitions/v1CreateAccountResponse"
             }
           },
           "400": {
@@ -66,11 +71,17 @@
             "schema": {
               "$ref": "#/definitions/commonExceptionResponse"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
           }
         },
         "parameters": [
           {
-            "name": "account.account_id",
+            "name": "account.accountId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -80,7 +91,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/cdmAccount"
+              "$ref": "#/definitions/v1Account"
             }
           }
         ],
@@ -89,14 +100,14 @@
         ]
       }
     },
-    "/v1/accounts/{account_id}": {
+    "/v1/accounts/{accountId}": {
       "get": {
-        "operationId": "GetAccount",
+        "operationId": "SandboxService_GetAccount",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/cdmGetAccountResponse"
+              "$ref": "#/definitions/v1GetAccountResponse"
             }
           },
           "400": {
@@ -141,11 +152,17 @@
             "schema": {
               "$ref": "#/definitions/commonExceptionResponse"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
           }
         },
         "parameters": [
           {
-            "name": "account_id",
+            "name": "accountId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -159,12 +176,12 @@
     "/v1/health_check": {
       "get": {
         "summary": "Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.",
-        "operationId": "HealthCheck",
+        "operationId": "SandboxService_HealthCheck",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/cdmGetHealthCheckResponse"
+              "$ref": "#/definitions/v1HealthCheckResponse"
             }
           },
           "400": {
@@ -209,16 +226,21 @@
             "schema": {
               "$ref": "#/definitions/commonExceptionResponse"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
           }
         },
         "parameters": [
           {
-            "name": "oracle_only",
+            "name": "oracleOnly",
             "description": "Skip the chaincode healthcheck.",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -228,12 +250,12 @@
     },
     "/v1/transfer": {
       "post": {
-        "operationId": "Transfer",
+        "operationId": "SandboxService_Transfer",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/cdmTransferResponse"
+              "$ref": "#/definitions/v1TransferResponse"
             }
           },
           "400": {
@@ -278,6 +300,12 @@
             "schema": {
               "$ref": "#/definitions/commonExceptionResponse"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
           }
         },
         "parameters": [
@@ -286,7 +314,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/cdmTransferRequest"
+              "$ref": "#/definitions/v1TransferRequest"
             }
           }
         ],
@@ -297,99 +325,6 @@
     }
   },
   "definitions": {
-    "cdmAccount": {
-      "type": "object",
-      "properties": {
-        "account_id": {
-          "type": "string"
-        },
-        "current_balance": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "cdmCreateAccountResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/commonException"
-        }
-      }
-    },
-    "cdmGetAccountResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/commonException"
-        },
-        "account": {
-          "$ref": "#/definitions/cdmAccount"
-        }
-      }
-    },
-    "cdmGetHealthCheckResponse": {
-      "type": "object",
-      "properties": {
-        "reports": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/cdmHealthCheckReport"
-          },
-          "description": "The status of the relevant sub services."
-        },
-        "exception": {
-          "$ref": "#/definitions/commonException",
-          "description": "An exception if an error occurred during processing request."
-        }
-      },
-      "description": "Health status of services."
-    },
-    "cdmHealthCheckReport": {
-      "type": "object",
-      "properties": {
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of when the report was generated (RFC3339)."
-        },
-        "status": {
-          "type": "string",
-          "description": "Status of the service."
-        },
-        "service_name": {
-          "type": "string",
-          "description": "Name of the service."
-        },
-        "service_version": {
-          "type": "string",
-          "description": "Version of the service."
-        }
-      },
-      "description": "Health check status of an individual service."
-    },
-    "cdmTransferRequest": {
-      "type": "object",
-      "properties": {
-        "payer_id": {
-          "type": "string"
-        },
-        "payee_id": {
-          "type": "string"
-        },
-        "transfer_amount": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "cdmTransferResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/commonException"
-        }
-      }
-    },
     "commonException": {
       "type": "object",
       "properties": {
@@ -409,7 +344,7 @@
           "type": "string",
           "description": "Human readable description of exception."
         },
-        "exception_metadata": {
+        "exceptionMetadata": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
@@ -441,6 +376,126 @@
       ],
       "default": "INVALID_TYPE",
       "description": "Type of exception.\n\n - INVALID_TYPE: Default for no exception.\n - BUSINESS: Business logic error.\n - SERVICE_NOT_AVAILABLE: A service was unavailable.\n - INFRASTRUCTURE: Infrastructure was down.\n - UNEXPECTED: Catch-all for all other types.\n - SECURITY_VIOLATION: Security related error."
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1Account": {
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string"
+        },
+        "currentBalance": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1CreateAccountResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        }
+      }
+    },
+    "v1GetAccountResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        },
+        "account": {
+          "$ref": "#/definitions/v1Account"
+        }
+      }
+    },
+    "v1HealthCheckReport": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the report was generated (RFC3339)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the service."
+        },
+        "serviceName": {
+          "type": "string",
+          "description": "Name of the service."
+        },
+        "serviceVersion": {
+          "type": "string",
+          "description": "Version of the service."
+        }
+      },
+      "description": "Health check status of an individual service."
+    },
+    "v1HealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1HealthCheckReport"
+          },
+          "description": "The status of the relevant sub services."
+        },
+        "exception": {
+          "$ref": "#/definitions/commonException",
+          "description": "An exception if an error occurred during processing request."
+        }
+      },
+      "description": "Health status of services."
+    },
+    "v1TransferRequest": {
+      "type": "object",
+      "properties": {
+        "payerId": {
+          "type": "string"
+        },
+        "payeeId": {
+          "type": "string"
+        },
+        "transferAmount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1TransferResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/commonException"
+        }
+      }
     }
   },
   "securityDefinitions": {
