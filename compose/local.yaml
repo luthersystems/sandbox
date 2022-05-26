@@ -11,6 +11,9 @@ services:
     environment:
     - SANDBOX_ORACLE_EMULATE_CC=false
     - SANDBOX_ORACLE_GATEWAY_ENDPOINT=http://shiroclient_gw_phylum:8082
+    # include these in compose/.env
+    - DD_API_KEY=${DD_API_KEY}
+    - DD_APP_KEY=${DD_APP_KEY}
     networks:
     - fnb_byfn
 networks:
