@@ -272,10 +272,10 @@ github.com/luthersystems/elps v1.14.1/go.mod h1:hcUH6wtTsw2Xvm5AdoCZPKuDoLJbwg2j
 github.com/luthersystems/protos v0.1.2 h1:u1GYSb83fXsJLnW6NkzPmDN+15vSoAu2mzi+ibpIFR4=
 github.com/luthersystems/protos v0.1.2/go.mod h1:roefWQckNntRXvyHzjJZCEFNzkcRli9mD+Za0qndTNQ=
 github.com/luthersystems/raymond v1.1.1-0.20200710185833-e77462cef10d/go.mod h1:maDY7J3mlP6v6PpI/btDa9r3/gvbYbVKm+tz2DZaTZU=
-github.com/luthersystems/shiroclient-sdk-go v0.3.0 h1:w7b460KIS8lBB5I6NFlCNet9YkfjQalpJtfBezQKEH4=
-github.com/luthersystems/shiroclient-sdk-go v0.3.0/go.mod h1:/7SUNErMA+F9s1ebGeEaMIwRfLc39mo4Gkichww4vNE=
-github.com/luthersystems/substratecommon v0.0.0-20220525205431-770a01abef5a h1:SVgdXcLOsZ7EzI7SWWt4kU4G+hvEQgHwjOyRZ62jzdw=
-github.com/luthersystems/substratecommon v0.0.0-20220525205431-770a01abef5a/go.mod h1:5zcOJC23goso/qOAnN9FkjvUFfebJ+ogr5m71LkZtL4=
+github.com/luthersystems/shiroclient-sdk-go v0.3.1-0.20220526043945-0e7767cdbac6 h1:mC58D48PxeSFWhWGyNL5Q/NYz2W8EJYt+a/XCJIsQdQ=
+github.com/luthersystems/shiroclient-sdk-go v0.3.1-0.20220526043945-0e7767cdbac6/go.mod h1:fzC9nHSG5UrDk5exvEQ8oS1k4zVOMtdIKRqMSpS5ZH8=
+github.com/luthersystems/substratecommon v0.0.0-20220526043645-325d67d84048 h1:2Io5AvQomkfXSSnVXbmE2JTjnWpS/2oKl3aFklYE2XA=
+github.com/luthersystems/substratecommon v0.0.0-20220526043645-325d67d84048/go.mod h1:XgDJiOisV7/bYpUU5urG/GErc+ObkiSQC8dA47dKXo8=
 github.com/luthersystems/svc v0.6.0 h1:9QzvMvOoZq8l6o6PsptFOl1v6mFaVK2zAohJ7Ta+dqA=
 github.com/luthersystems/svc v0.6.0/go.mod h1:a3QRcx2WmLQ69ARFyhtzQntPfo//symKQcxILJjAedc=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
