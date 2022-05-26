@@ -206,7 +206,7 @@ func (s *Client) sdkCall(ctx context.Context, cmd string, params interface{}, re
 	if err != nil {
 		s.logEntry(ctx).
 			// IMPORTANT: we cannot log this since it may contain PII.
-			WithField("debug_json", string(resp.ResultJSON())).
+			//WithField("debug_json", string(resp.ResultJSON())).
 			WithError(err).Errorf("Shiro RPC result could not be decoded")
 		return err
 	}
