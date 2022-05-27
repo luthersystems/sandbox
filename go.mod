@@ -3,6 +3,7 @@ module github.com/luthersystems/sandbox
 go 1.16
 
 require (
+	github.com/DataDog/datadog-api-client-go v1.14.0 // indirect
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
