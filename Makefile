@@ -98,11 +98,15 @@ endif
 down: mem-down explorer-down
 
 .PHONY: explorer
-explorer: explorer-up
+explorer: explorer-up-clean
 
 .PHONY: explorer-up
 explorer-up:
 	cd ${PROJECT_REL_DIR}/explorer && make up
+
+.PHONY: explorer-up-clean
+explorer-up-clean:
+	cd ${PROJECT_REL_DIR}/explorer && make up-clean
 
 .PHONY: explorer-down
 explorer-down:

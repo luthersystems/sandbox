@@ -172,6 +172,32 @@ make down
 
 Running `docker ps` again will show all the containers have been removed.
 
+### Run Blockchain Explorer
+
+To examine a graphical UI for the chaincodee transactions and blocks and look at
+the details of the work the sandbox network has done, build the Blockchain
+Explorer. With the full network running, run:
+
+```
+make explorer
+```
+
+This creates a web app which will be visible on `localhost:8090`. The default
+login credentials are username: `admin`, password `adminpw`. Bringing up the
+network should produce some transactions and blocks, and `make integration` will
+generate more activity, which can be viewed in the web app.
+
+If the `make` command fails, or if the Explorer runs but no new activity is
+detected, it has most likely failed to authenticate; run
+
+```
+make explorer-clean
+make explorer-up
+```
+
+To wipe out the pre-existing database and recreate it empty, then re-build the
+Explorer. This will reconnect it to the current network.
+
 ## Build in Codespaces
 
 Run `make` to build all the services:
