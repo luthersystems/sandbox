@@ -166,8 +166,7 @@ func Run(config *Config) error {
 	// Create a grpc-gateway handler which talks to the oracle through the grpc
 	// client.  Wrap the grpc-gateway with middleware to produce complete
 	// service handler.
-	grpcGatewayInit(oracle.log)
-	jsonapi, err := grpcGateway(ctx, grpcSandboxProcessorClient)
+	jsonapi, err := grpcGateway(ctx, oracle.log, grpcSandboxProcessorClient)
 	if err != nil {
 		return err
 	}
@@ -223,15 +222,10 @@ func Run(config *Config) error {
 	return <-errServe
 }
 
-// grpcGatewayInit performs global configuration that only needs to be done
-// once per process.
-func grpcGatewayInit(log func(ctx context.Context) *logrus.Entry) {
-	runtime.WithErrorHandler(svcerr.ErrIntercept(log))
-}
-
 // grpcGateway constructs a new grpc-gateway to serve the application's JSON API.
-func grpcGateway(ctx context.Context, client srv.SandboxServiceClient) (*runtime.ServeMux, error) {
+func grpcGateway(ctx context.Context, log func(context.Context) *logrus.Entry, client srv.SandboxServiceClient) (*runtime.ServeMux, error) {
 	opts := []runtime.ServeMuxOption{
+		runtime.WithErrorHandler(svcerr.ErrIntercept(log)),
 		runtime.WithIncomingHeaderMatcher(incomingHeaderMatcher),
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 			MarshalOptions: protojson.MarshalOptions{
