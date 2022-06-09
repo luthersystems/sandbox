@@ -15,11 +15,11 @@ storage-down:
 
 .PHONY: service-up
 service-up: api oracle storage-up
-	./${PROJECT}_compose.py local up -d
+	./blockchain_compose.py local up -d
 
 .PHONY: service-down
 service-down:
-	-./${PROJECT}_compose.py local down
+	-./blockchain_compose.py local down
 
 .PHONY: up
 up: full-up
