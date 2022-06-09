@@ -1,31 +1,3 @@
-//// Validate API key returns "OK" response
-//
-//package main
-//
-//import (
-//    "context"
-//    "encoding/json"
-//    "fmt"
-//    "os"
-//
-//    datadog "github.com/DataDog/datadog-api-client-go/api/v1/datadog"
-//)
-//
-//func main() {
-//    ctx := datadog.NewDefaultContext(context.Background())
-//    configuration := datadog.NewConfiguration()
-//    apiClient := datadog.NewAPIClient(configuration)
-//    resp, r, err := apiClient.AuthenticationApi.Validate(ctx)
-//
-//    if err != nil {
-//        fmt.Fprintf(os.Stderr, "Error when calling `AuthenticationApi.Validate`: %v\n", err)
-//        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-//    }
-//
-//    responseContent, _ := json.MarshalIndent(resp, "", "  ")
-//    fmt.Fprintf(os.Stdout, "Response from `AuthenticationApi.Validate`:\n%s\n", responseContent)
-//}
-
 // Submit metrics returns "Payload accepted" response
 
 package main
@@ -47,6 +19,11 @@ type datadogSetup struct {
 
 var defaultDatadogSetup datadogSetup
 
+func setEnv() {
+	os.Setenv("DD_SITE", "localhost")
+	// needs "DD_API_KEY" and "DD_APP_KEY" set by non-checked-in env
+}
+
 func sendBody(ctx context.Context, body datadog.MetricPayload) error {
 	payload, resp, err := defaultDatadogSetup.Client.MetricsApi.SubmitMetrics(ctx, body, *datadog.NewSubmitMetricsOptionalParameters())
 
@@ -63,6 +40,7 @@ func sendBody(ctx context.Context, body datadog.MetricPayload) error {
 }
 
 func main() {
+	setEnv()
 	ctx := datadog.NewDefaultContext(context.Background())
 	defaultDatadogSetup.Config = datadog.NewConfiguration()
 	defaultDatadogSetup.Client = datadog.NewAPIClient(defaultDatadogSetup.Config)
@@ -75,7 +53,7 @@ func main() {
 					Type:   datadog.METRICINTAKETYPE_COUNT.Ptr(),
 					Points: []datadog.MetricPoint{
 						{
-							Timestamp: datadog.PtrInt64(time.Now().Unix()),
+							Timestamp: datadog.PtrInt64(time.Now().Unix() - 90),
 							Value:     datadog.PtrFloat64(3.0),
 						},
 					},
@@ -89,7 +67,7 @@ func main() {
 					Type:   datadog.METRICINTAKETYPE_COUNT.Ptr(),
 					Points: []datadog.MetricPoint{
 						{
-							Timestamp: datadog.PtrInt64(time.Now().Unix() + 40),
+							Timestamp: datadog.PtrInt64(time.Now().Unix() - 40),
 							Value:     datadog.PtrFloat64(2.0),
 						},
 					},
@@ -103,7 +81,7 @@ func main() {
 					Type:   datadog.METRICINTAKETYPE_COUNT.Ptr(),
 					Points: []datadog.MetricPoint{
 						{
-							Timestamp: datadog.PtrInt64(time.Now().Unix() + 90),
+							Timestamp: datadog.PtrInt64(time.Now().Unix()),
 							Value:     datadog.PtrFloat64(18.0),
 						},
 					},
