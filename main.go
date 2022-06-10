@@ -24,10 +24,60 @@ func setEnv() {
 	// needs "DD_API_KEY" and "DD_APP_KEY" set by non-checked-in env
 }
 
+func localHostConfiguration() *datadog.Configuration {
+	conf := datadog.NewConfiguration()
+	conf.Servers = datadog.ServerConfigurations{
+		{
+			URL:         "http://{site}",
+			Description: "No description provided",
+			Variables: map[string]datadog.ServerVariable{
+				"site": {
+					Description:  "The regional site for Datadog customers.",
+					DefaultValue: "api.datadoghq.com",
+					EnumValues: []string{
+						"api.datadoghq.com",
+						"api.us3.datadoghq.com",
+						"api.us5.datadoghq.com",
+						"api.datadoghq.eu",
+						"api.ddog-gov.com",
+						"localhost",
+					},
+				},
+			},
+		},
+		{
+			URL:         "{protocol}://{name}",
+			Description: "No description provided",
+			Variables: map[string]datadog.ServerVariable{
+				"name": {
+					Description:  "Full site DNS name.",
+					DefaultValue: "localhost",
+				},
+				"protocol": {
+					Description:  "The protocol for accessing the API.",
+					DefaultValue: "http",
+				},
+			},
+		},
+		{
+			URL:         "http://{site}",
+			Description: "No description provided",
+			Variables: map[string]datadog.ServerVariable{
+				"site": {
+					Description:  "Any Datadog deployment.",
+					DefaultValue: "api.datadoghq.com",
+				},
+			},
+		},
+	}
+	return conf
+}
+
 func sendBody(ctx context.Context, body datadog.MetricPayload) error {
 	payload, resp, err := defaultDatadogSetup.Client.MetricsApi.SubmitMetrics(ctx, body, *datadog.NewSubmitMetricsOptionalParameters())
 
 	fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", resp)
+	fmt.Fprintf(os.Stderr, "Intake Payload object: %v\n", payload)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `MetricsApi.SubmitMetrics`: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", resp)
@@ -42,7 +92,7 @@ func sendBody(ctx context.Context, body datadog.MetricPayload) error {
 func main() {
 	setEnv()
 	ctx := datadog.NewDefaultContext(context.Background())
-	defaultDatadogSetup.Config = datadog.NewConfiguration()
+	defaultDatadogSetup.Config = localHostConfiguration()
 	defaultDatadogSetup.Client = datadog.NewAPIClient(defaultDatadogSetup.Config)
 
 	bodies := [3]datadog.MetricPayload{
