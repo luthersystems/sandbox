@@ -107,6 +107,9 @@ func main() {
 							Value:     datadog.PtrFloat64(3.0),
 						},
 					},
+					Tags: []string{
+						"license-digest:deadbeef",
+					},
 				},
 			},
 		},
@@ -121,6 +124,9 @@ func main() {
 							Value:     datadog.PtrFloat64(2.0),
 						},
 					},
+					Tags: []string{
+						"license-digest:decafbed",
+					},
 				},
 			},
 		},
@@ -134,6 +140,9 @@ func main() {
 							Timestamp: datadog.PtrInt64(time.Now().Unix()),
 							Value:     datadog.PtrFloat64(18.0),
 						},
+					},
+					Tags: []string{
+						"license-digest:fadedcab",
 					},
 				},
 			},
