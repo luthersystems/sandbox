@@ -122,11 +122,11 @@ explorer-watch:
 
 .PHONY: mem-up
 mem-up: all mem-down
-	./${PROJECT}_compose.py mem up -d
+	./blockchain_compose.py mem up -d
 
 .PHONY: mem-down
 mem-down:
-	-./${PROJECT}_compose.py mem down
+	-./blockchain_compose.py mem down
 
 # citest runs unit tests and integration tests within containers, like CI.
 .PHONY: citest

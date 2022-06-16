@@ -13,7 +13,7 @@ SERVICE_DIR=oracleserv/sandbox-oracle
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=0.0.51
+BUILDENV_TAG=v0.0.56
 
 # These variables control the version numbers for parts of the LEIA platform
 # and should be kept up-to-date to leverage the latest platform features.

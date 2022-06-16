@@ -249,7 +249,7 @@ api/:
 compose/:
 	Configuration for docker compose networks that are brought up during
 	testing. These configurations are used by the existing Make targets
-	and `sandbox_compose.py`.
+	and `blockchain_compose.py`.
 fabric/:
 	Configuration and scripts to launch a fabric network locally. Not used in
     codespaces.

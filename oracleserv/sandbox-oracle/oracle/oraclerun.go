@@ -208,9 +208,10 @@ func Run(config *Config) error {
 		h := http.NewServeMux()
 		h.Handle(metricsPath, promhttp.Handler())
 		s := &http.Server{
-			Addr:         metricsAddr,
-			WriteTimeout: 10 * time.Second,
-			Handler:      h,
+			Addr:              metricsAddr,
+			WriteTimeout:      10 * time.Second,
+			ReadHeaderTimeout: 2 * time.Second,
+			Handler:           h,
 		}
 		oracle.log(ctx).Infof("prometheus listen")
 		trySendError(errServe, s.ListenAndServe())
