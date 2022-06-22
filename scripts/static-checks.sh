@@ -6,9 +6,4 @@
 
 set -exuo pipefail
 
-go vet ./...
-
-GOSEC_EXCLUSIONS="${GOSEC_EXCLUSIONS:-}"
-gosec -exclude="$GOSEC_EXCLUSIONS" ./...
-
-GOFLAGS="-buildvcs=false" staticcheck ./...
+GOFLAGS="-buildvcs=false" golangci-lint run -v
