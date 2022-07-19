@@ -86,6 +86,8 @@ func sendBody(ctx context.Context, body datadog.MetricPayload) error {
 
 	payloadContent, _ := json.MarshalIndent(payload, "", "  ")
 	fmt.Fprintf(os.Stdout, "Intake Payload from `MetricsApi.SubmitMetrics`: %s\n", payloadContent)
+	clientConfig := defaultDatadogSetup.Client.GetConfig()
+	fmt.Fprintf(os.Stdout, "Datadog Client Configuration:\n%s\n", clientConfig)
 	return nil
 }
 
