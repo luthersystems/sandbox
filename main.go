@@ -19,28 +19,59 @@ type datadogSetup struct {
 
 var defaultDatadogSetup datadogSetup
 
-func setEnv() {
-	os.Setenv("DD_SITE", "localhost")
+func setEnv(local bool) {
+	if local {
+		os.Setenv("DD_SITE", "localhost")
+	} else {
+		os.Setenv("DD_SITE", "")
+	}
 	// needs "DD_API_KEY" and "DD_APP_KEY" set by non-checked-in env
 }
 
-func localHostConfiguration() *datadog.Configuration {
+const devProxyHost = "localhost"
+const prodProxyHost = "metrics.platform-test.luthersystemsapp.com/metrics"
+
+var validProxyHosts = map[string]bool{
+	devProxyHost:  true,
+	prodProxyHost: true,
+}
+
+// This overrides the configuration for the datadog Client, expanding the list
+// of permissible server URLs to include our proxy and localhost for dev
+// debugging. URLs are checked against the cases based on undocumented logic,
+// probably pattern-matching to most specific case.
+// See https://github.com/DataDog/datadog-api-client-go/blob/master/api/v2/datadog/configuration.go
+// Can't be safely changed after Client starts.
+func configurationForProxy(proxyHost string, secure bool) (*datadog.Configuration, error) {
+	if proxyHost == "" {
+		proxyHost = devProxyHost
+	}
+	if !validProxyHosts[proxyHost] {
+		return nil, fmt.Errorf("Invalid proxy host given: %s", proxyHost)
+	}
+	protocol := "http"
+	if secure {
+		protocol = "https"
+	}
+	fmt.Fprintf(os.Stderr, "Datadog client config: secure=%t, host=%s", secure, proxyHost)
+
 	conf := datadog.NewConfiguration()
-	conf.Servers = datadog.ServerConfigurations{
+	conf.Servers = []datadog.ServerConfiguration{
 		{
-			URL:         "http://{site}",
+			URL:         protocol + "://{site}",
 			Description: "No description provided",
 			Variables: map[string]datadog.ServerVariable{
 				"site": {
 					Description:  "The regional site for Datadog customers.",
-					DefaultValue: "api.datadoghq.com",
+					DefaultValue: proxyHost,
 					EnumValues: []string{
 						"api.datadoghq.com",
 						"api.us3.datadoghq.com",
 						"api.us5.datadoghq.com",
 						"api.datadoghq.eu",
 						"api.ddog-gov.com",
-						"localhost",
+						prodProxyHost,
+						devProxyHost,
 					},
 				},
 			},
@@ -51,26 +82,26 @@ func localHostConfiguration() *datadog.Configuration {
 			Variables: map[string]datadog.ServerVariable{
 				"name": {
 					Description:  "Full site DNS name.",
-					DefaultValue: "localhost",
+					DefaultValue: proxyHost,
 				},
 				"protocol": {
 					Description:  "The protocol for accessing the API.",
-					DefaultValue: "http",
+					DefaultValue: protocol,
 				},
 			},
 		},
 		{
-			URL:         "http://{site}",
+			URL:         protocol + "://{site}",
 			Description: "No description provided",
 			Variables: map[string]datadog.ServerVariable{
 				"site": {
 					Description:  "Any Datadog deployment.",
-					DefaultValue: "api.datadoghq.com",
+					DefaultValue: proxyHost,
 				},
 			},
 		},
 	}
-	return conf
+	return conf, nil
 }
 
 func sendBody(ctx context.Context, body datadog.MetricPayload) error {
@@ -92,9 +123,9 @@ func sendBody(ctx context.Context, body datadog.MetricPayload) error {
 }
 
 func main() {
-	setEnv()
+	setEnv(true)
 	ctx := datadog.NewDefaultContext(context.Background())
-	defaultDatadogSetup.Config = localHostConfiguration()
+	defaultDatadogSetup.Config = configurationForProxy(devProxyHost, false)
 	defaultDatadogSetup.Client = datadog.NewAPIClient(defaultDatadogSetup.Config)
 
 	bodies := [3]datadog.MetricPayload{
