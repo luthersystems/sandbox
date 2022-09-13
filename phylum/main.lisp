@@ -14,8 +14,8 @@
 ;; service-name can be used to identify the service in health checks and longs.
 (set 'service-name "sandbox-cc")
 
-(set 'version "PROJECT_VERSION")  ; overridden during build
-(set 'build-id "PROJECT_BUILD_ID")  ; overridden during build
+(set 'version "LUTHER_PROJECT_VERSION")  ; overridden during build
+(set 'build-id "LUTHER_PROJECT_BUILD_ID")  ; overridden during build
 (set 'service-version (format-string "{} ({})" version build-id))
 
 (load-file "utils.lisp")
