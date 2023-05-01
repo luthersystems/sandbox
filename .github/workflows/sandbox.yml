@@ -1,0 +1,16 @@
+name: CI Tests
+on:
+  pull_request:
+    branches:
+    - main
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3.5.0
+    - name: Set license file
+      run: echo $LUTHER_LICENSE | base64 -d > .luther-license.yaml
+      env:
+        LUTHER_LICENSE: ${{ secrets.LUTHER_LICENSE }}
+    - name: Run CI tests
+      run: script -q -e -c "make citest"
