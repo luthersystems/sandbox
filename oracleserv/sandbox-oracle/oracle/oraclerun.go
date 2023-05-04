@@ -200,7 +200,12 @@ func Run(config *Config) error {
 
 	go func() {
 		oracle.log(ctx).Infof("oracle listen")
-		trySendError(errServe, http.ListenAndServe(config.ListenAddress, httpHandler))
+		server := &http.Server{
+			Addr:              config.ListenAddress,
+			Handler:           httpHandler,
+			ReadHeaderTimeout: 3 * time.Second,
+		}
+		trySendError(errServe, server.ListenAndServe())
 	}()
 
 	go func() {
