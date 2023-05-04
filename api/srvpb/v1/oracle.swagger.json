@@ -87,11 +87,17 @@
             "type": "string"
           },
           {
-            "name": "body",
+            "name": "account",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1Account"
+              "type": "object",
+              "properties": {
+                "currentBalance": {
+                  "type": "string",
+                  "format": "int64"
+                }
+              }
             }
           }
         ],
@@ -237,7 +243,7 @@
         "parameters": [
           {
             "name": "oracleOnly",
-            "description": "Skip the chaincode healthcheck.",
+            "description": "Skip the chaincode healthcheck",
             "in": "query",
             "required": false,
             "type": "boolean"
@@ -399,6 +405,7 @@
         "details": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
@@ -463,6 +470,7 @@
         "reports": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1HealthCheckReport"
           },
           "description": "The status of the relevant sub services."
