@@ -13,6 +13,7 @@ clean:
 .PHONY: pristine
 pristine: clean clean-generated
 	rm -rf chaincodes/*.tar.gz
+	rm docker-compose-couch.yaml shiroclient_phylum.yaml shiroclient_fast.yaml shiroclient.yaml fabric-client_template.yaml fabric-client.yaml
 
 .PHONY: clean-generated
 clean-generated:
@@ -65,24 +66,12 @@ NOTIFY_GATEWAYS=$(addprefix notify-gw-,${GATEWAYS})
 FUNCTIONAL_TEST_PHYLA=$(addprefix functional-test-phylum-,${PHYLA})
 SHIRO_INIT_PHYLA=$(addprefix shiro-init-phylum-,${PHYLA})
 
-FABRIC_IMAGE_NAMES=peer orderer ccenv
-FABRIC_IMAGE_NS=hyperledger
-FABRIC_IMAGE_FQNS=$(patsubst %,${FABRIC_IMAGE_NS}/fabric-%,${FABRIC_IMAGE_NAMES})
-FABRIC_CA_IMAGE_FQN=${FABRIC_IMAGE_NS}/fabric-ca
 DBMODE ?= goleveldb
-
-FABRIC_IMAGES=$(foreach fqn,${FABRIC_IMAGE_FQNS},${fqn}\:${FABRIC_IMAGE_TAG}) \
-              ${FABRIC_CA_IMAGE_FQN}\:${FABRIC_CA_IMAGE_TAG}
-FABRIC_IMAGE_TARGETS=$(addprefix docker-pull/,${FABRIC_IMAGES})
 
 FABRIC_DOCKER_NETWORK=fnb_byfn
 
 .PHONY: default all
 default: ${CC_PATH}
-	@
-
-.PHONY: images
-images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
 .PHONY: install
@@ -337,7 +326,7 @@ all: up
 up: fnb-up gateway-up
 
 .PHONY: fnb-up
-fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
+fnb-up: ${NETWORK_BUILDER_TARGET} channel-artifacts/genesis.block
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 		-v "${FABRIC_DIR}:${CURDIR}" \
@@ -347,7 +336,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/gene
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up --log-spec debug
 
 .PHONY: fnb-extend
-fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+fnb-extend: ${NETWORK_BUILDER_TARGET}
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 		-v "${FABRIC_DIR}:${CURDIR}" \
@@ -358,7 +347,7 @@ fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 			--domain-name=${FABRIC_DOMAIN}
 
 .PHONY: fnb-shell
-fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+fnb-shell: ${NETWORK_BUILDER_TARGET}
 	${DOCKER_RUN} -it \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 		-v "${FABRIC_DIR}:${CURDIR}" \
