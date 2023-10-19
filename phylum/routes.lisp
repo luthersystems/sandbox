@@ -62,26 +62,40 @@
                           "service_name"    service-name
                           "timestamp"       (cc:timestamp (cc:now)))))))
 
-
-; initialize entities a and b to integer values
-(defendpoint "create_account" (create)
+(defun create-acount-handler (create)
   (let* ([acct (get create "account")])
-    (if (create-account! (get acct "account_id") (to-int (get acct "current_balance")))
+    (if (create-account! (get acct "account_id") (to-int (get acct "balance")))
       (route-success ())
       (set-exception-business "account_id already exists"))))
 
-; return the value of entity a
-(defendpoint-get "get_account" (acct)
+; initialize entities a and b to integer values
+(defendpoint "create_account" (create) (create-acount-handler create))
+
+(defun update-account-handler (update)
+  (let* ([acct (get update "account")])
+    (if (set-balance! (get acct "account_id") (to-int (get acct "balance")))
+      (route-success ())
+      (set-exception-business "invalid update request"))))
+
+; update an account
+(defendpoint "update_account" (update) (update-account-handler update))
+
+(defun get-account-handler (acct)
   (let* ([acct (get-account (get acct "account_id"))])
     (if (nil? acct)
       (set-exception-business "account_id not found")
       (route-success (sorted-map "account" acct)))))
 
-; make a payment of x units from entity a to entity b
-(defendpoint "transfer" (xfer)
+; return the value of entity a
+(defendpoint-get "get_account" (acct) (get-account-handler acct))
+
+(defun transfer-handler (xfer)
   (let* ([payer-id (get xfer "payer_id")]
          [payee-id (get xfer "payee_id")]
          [xfer-amount (to-int (get xfer "transfer_amount"))])
     (if (account-transfer! payer-id payee-id xfer-amount)
       (route-success ())
       (set-exception-business "account does not exist"))))
+
+; make a payment of x units from entity a to entity b
+(defendpoint "transfer" (xfer) (transfer-handler xfer))

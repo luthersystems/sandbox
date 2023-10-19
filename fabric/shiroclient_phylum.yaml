@@ -1,0 +1,13 @@
+phylum:
+  version: local
+chaincode:
+  id: com_luthersystems_chaincode_substrate01
+channel:
+  id: luther
+  min-endorsers: 0
+enroll:
+  org: org1
+fabric:
+  client-config: fabric-client.yaml
+peer:
+  username: Admin

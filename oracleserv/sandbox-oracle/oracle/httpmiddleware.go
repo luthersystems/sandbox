@@ -47,7 +47,7 @@ func addServerHeader() midware.Middleware {
 
 // healthCheckHandler intercepts the healthcheck endpoint to return 503 on
 // error.
-func healthCheckHandler(oracle *Oracle, client srv.SandboxServiceClient) http.Handler {
+func healthCheckHandler(oracle *Oracle, client srv.LedgerServiceClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		sendResponse := func(resp *pb.HealthCheckResponse, responseCode int) {

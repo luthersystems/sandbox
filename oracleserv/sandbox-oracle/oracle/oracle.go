@@ -106,7 +106,7 @@ func (c *Config) Valid() error {
 
 // Oracle provides services.
 type Oracle struct {
-	srv.UnimplementedSandboxServiceServer
+	srv.UnimplementedLedgerServiceServer
 
 	// log provides logging.
 	logBase *logrus.Entry
@@ -275,10 +275,26 @@ func (orc *Oracle) CreateAccount(ctx context.Context, in *pb.CreateAccountReques
 	return orc.phylum.CreateAccount(ctx, in, sopts...)
 }
 
+// UpdateAccount is an example resource update endpoint.
+func (orc *Oracle) UpdateAccount(ctx context.Context, in *pb.UpdateAccountRequest) (*pb.UpdateAccountResponse, error) {
+	sopts := orc.txConfigs(ctx)
+	return orc.phylum.UpdateAccount(ctx, in, sopts...)
+}
+
 // GetAccount is an example query endpoint.
 func (orc *Oracle) GetAccount(ctx context.Context, in *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
 	sopts := orc.txConfigs(ctx)
 	return orc.phylum.GetAccount(ctx, in, sopts...)
+}
+
+func (orc *Oracle) GetUserAccounts(ctx context.Context, in *pb.GetUserAccountsRequest) (*pb.GetUserAccountsResponse, error) {
+	sopts := orc.txConfigs(ctx)
+	return orc.phylum.GetUserAccounts(ctx, in, sopts...)
+}
+
+func (orc *Oracle) DeleteAccount(ctx context.Context, in *pb.DeleteAccountRequest) (*pb.DeleteAccountResponse, error) {
+	sopts := orc.txConfigs(ctx)
+	return orc.phylum.DeleteAccount(ctx, in, sopts...)
 }
 
 // Transfer is an example write operation.

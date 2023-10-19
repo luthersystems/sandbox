@@ -1,0 +1,30 @@
+organizations:
+  org1:
+    mspid: Org1MSP
+    cryptoPath:  peerOrganizations/org1.luther.systems/users/{username}@org1.luther.systems/msp
+    peers:
+      - peer0.org1.luther.systems
+    certificateAuthorities:
+      - ca.org1.luther.systems
+  ordererorg:
+    mspID: "OrdererOrg"
+    cryptoPath: ordererOrganizations/luther.systems/users/{username}@luther.systems/msp
+
+orderers:
+  _default:
+    grpcOptions:
+      keep-alive-time: 30s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+....
+peers:
+  _default:
+    grpcOptions:
+      keep-alive-time: 30s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+...

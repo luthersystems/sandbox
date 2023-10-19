@@ -41,8 +41,17 @@ var (
 	phylumCreateAccount = &phylumMethod{
 		method: "create_account",
 	}
+	phylumUpdateAccount = &phylumMethod{
+		method: "update_account",
+	}
 	phylumGetAccount = &phylumMethod{
 		method: "get_account",
+	}
+	phylumGetUserAccounts = &phylumMethod{
+		method: "get_user_accounts",
+	}
+	phylumDeleteAccount = &phylumMethod{
+		method: "delete_account",
 	}
 	phylumTransfer = &phylumMethod{
 		method: "transfer",
@@ -271,10 +280,20 @@ func convertHealthReport(report shiroclient.HealthCheckReport) *pb.HealthCheckRe
 	}
 }
 
-// CreateAccount is an example endpoint to create a resource
+// CreateAccount is an example endpoint to create a resource.
 func (s *Client) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest, config ...Config) (*pb.CreateAccountResponse, error) {
 	resp := &pb.CreateAccountResponse{}
 	err := s.callMethod(ctx, phylumCreateAccount, cmdParams(req), resp, config)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// UpdateAccount is an example endpoint to update a resource.
+func (s *Client) UpdateAccount(ctx context.Context, req *pb.UpdateAccountRequest, config ...Config) (*pb.UpdateAccountResponse, error) {
+	resp := &pb.UpdateAccountResponse{}
+	err := s.callMethod(ctx, phylumUpdateAccount, cmdParams(req), resp, config)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +310,24 @@ func (s *Client) GetAccount(ctx context.Context, req *pb.GetAccountRequest, conf
 	return resp, nil
 }
 
-// Transfer is an example transaction
+func (s *Client) GetUserAccounts(ctx context.Context, req *pb.GetUserAccountsRequest, config ...Config) (*pb.GetUserAccountsResponse, error) {
+	resp := &pb.GetUserAccountsResponse{}
+	err := s.callMethod(ctx, phylumGetUserAccounts, cmdParams(req), resp, config)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *Client) DeleteAccount(ctx context.Context, req *pb.DeleteAccountRequest, config ...Config) (*pb.DeleteAccountResponse, error) {
+	resp := &pb.DeleteAccountResponse{}
+	err := s.callMethod(ctx, phylumDeleteAccount, cmdParams(req), resp, config)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (s *Client) Transfer(ctx context.Context, req *pb.TransferRequest, config ...Config) (*pb.TransferResponse, error) {
 	resp := &pb.TransferResponse{}
 	err := s.callMethod(ctx, phylumTransfer, cmdParams(req), resp, config)
