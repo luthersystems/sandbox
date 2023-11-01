@@ -13,7 +13,7 @@ clean:
 .PHONY: pristine
 pristine: clean clean-generated
 	rm -rf chaincodes/*.tar.gz
-	rm docker-compose-couch.yaml shiroclient_phylum.yaml shiroclient_fast.yaml shiroclient.yaml fabric-client_template.yaml fabric-client.yaml
+	rm -f docker-compose-couch.yaml shiroclient_phylum.yaml shiroclient_fast.yaml shiroclient.yaml fabric-client_template.yaml fabric-client.yaml
 
 .PHONY: clean-generated
 clean-generated:
