@@ -2,7 +2,7 @@
 
 This repository contains an example backend app (oracle, API, and chaincode).
 
-[![CircleCI](https://circleci.com/gh/luthersystems/sandbox.svg?style=svg)](https://circleci.com/gh/luthersystems/sandbox)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/luthersystems/sandbox?quickstart=1)
 
 
 ```
