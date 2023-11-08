@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NYTimes/gziphandler"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -175,10 +174,9 @@ func Run(config *Config) error {
 		return fmt.Errorf("swagger definition error: %v", err)
 	}
 	middleware := midware.Chain{
-		// The gzip and trace header middlewares to appear early in the chain
+		// The trace header middleware appears early in the chain
 		// because of how important it is that they happen for essentially all
 		// requests.
-		midware.Func(gziphandler.GzipHandler),
 		midware.TraceHeaders(HeaderReqID, true),
 		addServerHeader(),
 		// PathOverrides and other middleware that may serve requests or have
