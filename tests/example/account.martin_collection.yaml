@@ -5,10 +5,11 @@ headers:
 tests:
     - name: "Create Account 1"
       method: POST
-      path: "v1/accounts/{{ACCT1}}"
+      path: "v1/accounts"
       body: |
           {
-            "current_balance": 100
+            "account_id": "{{ACCT1}}",
+            "balance": 100
           }
       setup_script: |
           const uuidv4 = require('uuid');
@@ -22,10 +23,11 @@ tests:
           });
     - name: "Create Account 2"
       method: POST
-      path: "v1/accounts/{{ACCT2}}"
+      path: "v1/accounts"
       body: |
           {
-            "current_balance": 100
+            "account_id": "{{ACCT2}}",
+            "balance": 100
           }
       setup_script: |
           const uuidv4 = require('uuid');
@@ -55,7 +57,7 @@ tests:
           });
     - name: "Get Account: 2"
       method: GET
-      path: "v1/accounts/{{ACCT2}}"
+      path: "v1/account/{{ACCT2}}"
       test_script: |
           pm.test("ok", () => {
               let data = pm.response.json();
@@ -65,5 +67,5 @@ tests:
               pm.expect(data).to.have.property("account");
               pm.expect(data.account.account_id).to.equal(pm.environment.get("ACCT2"));
               // int64 protobuf fields come out as strings in javascript
-              pm.expect(data.account.current_balance).to.equal('120');
+              pm.expect(data.account.balance).to.equal('120');
           });

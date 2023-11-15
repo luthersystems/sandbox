@@ -146,7 +146,7 @@ make
 
 ### Running the Application
 
-First we'll run the sample application with a local instance of the LEIA
+First we'll run the sample application with a local instance of the Luther
 platform (gateway, chaincode, and a fabric network).  Run `make up` to bring up
 a local docker network running the application and platform containers.
 
@@ -206,7 +206,7 @@ Run `make` to build all the services:
 make
 ```
 
-Run the sample application with an in-memory instance of the LEIA platform:
+Run the sample application with an in-memory instance of the Luther platform:
 
 ```
 make mem-up
@@ -270,7 +270,7 @@ The API is defined using protobuf objects and service definitions under the
 `api/` directory.  Learn more about how the API is defined and the data model
 definitions by reading the sandbox API's [documentation](api/).
 
-The application API is served by the "oracle", which interfaces with the LEIA
+The application API is served by the "oracle", which interfaces with the Luther
 platform.  Learn more about the design of the oracle and how to extend its
 functionality by reading the sandbox oracle's
 [documentation](oracleserv/sandbox-oracle/).
@@ -346,7 +346,7 @@ infrastructure.
 
 ### Rapid Development and Live Reloading in an In-Memory Simulation
 
-Constantly running a local instance of the LEIA platform can consume a lot of
+Constantly running a local instance of the Luther platform can consume a lot of
 computer resources and running `make up` and `make down` frequently is time
 consuming.  Instead of running the complete platform it can be simulated
 locally, in-memory.  Running an in-memory version of the platform is much faster

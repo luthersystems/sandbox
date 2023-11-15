@@ -109,8 +109,8 @@ func createAccount(t *testing.T, server *Oracle, id string, balance int64) bool 
 	t.Helper()
 	resp, err := server.CreateAccount(context.Background(), &pb.CreateAccountRequest{
 		Account: &pb.Account{
-			AccountId:      id,
-			CurrentBalance: balance,
+			AccountId: id,
+			Balance:   balance,
 		},
 	})
 	return assert.Nil(t, err) && assert.NotNil(t, resp)
@@ -141,8 +141,8 @@ func TestCreateAccount(t *testing.T) {
 		ctx := context.Background()
 		resp, err := server.CreateAccount(ctx, &pb.CreateAccountRequest{
 			Account: &pb.Account{
-				AccountId:      "abc",
-				CurrentBalance: 100,
+				AccountId: "abc",
+				Balance:   100,
 			},
 		})
 		if assert.Nil(t, err) {
@@ -161,7 +161,7 @@ func TestGetAccount(t *testing.T) {
 	}
 	var acct *pb.Account
 	if getAccount(t, server, "abc", &acct) {
-		assert.Equal(t, int64(100), acct.GetCurrentBalance())
+		assert.Equal(t, int64(100), acct.GetBalance())
 
 		resp, err := server.GetAccount(context.Background(), &pb.GetAccountRequest{
 			AccountId: "xyz",
@@ -194,10 +194,10 @@ func TestTransfer(t *testing.T) {
 			if assert.Nil(t, resp.Exception) {
 				var acct *pb.Account
 				if getAccount(t, server, "abc", &acct) {
-					assert.Equal(t, int64(70), acct.CurrentBalance)
+					assert.Equal(t, int64(70), acct.Balance)
 				}
 				if getAccount(t, server, "xyz", &acct) {
-					assert.Equal(t, int64(80), acct.CurrentBalance)
+					assert.Equal(t, int64(80), acct.Balance)
 				}
 			}
 		}

@@ -141,7 +141,7 @@ func Run(config *Config) error {
 				grpclogging.UpperBoundTimer(time.Millisecond),
 				grpclogging.RealTime()),
 			svcerr.AppErrorUnaryInterceptor(oracle.log))))
-	srv.RegisterSandboxServiceServer(grpcServer, oracle)
+	srv.RegisterLedgerServiceServer(grpcServer, oracle)
 	listener, err := net.Listen("unix", grpcAddr)
 	if err != nil {
 		return fmt.Errorf("grpc listen: %w", err)
@@ -160,12 +160,12 @@ func Run(config *Config) error {
 	if err != nil {
 		return fmt.Errorf("grpc dial: %w", err)
 	}
-	grpcSandboxProcessorClient := srv.NewSandboxServiceClient(grpcConn)
+	grpcLedgerProcessorClient := srv.NewLedgerServiceClient(grpcConn)
 
 	// Create a grpc-gateway handler which talks to the oracle through the grpc
 	// client.  Wrap the grpc-gateway with middleware to produce complete
 	// service handler.
-	jsonapi, err := grpcGateway(ctx, oracle.log, grpcSandboxProcessorClient)
+	jsonapi, err := grpcGateway(ctx, oracle.log, grpcLedgerProcessorClient)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func Run(config *Config) error {
 		// on the presence of the generic utility middleware above.
 		midware.PathOverrides{
 			swaggerPath:     swaggerHandler,
-			healthCheckPath: healthCheckHandler(oracle, grpcSandboxProcessorClient),
+			healthCheckPath: healthCheckHandler(oracle, grpcLedgerProcessorClient),
 		},
 	}
 	httpHandler := middleware.Wrap(jsonapi)
@@ -227,7 +227,7 @@ func Run(config *Config) error {
 }
 
 // grpcGateway constructs a new grpc-gateway to serve the application's JSON API.
-func grpcGateway(ctx context.Context, log func(context.Context) *logrus.Entry, client srv.SandboxServiceClient) (*runtime.ServeMux, error) {
+func grpcGateway(ctx context.Context, log func(context.Context) *logrus.Entry, client srv.LedgerServiceClient) (*runtime.ServeMux, error) {
 	opts := []runtime.ServeMuxOption{
 		runtime.WithErrorHandler(svcerr.ErrIntercept(log)),
 		runtime.WithIncomingHeaderMatcher(incomingHeaderMatcher),
@@ -241,7 +241,7 @@ func grpcGateway(ctx context.Context, log func(context.Context) *logrus.Entry, c
 		}),
 	}
 	mux := runtime.NewServeMux(opts...)
-	err := srv.RegisterSandboxServiceHandlerClient(ctx, mux, client)
+	err := srv.RegisterLedgerServiceHandlerClient(ctx, mux, client)
 	if err != nil {
 		return nil, err
 	}

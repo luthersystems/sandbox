@@ -47,6 +47,22 @@ message CreateAccountResponse {
   common.Exception exception = 1;
 }
 
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+message DeleteAccountResponse {
+  common.Exception exception = 1;
+}
+
+message UpdateAccountRequest {
+  Account account = 1;
+}
+
+message UpdateAccountResponse {
+  common.Exception exception = 1;
+}
+
 message GetAccountRequest {
   string account_id = 1;
 }
@@ -56,9 +72,22 @@ message GetAccountResponse {
   Account account = 2;
 }
 
+message GetUserAccountsRequest {
+  string user_id = 1;
+}
+
+message GetUserAccountsResponse {
+  common.Exception exception = 1;
+  repeated Account accounts = 2;
+}
+
+// Transfer funds from payer account to payee account. Accounts must have same denomination (asset ID). Transfer amount cannot be negative.
 message TransferRequest {
+  // Account debited. Required.
   string payer_id = 1;
+  // Account credited. Required.
   string payee_id = 2;
+  // Amount transfered from payer account to payee account. Required.
   int64 transfer_amount = 3;
 }
 
@@ -66,7 +95,14 @@ message TransferResponse {
   common.Exception exception = 1;
 }
 
+// Account represents a balance for an indiviudal denominated in a unit asset. An account holder may have multiple accounts.
 message Account {
+  // Unique ID for the account. Immutable.
   string account_id = 1;
-  int64 current_balance = 2;
+  // Current balance in the account denominated in the underlying asset. Cannot be negative.
+  int64 balance = 2;
+  // ID for the underlying asset that current balance is denominated in. Immutable.
+  string asset_id = 3;
+  // ID of the primary account owner.
+  string user_id = 4;
 }

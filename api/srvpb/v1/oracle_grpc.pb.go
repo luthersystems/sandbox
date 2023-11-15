@@ -24,202 +24,325 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	SandboxService_HealthCheck_FullMethodName   = "/srvpb.v1.SandboxService/HealthCheck"
-	SandboxService_CreateAccount_FullMethodName = "/srvpb.v1.SandboxService/CreateAccount"
-	SandboxService_GetAccount_FullMethodName    = "/srvpb.v1.SandboxService/GetAccount"
-	SandboxService_Transfer_FullMethodName      = "/srvpb.v1.SandboxService/Transfer"
+	LedgerService_HealthCheck_FullMethodName     = "/srvpb.v1.LedgerService/HealthCheck"
+	LedgerService_CreateAccount_FullMethodName   = "/srvpb.v1.LedgerService/CreateAccount"
+	LedgerService_UpdateAccount_FullMethodName   = "/srvpb.v1.LedgerService/UpdateAccount"
+	LedgerService_DeleteAccount_FullMethodName   = "/srvpb.v1.LedgerService/DeleteAccount"
+	LedgerService_GetAccount_FullMethodName      = "/srvpb.v1.LedgerService/GetAccount"
+	LedgerService_GetUserAccounts_FullMethodName = "/srvpb.v1.LedgerService/GetUserAccounts"
+	LedgerService_Transfer_FullMethodName        = "/srvpb.v1.LedgerService/Transfer"
 )
 
-// SandboxServiceClient is the client API for SandboxService service.
+// LedgerServiceClient is the client API for LedgerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type SandboxServiceClient interface {
-	// Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.
+type LedgerServiceClient interface {
+	// Check the health of the service. This is used by load balancers to check service health.
 	HealthCheck(ctx context.Context, in *v1.HealthCheckRequest, opts ...grpc.CallOption) (*v1.HealthCheckResponse, error)
+	// Create a new account denominated in an underlying asset.
 	CreateAccount(ctx context.Context, in *v1.CreateAccountRequest, opts ...grpc.CallOption) (*v1.CreateAccountResponse, error)
+	// Update an account.
+	UpdateAccount(ctx context.Context, in *v1.UpdateAccountRequest, opts ...grpc.CallOption) (*v1.UpdateAccountResponse, error)
+	// Delete an account.
+	DeleteAccount(ctx context.Context, in *v1.DeleteAccountRequest, opts ...grpc.CallOption) (*v1.DeleteAccountResponse, error)
+	// Retrieve account details.
 	GetAccount(ctx context.Context, in *v1.GetAccountRequest, opts ...grpc.CallOption) (*v1.GetAccountResponse, error)
+	// Get accounts for a user.
+	GetUserAccounts(ctx context.Context, in *v1.GetUserAccountsRequest, opts ...grpc.CallOption) (*v1.GetUserAccountsResponse, error)
+	// Transfer between accounts denominated in the same underlying asset.
 	Transfer(ctx context.Context, in *v1.TransferRequest, opts ...grpc.CallOption) (*v1.TransferResponse, error)
 }
 
-type sandboxServiceClient struct {
+type ledgerServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSandboxServiceClient(cc grpc.ClientConnInterface) SandboxServiceClient {
-	return &sandboxServiceClient{cc}
+func NewLedgerServiceClient(cc grpc.ClientConnInterface) LedgerServiceClient {
+	return &ledgerServiceClient{cc}
 }
 
-func (c *sandboxServiceClient) HealthCheck(ctx context.Context, in *v1.HealthCheckRequest, opts ...grpc.CallOption) (*v1.HealthCheckResponse, error) {
+func (c *ledgerServiceClient) HealthCheck(ctx context.Context, in *v1.HealthCheckRequest, opts ...grpc.CallOption) (*v1.HealthCheckResponse, error) {
 	out := new(v1.HealthCheckResponse)
-	err := c.cc.Invoke(ctx, SandboxService_HealthCheck_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, LedgerService_HealthCheck_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *sandboxServiceClient) CreateAccount(ctx context.Context, in *v1.CreateAccountRequest, opts ...grpc.CallOption) (*v1.CreateAccountResponse, error) {
+func (c *ledgerServiceClient) CreateAccount(ctx context.Context, in *v1.CreateAccountRequest, opts ...grpc.CallOption) (*v1.CreateAccountResponse, error) {
 	out := new(v1.CreateAccountResponse)
-	err := c.cc.Invoke(ctx, SandboxService_CreateAccount_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, LedgerService_CreateAccount_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *sandboxServiceClient) GetAccount(ctx context.Context, in *v1.GetAccountRequest, opts ...grpc.CallOption) (*v1.GetAccountResponse, error) {
+func (c *ledgerServiceClient) UpdateAccount(ctx context.Context, in *v1.UpdateAccountRequest, opts ...grpc.CallOption) (*v1.UpdateAccountResponse, error) {
+	out := new(v1.UpdateAccountResponse)
+	err := c.cc.Invoke(ctx, LedgerService_UpdateAccount_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ledgerServiceClient) DeleteAccount(ctx context.Context, in *v1.DeleteAccountRequest, opts ...grpc.CallOption) (*v1.DeleteAccountResponse, error) {
+	out := new(v1.DeleteAccountResponse)
+	err := c.cc.Invoke(ctx, LedgerService_DeleteAccount_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ledgerServiceClient) GetAccount(ctx context.Context, in *v1.GetAccountRequest, opts ...grpc.CallOption) (*v1.GetAccountResponse, error) {
 	out := new(v1.GetAccountResponse)
-	err := c.cc.Invoke(ctx, SandboxService_GetAccount_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, LedgerService_GetAccount_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *sandboxServiceClient) Transfer(ctx context.Context, in *v1.TransferRequest, opts ...grpc.CallOption) (*v1.TransferResponse, error) {
+func (c *ledgerServiceClient) GetUserAccounts(ctx context.Context, in *v1.GetUserAccountsRequest, opts ...grpc.CallOption) (*v1.GetUserAccountsResponse, error) {
+	out := new(v1.GetUserAccountsResponse)
+	err := c.cc.Invoke(ctx, LedgerService_GetUserAccounts_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ledgerServiceClient) Transfer(ctx context.Context, in *v1.TransferRequest, opts ...grpc.CallOption) (*v1.TransferResponse, error) {
 	out := new(v1.TransferResponse)
-	err := c.cc.Invoke(ctx, SandboxService_Transfer_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, LedgerService_Transfer_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SandboxServiceServer is the server API for SandboxService service.
-// All implementations must embed UnimplementedSandboxServiceServer
+// LedgerServiceServer is the server API for LedgerService service.
+// All implementations must embed UnimplementedLedgerServiceServer
 // for forward compatibility
-type SandboxServiceServer interface {
-	// Check the health of the scaffold processor. This is used by load balancers to check end-to-end service health.
+type LedgerServiceServer interface {
+	// Check the health of the service. This is used by load balancers to check service health.
 	HealthCheck(context.Context, *v1.HealthCheckRequest) (*v1.HealthCheckResponse, error)
+	// Create a new account denominated in an underlying asset.
 	CreateAccount(context.Context, *v1.CreateAccountRequest) (*v1.CreateAccountResponse, error)
+	// Update an account.
+	UpdateAccount(context.Context, *v1.UpdateAccountRequest) (*v1.UpdateAccountResponse, error)
+	// Delete an account.
+	DeleteAccount(context.Context, *v1.DeleteAccountRequest) (*v1.DeleteAccountResponse, error)
+	// Retrieve account details.
 	GetAccount(context.Context, *v1.GetAccountRequest) (*v1.GetAccountResponse, error)
+	// Get accounts for a user.
+	GetUserAccounts(context.Context, *v1.GetUserAccountsRequest) (*v1.GetUserAccountsResponse, error)
+	// Transfer between accounts denominated in the same underlying asset.
 	Transfer(context.Context, *v1.TransferRequest) (*v1.TransferResponse, error)
-	mustEmbedUnimplementedSandboxServiceServer()
+	mustEmbedUnimplementedLedgerServiceServer()
 }
 
-// UnimplementedSandboxServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedSandboxServiceServer struct {
+// UnimplementedLedgerServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedLedgerServiceServer struct {
 }
 
-func (UnimplementedSandboxServiceServer) HealthCheck(context.Context, *v1.HealthCheckRequest) (*v1.HealthCheckResponse, error) {
+func (UnimplementedLedgerServiceServer) HealthCheck(context.Context, *v1.HealthCheckRequest) (*v1.HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
 }
-func (UnimplementedSandboxServiceServer) CreateAccount(context.Context, *v1.CreateAccountRequest) (*v1.CreateAccountResponse, error) {
+func (UnimplementedLedgerServiceServer) CreateAccount(context.Context, *v1.CreateAccountRequest) (*v1.CreateAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAccount not implemented")
 }
-func (UnimplementedSandboxServiceServer) GetAccount(context.Context, *v1.GetAccountRequest) (*v1.GetAccountResponse, error) {
+func (UnimplementedLedgerServiceServer) UpdateAccount(context.Context, *v1.UpdateAccountRequest) (*v1.UpdateAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAccount not implemented")
+}
+func (UnimplementedLedgerServiceServer) DeleteAccount(context.Context, *v1.DeleteAccountRequest) (*v1.DeleteAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
+}
+func (UnimplementedLedgerServiceServer) GetAccount(context.Context, *v1.GetAccountRequest) (*v1.GetAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAccount not implemented")
 }
-func (UnimplementedSandboxServiceServer) Transfer(context.Context, *v1.TransferRequest) (*v1.TransferResponse, error) {
+func (UnimplementedLedgerServiceServer) GetUserAccounts(context.Context, *v1.GetUserAccountsRequest) (*v1.GetUserAccountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserAccounts not implemented")
+}
+func (UnimplementedLedgerServiceServer) Transfer(context.Context, *v1.TransferRequest) (*v1.TransferResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Transfer not implemented")
 }
-func (UnimplementedSandboxServiceServer) mustEmbedUnimplementedSandboxServiceServer() {}
+func (UnimplementedLedgerServiceServer) mustEmbedUnimplementedLedgerServiceServer() {}
 
-// UnsafeSandboxServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SandboxServiceServer will
+// UnsafeLedgerServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LedgerServiceServer will
 // result in compilation errors.
-type UnsafeSandboxServiceServer interface {
-	mustEmbedUnimplementedSandboxServiceServer()
+type UnsafeLedgerServiceServer interface {
+	mustEmbedUnimplementedLedgerServiceServer()
 }
 
-func RegisterSandboxServiceServer(s grpc.ServiceRegistrar, srv SandboxServiceServer) {
-	s.RegisterService(&SandboxService_ServiceDesc, srv)
+func RegisterLedgerServiceServer(s grpc.ServiceRegistrar, srv LedgerServiceServer) {
+	s.RegisterService(&LedgerService_ServiceDesc, srv)
 }
 
-func _SandboxService_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LedgerService_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.HealthCheckRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SandboxServiceServer).HealthCheck(ctx, in)
+		return srv.(LedgerServiceServer).HealthCheck(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SandboxService_HealthCheck_FullMethodName,
+		FullMethod: LedgerService_HealthCheck_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SandboxServiceServer).HealthCheck(ctx, req.(*v1.HealthCheckRequest))
+		return srv.(LedgerServiceServer).HealthCheck(ctx, req.(*v1.HealthCheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SandboxService_CreateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LedgerService_CreateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.CreateAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SandboxServiceServer).CreateAccount(ctx, in)
+		return srv.(LedgerServiceServer).CreateAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SandboxService_CreateAccount_FullMethodName,
+		FullMethod: LedgerService_CreateAccount_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SandboxServiceServer).CreateAccount(ctx, req.(*v1.CreateAccountRequest))
+		return srv.(LedgerServiceServer).CreateAccount(ctx, req.(*v1.CreateAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SandboxService_GetAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LedgerService_UpdateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.UpdateAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LedgerServiceServer).UpdateAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LedgerService_UpdateAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LedgerServiceServer).UpdateAccount(ctx, req.(*v1.UpdateAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LedgerService_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.DeleteAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LedgerServiceServer).DeleteAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LedgerService_DeleteAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LedgerServiceServer).DeleteAccount(ctx, req.(*v1.DeleteAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LedgerService_GetAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.GetAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SandboxServiceServer).GetAccount(ctx, in)
+		return srv.(LedgerServiceServer).GetAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SandboxService_GetAccount_FullMethodName,
+		FullMethod: LedgerService_GetAccount_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SandboxServiceServer).GetAccount(ctx, req.(*v1.GetAccountRequest))
+		return srv.(LedgerServiceServer).GetAccount(ctx, req.(*v1.GetAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SandboxService_Transfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LedgerService_GetUserAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetUserAccountsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LedgerServiceServer).GetUserAccounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LedgerService_GetUserAccounts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LedgerServiceServer).GetUserAccounts(ctx, req.(*v1.GetUserAccountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LedgerService_Transfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.TransferRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SandboxServiceServer).Transfer(ctx, in)
+		return srv.(LedgerServiceServer).Transfer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SandboxService_Transfer_FullMethodName,
+		FullMethod: LedgerService_Transfer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SandboxServiceServer).Transfer(ctx, req.(*v1.TransferRequest))
+		return srv.(LedgerServiceServer).Transfer(ctx, req.(*v1.TransferRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// SandboxService_ServiceDesc is the grpc.ServiceDesc for SandboxService service.
+// LedgerService_ServiceDesc is the grpc.ServiceDesc for LedgerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SandboxService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "srvpb.v1.SandboxService",
-	HandlerType: (*SandboxServiceServer)(nil),
+var LedgerService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "srvpb.v1.LedgerService",
+	HandlerType: (*LedgerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "HealthCheck",
-			Handler:    _SandboxService_HealthCheck_Handler,
+			Handler:    _LedgerService_HealthCheck_Handler,
 		},
 		{
 			MethodName: "CreateAccount",
-			Handler:    _SandboxService_CreateAccount_Handler,
+			Handler:    _LedgerService_CreateAccount_Handler,
+		},
+		{
+			MethodName: "UpdateAccount",
+			Handler:    _LedgerService_UpdateAccount_Handler,
+		},
+		{
+			MethodName: "DeleteAccount",
+			Handler:    _LedgerService_DeleteAccount_Handler,
 		},
 		{
 			MethodName: "GetAccount",
-			Handler:    _SandboxService_GetAccount_Handler,
+			Handler:    _LedgerService_GetAccount_Handler,
+		},
+		{
+			MethodName: "GetUserAccounts",
+			Handler:    _LedgerService_GetUserAccounts_Handler,
 		},
 		{
 			MethodName: "Transfer",
-			Handler:    _SandboxService_Transfer_Handler,
+			Handler:    _LedgerService_Transfer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
