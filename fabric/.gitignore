@@ -3,6 +3,7 @@
 /chaincodes/*.tar.gz
 /crypto-config/
 /channel-artifacts/
+/couchdb/
 docker-compose-couch.yaml
 shiroclient_phylum.yaml
 shiroclient_fast.yaml
