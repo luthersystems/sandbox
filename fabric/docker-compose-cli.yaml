@@ -53,18 +53,17 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/ca.crt
       - CORE_PEER_MSPCONFIGPATH=/crypto-config/peerOrganizations/org1.luther.systems/users/Admin@org1.luther.systems/msp
-      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
+      - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
       - CORE_PEER_TLS_CLIENTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.crt
       - CORE_PEER_TLS_CLIENTKEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
-      - DOCKER_PROJECT_DIR
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: /bin/bash
     volumes:
-      - ${DOCKER_PROJECT_DIR}/fabric/chaincodes:/chaincodes
-      - ${DOCKER_PROJECT_DIR}/fabric/crypto-config:/crypto-config
-      - ${DOCKER_PROJECT_DIR}/fabric/scripts:/scripts
-      - ${DOCKER_PROJECT_DIR}/fabric/channel-artifacts:/channel-artifacts
-      - ${DOCKER_PROJECT_DIR}/fabric/collections.json:/collections.json
+      - ./chaincodes:/chaincodes
+      - ./crypto-config:/crypto-config/
+      - ./scripts:/scripts
+      - ./channel-artifacts:/channel-artifacts
+      - ./collections.json:/collections.json
     depends_on:
       - orderer0.luther.systems
       - peer0.org1.luther.systems

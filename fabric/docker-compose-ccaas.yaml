@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  sandbox-peer0:
+    image: luthersystems/substrate:$CHAINCODE_VERSION
+    command: ["$CCID_SANDBOX"]
+    ports:
+      - "9080:8080"
+    networks:
+      - byfn
+    environment:
+      CHAINCODE_OTLP_TRACER_ENDPOINT:
+      CHAINCODE_LOG_LEVEL:
+networks:
+  byfn:
+    name: byfn

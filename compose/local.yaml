@@ -12,7 +12,8 @@ services:
     - SANDBOX_ORACLE_EMULATE_CC=false
     - SANDBOX_ORACLE_GATEWAY_ENDPOINT=http://shiroclient_gw_phylum:8082
     networks:
-    - fnb_byfn
+    - byfn
 networks:
-  fnb_byfn:
+  byfn:
+    name: byfn
     external: true

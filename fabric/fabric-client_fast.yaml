@@ -4,11 +4,11 @@ client:
     level: info
   discovery:
     timeout:
-      connection: 2s
-      response: 2s
+      connection: 10s
+      response: 10s
   peer:
     timeout:
-      connection: 2s
+      connection: 10s
       # this timeout must be set to be longer than the longest execution time
       # of any query/transaction. after this time, the peer is assumed to be
       # down rather than working.
@@ -20,20 +20,20 @@ client:
       registrationResponse: 15s
   orderer:
     timeout:
-      connection: 2s
-      response: 2s
+      connection: 10s
+      response: 10s
   global:
     timeout:
-      query: 180s
-      execute: 180s
-      resmgmt: 180s
+      query: 3m
+      execute: 3m
+      resmgmt: 3m
     cache:
       connectionIdle: 30s
       eventServiceIdle: 2m
       channelConfig: 30m
       channelMembership: 30s
-      discovery: 1s
-      selection: 1s
+      discovery: 30s
+      selection: 30s
   cryptoconfig:
     path: "/tmp/fabric/crypto-config"
   BCCSP:
@@ -86,29 +86,33 @@ organizations:
     cryptoPath: ordererOrganizations/luther.systems/users/{username}@luther.systems/msp
 
 orderers:
+  _default:
+    grpcOptions:
+      keep-alive-time: 30s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: true
+      allow-insecure: false
   orderer0.luther.systems:
     url: orderer0.luther.systems:7050
     grpcOptions:
       ssl-target-name-override: orderer0.luther.systems
-      keep-alive-time: 1s
-      keep-alive-timeout: 5s
-      keep-alive-permit: false
-      fail-fast: false
-      allow-insecure: false
     tlsCACerts:
       path: "/tmp/fabric/crypto-config/ordererOrganizations/luther.systems/tlsca/tlsca.luther.systems-cert.pem"
 
 peers:
+  _default:
+    grpcOptions:
+      keep-alive-time: 30s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: true
+      allow-insecure: false
   peer0.org1.luther.systems:
     url: peer0.org1.luther.systems:7051
     eventUrl: peer0.org1.luther.systems:7053
     grpcOptions:
       ssl-target-name-override: peer0.org1.luther.systems
-      keep-alive-time: 1s
-      keep-alive-timeout: 5s
-      keep-alive-permit: false
-      fail-fast: true
-      allow-insecure: false
     tlsCACerts:
       path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/tlsca/tlsca.org1.luther.systems-cert.pem"
 

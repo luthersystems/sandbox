@@ -198,7 +198,6 @@ func txConfigs() func(context.Context, ...shiroclient.Config) []shiroclient.Conf
 		fields := grpclogging.GetLogrusFields(ctx)
 		configs := []shiroclient.Config{
 			shiroclient.WithLogrusFields(fields),
-			shiroclient.WithContext(ctx),
 		}
 		if fields["req_id"] != nil {
 			logrus.WithField("req_id", fields["req_id"]).Infof("setting request id")

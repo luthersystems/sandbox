@@ -1,6 +1,8 @@
 /build/
 /chaincodes/metadata.json
 /chaincodes/*.tar.gz
+/chaincodes/*.id
+/.env
 /crypto-config/
 /channel-artifacts/
 /couchdb/

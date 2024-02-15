@@ -123,7 +123,7 @@ Capabilities:
         # features and fixes of fabric v2.0.
         # Prior to enabling V2.0 orderer capabilities, ensure that all
         # orderers on a channel are at v2.0.0 or later.
-        V2_0: true
+        V2_5: true
 
 ################################################################################
 #

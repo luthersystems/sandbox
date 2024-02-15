@@ -139,7 +139,7 @@ func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, er
 		return nil, err
 	}
 	if r == nil {
-		err = mock.Init(shiroclient.EncodePhylumBytes([]byte(phylumPath)))
+		err = mock.Init(context.Background(), shiroclient.EncodePhylumBytes([]byte(phylumPath)))
 		if err != nil {
 			return nil, err
 		}
@@ -173,7 +173,6 @@ func (s *Client) sdkCall(ctx context.Context, cmd string, params interface{}, re
 	configs := make([]Config, 0, len(clientConfigs)+2)
 	configs = append(configs, shiroclient.WithParams(params))
 	configs = append(configs, clientConfigs...)
-	configs = append(configs, shiroclient.WithContext(ctx))
 	resp, err := s.rpc.Call(ctx, cmd, configs...)
 	if err != nil {
 		if shiroclient.IsTimeoutError(err) {

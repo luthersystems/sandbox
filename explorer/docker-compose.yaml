@@ -9,7 +9,7 @@ volumes:
 networks:
   luther.systems:
     external:
-      name: fnb_byfn
+      name: byfn
 
 services:
 

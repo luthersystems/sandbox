@@ -23,6 +23,7 @@ PRESIGNED_PATH=${PROJECT_REL_DIR}/build/presigned.json
 
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
+CC_VERSION=${SUBSTRATE_VERSION}
 
 BUILD_IMAGE_GO_ALPINE=luthersystems/build-go-alpine
 SERVICE_BASE_IMAGE_ALPINE=luthersystems/service-base-alpine
@@ -92,6 +93,8 @@ DOCKER_DIR=$(if $(IS_WINDOWS),$(call DOCKER_WIN_DIR, $(1)),$(call DOCKER_NIX_DIR
 CODESPACE_DOCKER_PROJECT_DIR:=$(abspath ${LOCAL_WORKSPACE_FOLDER})
 STANDALONE_DOCKER_PROJECT_DIR:=$(call DOCKER_DIR, ${PROJECT_REL_DIR})
 DOCKER_PROJECT_DIR:=$(if $(LOCAL_WORKSPACE_FOLDER),${CODESPACE_DOCKER_PROJECT_DIR},${STANDALONE_DOCKER_PROJECT_DIR})
+
+DOCKER_IN_DOCKER_MOUNT=-v /var/run/docker.sock:/var/run/docker.sock
 
 # print out make variables, e.g.:
 # make echo:VERSION

@@ -28,7 +28,7 @@ MARTIN=$(make echo:RUN_MARTIN)
 MARTIN_BIND_SOURCE=$(make echo:MARTIN_BIND_SOURCE)
 MARTIN_BIND_DEST=$(make echo:MARTIN_BIND_DEST)
 
-docker network inspect fnb_byfn 1>/dev/null 2>/dev/null
+docker network inspect byfn 1>/dev/null 2>/dev/null
 RESULT="$?"
 if [ $RESULT -eq 0 ]; then
 	echo ${MARTIN_NETWORK}

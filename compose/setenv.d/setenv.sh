@@ -15,7 +15,7 @@ export DOCKER_GID="$(id -g)"
 
 export VERSION="$(grep '^VERSION=' common.mk | awk -F= '{print $2}')"
 export VERSION_SUBSTRATE="$(grep '^SUBSTRATE_VERSION=' common.mk | awk -F= '{print $2}')"
-PHYLUM_VERSION_FILE="$(grep '^PHYLUM_VERSION_FILE=' fabric/common.fabric.mk | awk -F= '{print $2}')"
+PHYLUM_VERSION_FILE="$(grep '^PHYLUM_VERSION_FILE=' common.fabric.mk | awk -F= '{print $2}')"
 mkdir -p $(dirname ./fabric/"$PHYLUM_VERSION_FILE")
 touch ./fabric/"$PHYLUM_VERSION_FILE"
 export PHYLUM_VERSION="$(cat ./fabric/"$PHYLUM_VERSION_FILE")"
