@@ -131,7 +131,9 @@ generate-template: ${NETWORK_BUILDER_TARGET}
 			${GENERATE_OPTS} --template
 
 .PHONY: generate-assets
-generate-assets: ${NETWORK_BUILDER_TARGET}
+generate-assets: channel-artifacts/genesis.block
+
+channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
 	rm -rf ./crypto-config ./channel-artifacts
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
@@ -151,7 +153,7 @@ up: generate-chaincodes .env fnb-up gateway-up
 	@
 
 .PHONY: fnb-up
-fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \

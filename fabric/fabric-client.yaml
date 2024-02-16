@@ -1,0 +1,100 @@
+client:
+  #organization: org1
+  logging:
+    level: info
+  cryptoconfig:
+    path: "/tmp/fabric/crypto-config"
+  BCCSP:
+    security:
+     enabled: true
+     default:
+      provider: "SW"
+     hashAlgorithm: "SHA2"
+     softVerify: true
+     level: 256
+  credentialStore:
+    path: "/tmp/state-store"
+    cryptoStore:
+      path: /tmp/msp
+  tlsCerts:
+    client:
+      key:
+        path: "/tmp/fabric/crypto-config/peerOrganizations/${ORG}.${DOMAIN_NAME}/users/Admin@${ORG}.${DOMAIN_NAME}/tls/client.key"
+      cert:
+        path: "/tmp/fabric/crypto-config/peerOrganizations/${ORG}.${DOMAIN_NAME}/users/Admin@${ORG}.${DOMAIN_NAME}/tls/client.crt"
+
+channels:
+  luther:
+    peers:
+      peer0.org1.luther.systems:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      policies:
+      queryChannelConfig:
+        minResponses: 1
+        maxTargets: 1
+        retryOpts:
+          attempts: 5
+          initialBackoff: 500ms
+          maxBackoff: 5s
+          backoffFactor: 2.0
+
+organizations:
+  org1:
+    mspid: Org1MSP
+    cryptoPath:  peerOrganizations/org1.luther.systems/users/{username}@org1.luther.systems/msp
+    peers:
+      - peer0.org1.luther.systems
+    certificateAuthorities:
+      - ca.org1.luther.systems
+  ordererorg:
+    mspID: "OrdererOrg"
+    cryptoPath: ordererOrganizations/luther.systems/users/{username}@luther.systems/msp
+
+orderers:
+  _default:
+    grpcOptions:
+      keep-alive-time: 30s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+  orderer0.luther.systems:
+    url: orderer0.luther.systems:7050
+    grpcOptions:
+      ssl-target-name-override: orderer0.luther.systems
+    tlsCACerts:
+      path: "/tmp/fabric/crypto-config/ordererOrganizations/luther.systems/tlsca/tlsca.luther.systems-cert.pem"
+
+peers:
+  _default:
+    grpcOptions:
+      keep-alive-time: 30s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+  peer0.org1.luther.systems:
+    url: peer0.org1.luther.systems:7051
+    eventUrl: peer0.org1.luther.systems:7053
+    grpcOptions:
+      ssl-target-name-override: peer0.org1.luther.systems
+    tlsCACerts:
+      path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/tlsca/tlsca.org1.luther.systems-cert.pem"
+
+certificateAuthorities:
+ ca.org1.luther.systems:
+   url: https://ca.org1.luther.systems:7054
+   tlsCACerts:
+    path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/ca/ca.org1.luther.systems-cert.pem"
+    client:
+      key:
+        path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/users/Admin@org1.luther.systems/tls/client.key"
+      cert:
+        path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/users/Admin@org1.luther.systems/tls/client.crt"
+   registrar:
+     enrollId: admin
+     enrollSecret: adminpw
+   caName: ca.org1.luther.systems
