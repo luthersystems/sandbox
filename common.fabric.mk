@@ -432,7 +432,7 @@ build/volume/enroll_user:
 	chmod a+w $@
 
 .SECONDEXPANSION:
-compile-phylum-%: $$(shell find -L phylum_$$* -name "*.lisp" 2>/dev/null)
+compile-phylum-%: $$(shell find -L phylum_$$* -name "*.lisp" -not -path "*/build/*" 2>/dev/null)
 	mkdir -p ./build/phylum_$*
 	rm -rf   ./build/phylum_$*/src
 	mkdir -p ./build/phylum_$*/src
