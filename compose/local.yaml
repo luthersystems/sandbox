@@ -10,7 +10,6 @@ services:
     - "9600:9600" # expose this for testing purposes
     environment:
     - SANDBOX_ORACLE_EMULATE_CC=false
-    - SANDBOX_ORACLE_GATEWAY_ENDPOINT=http://shiroclient_gw_phylum:8082
     networks:
     - byfn
 networks:

@@ -64,7 +64,7 @@ func DefaultConfig() *Config {
 		ListenAddress:   ":8080",
 		PhylumVersion:   "test", // FIXME DELETEME
 		PhylumPath:      "./phylum",
-		GatewayEndpoint: "http://shiroclient_gateway:8082",
+		GatewayEndpoint: "http://shiroclient_gw_sandbox:8082",
 	}
 }
 
