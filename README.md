@@ -172,6 +172,20 @@ make down
 
 Running `docker ps` again will show all the containers have been removed.
 
+### Application tracing (OpenTelemetry)
+
+There is support for tracing of the application and the Luther platform using
+the OpenTelemetry protocol.  Each can optionally be configured by setting an
+environment variable to point at an OTLP endpoint (e.g. a Grafana agent).  When
+configured, trace spans will be created at key layers of the stack and delivered
+to the configured endpoint.
+
+```
+SANDBOX_ORACLE_OTLP_ENDPOINT=http://otlp-hostname:4317
+SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
+CHAINCODE_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
+```
+
 ### Run Blockchain Explorer
 
 To examine a graphical UI for the chaincodee transactions and blocks and look at

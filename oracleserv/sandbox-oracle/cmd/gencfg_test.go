@@ -28,6 +28,7 @@ func TestConfig(t *testing.T) {
 		PhylumVersion:   "phylum-version",
 		PhylumPath:      "phylum-path",
 		GatewayEndpoint: "gateway-endpoint",
+		OTLPEndpoint:    "otlp-endpoint",
 	}
 	var yamlExample = []byte(pretty(expectCfg))
 	err := myViper.ReadConfig(bytes.NewBuffer(yamlExample))
