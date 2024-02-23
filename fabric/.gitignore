@@ -1,6 +1,8 @@
 /build/
 /chaincodes/metadata.json
 /chaincodes/*.tar.gz
+/chaincodes/*.id
+/.env
 /crypto-config/
 /channel-artifacts/
 /couchdb/
@@ -9,4 +11,3 @@ shiroclient_phylum.yaml
 shiroclient_fast.yaml
 shiroclient.yaml
 fabric-client_template.yaml
-fabric-client.yaml

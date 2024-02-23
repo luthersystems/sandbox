@@ -64,7 +64,7 @@ func DefaultConfig() *Config {
 		ListenAddress:   ":8080",
 		PhylumVersion:   "test", // FIXME DELETEME
 		PhylumPath:      "./phylum",
-		GatewayEndpoint: "http://shiroclient_gateway:8082",
+		GatewayEndpoint: "http://shiroclient_gw_sandbox:8082",
 	}
 }
 
@@ -198,7 +198,6 @@ func txConfigs() func(context.Context, ...shiroclient.Config) []shiroclient.Conf
 		fields := grpclogging.GetLogrusFields(ctx)
 		configs := []shiroclient.Config{
 			shiroclient.WithLogrusFields(fields),
-			shiroclient.WithContext(ctx),
 		}
 		if fields["req_id"] != nil {
 			logrus.WithField("req_id", fields["req_id"]).Infof("setting request id")

@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-. /scripts/variables.sh
+script_dir=$(dirname "$0")
+. ${script_dir}/variables.sh
 
 # This is a collection of bash functions used by different scripts
 ORDERER_CA="/crypto-config/ordererOrganizations/${DOMAIN_NAME}/orderers/orderer0.${DOMAIN_NAME}/msp/tlscacerts/tlsca.${DOMAIN_NAME}-cert.pem"
@@ -67,7 +68,7 @@ setGlobals() {
     export CORE_PEER_TLS_ROOTCERT_FILE="$(peerRootCert "$PEER" "$ORG")"
     export CORE_PEER_TLS_CLIENTCERT_FILE="${CORE_PEER_TLS_CERT_FILE}"
     export CORE_PEER_TLS_CLIENTKEY_FILE="${CORE_PEER_TLS_KEY_FILE}"
-    export CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
+    export CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
 
     env |grep CORE >&2
 }
@@ -162,6 +163,44 @@ joinChannelWithRetry() {
     fi
 }
 
+generateChaincode() {
+    echo "generateChaincode: ""$*"
+
+    CC_SRC_PATH=$1
+    CC_NAME=$2
+    CC_VERSION=$3
+    IS_EXTERNAL=$4
+
+    TIMESTAMP="2016-01-01T00:00:00Z"
+    CC_LABEL=${CC_NAME}-${CC_VERSION}
+    CC_TYPE="golang"
+
+    CC_SRC_DIR=$(dirname ${CC_SRC_PATH})
+    CC_PATH=${CC_SRC_DIR}/${CC_LABEL}.tar.gz
+
+    tar -C /tmp -xf ${CC_SRC_PATH}
+
+    if [ "$IS_EXTERNAL" == "True" ]; then
+        cat >/tmp/connection.json <<EOF
+  {
+    "address": "${CC_NAME}-peer{{.index}}:8080",
+    "dial_timeout": "10s",
+    "tls_required": false,
+    "client_auth_required": false
+  }
+EOF
+	tar -zcf /tmp/code.tar.gz -C /tmp --mtime=$TIMESTAMP connection.json
+
+	CC_TYPE="ccaas"
+    fi
+
+    echo '{"path":"main","type":"'"${CC_TYPE}"'","label":"'"${CC_LABEL}"'"}' >/tmp/metadata.json
+
+    tar -zcf ${CC_PATH} -C /tmp --mtime=$TIMESTAMP metadata.json code.tar.gz
+    md5sum ${CC_PATH}
+    peer lifecycle chaincode calculatepackageid ${CC_PATH} | tee ${CC_SRC_DIR}/${CC_LABEL}.id
+}
+
 installChaincode() {
     echo "installChaincode: ""$*"
 
@@ -173,25 +212,22 @@ installChaincode() {
 
     queryChaincodePackage "$PEER" "$ORG" "$CC_NAME" "$CC_VERSION"
     if [ $? -eq 0 ]; then
-        echo "===================== Chaincode already installed on peer${PEER}.org${ORG} ===================== "
+        echo "===================== Chaincode ${CC_NAME}:${CC_VERSION} already installed on peer${PEER}.org${ORG} ===================== "
         echo
         return
     fi
-    echo
 
-    echo "Installing chaincode on peer${PEER}.org${ORG}..."
+
+    echo "Installing chaincode ${CC_NAME}:${CC_VERSION} on peer${PEER}.org${ORG}..."
     echo
     setGlobals $PEER $ORG
     set -x
-    CC_SRC_DIR="$(dirname "$CC_SRC_PATH")"
-    tar -C "$CC_SRC_DIR" -xf "$CC_SRC_PATH"
-    touch -r "$CC_SRC_DIR"/metadata.json timestamp
-    echo '{"path":"main","type":"golang","label":"'"${CC_NAME}-${CC_VERSION}"'"}' >"$CC_SRC_DIR"/metadata.json
-    touch -r timestamp "$CC_SRC_DIR"/metadata.json
-    tar -zcf "$CC_SRC_DIR"/chaincode.tar.gz -C "$CC_SRC_DIR" metadata.json code.tar.gz
-    md5sum "$CC_SRC_DIR"/chaincode.tar.gz
-    peer lifecycle chaincode install "$CC_SRC_DIR"/chaincode.tar.gz >&log.txt
+    CC_SRC_DIR=$(dirname ${CC_SRC_PATH})
+    CC_PATH=${CC_SRC_DIR}/${CC_NAME}-${CC_VERSION}.tar.gz
+
+    peer lifecycle chaincode install ${CC_PATH} >&log.txt
     res=$?
+
     set +x
     cat log.txt
     verifyResult $res "Chaincode installation on peer${PEER}.org${ORG} has Failed"
@@ -206,6 +242,8 @@ queryChaincodePackage() {
     CC_NAME=$3
     CC_VERSION=$4
 
+    CC_LABEL=${CC_NAME}-${CC_VERSION}
+
     echo "Querying installed chaincodes on peer${PEER}.org${ORG}..." >&2
     echo >&2
     setGlobals $PEER $ORG &>/dev/null
@@ -218,7 +256,7 @@ queryChaincodePackage() {
     fi
     query=$(cat <<EOF
 .installed_chaincodes[]
-  | select(.label == "${CC_NAME}-${CC_VERSION}")
+  | select(.label == "${CC_LABEL}")
   | .package_id
 EOF
     )
@@ -480,7 +518,7 @@ queryCommitted() {
     CC_NAME=$4
     CC_VERSION=$5
 
-    echo "Querying chaincode committed status on peer${PEER}.org${ORG}..." >&2
+    echo "Querying chaincode ${CC_NAME}:${CC_VERSION} committed status on peer${PEER}.org${ORG}..." >&2
     echo >&2
     setGlobals $PEER $ORG &>/dev/null
     set -x

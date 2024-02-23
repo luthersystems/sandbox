@@ -22,12 +22,11 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.luther.systems-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/priv_sk
-      - DOCKER_PROJECT_DIR
     ports:
       - 7054:7054
     command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org1.luther.systems-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/priv_sk -b admin:adminpw -d'
     volumes:
-      - ${DOCKER_PROJECT_DIR}/fabric/crypto-config/peerOrganizations/org1.luther.systems/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./crypto-config/peerOrganizations/org1.luther.systems/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca_peerOrg1
     networks:
       - byfn
@@ -39,7 +38,6 @@ services:
     container_name: orderer0.luther.systems
     environment:
       - FABRIC_LOGGING_SPEC
-      - DOCKER_PROJECT_DIR
     networks:
       - byfn
 
@@ -50,6 +48,5 @@ services:
       service: peer0.org1.luther.systems
     environment:
       - FABRIC_LOGGING_SPEC
-      - DOCKER_PROJECT_DIR
     networks:
       - byfn

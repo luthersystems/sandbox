@@ -19,3 +19,4 @@ services:
     - byfn
 networks:
   byfn:
+    name: byfn

@@ -13,12 +13,12 @@ SERVICE_DIR=oracleserv/sandbox-oracle
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=v0.0.76
+BUILDENV_TAG=v0.0.81
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.192.2
+SUBSTRATE_VERSION=v2.197.1
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 NETWORK_BUILDER_VERSION=${SUBSTRATE_VERSION}
@@ -38,3 +38,9 @@ GOPROXY ?= https://proxy.golang.org
 GOPRIVATE ?=
 GONOPROXY ?= ${GOPRIVATE}
 GONOSUMDB ?= ${GOPRIVATE}
+
+# These variables configure the Hyperledger Fabric image versions for running
+# the full test network.
+FABRIC_IMAGE_TAG=2.5.4
+FABRIC_CA_IMAGE_TAG=1.5.7
+BASE_IMAGE_TAG=0.4.20

@@ -21,7 +21,8 @@ services:
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=false
+      - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true
+      - ORDERER_GENERAL_KEEPALIVE_SERVERMININTERVAL=30s
       # NOTE:  Raft TLS server & client for a node will use the same cert/key
       # -- This matches the configtx.yaml Orderer.EtcdRaft.Concenters
       # configuration.
@@ -37,9 +38,9 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-      - ${DOCKER_PROJECT_DIR}/fabric/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-      - ${DOCKER_PROJECT_DIR}/fabric/crypto-config/ordererOrganizations/luther.systems/orderers/orderer0.luther.systems/msp:/var/hyperledger/orderer/msp
-      - ${DOCKER_PROJECT_DIR}/fabric/crypto-config/ordererOrganizations/luther.systems/orderers/orderer0.luther.systems/tls/:/var/hyperledger/orderer/tls
+      - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../crypto-config/ordererOrganizations/luther.systems/orderers/orderer0.luther.systems/msp:/var/hyperledger/orderer/msp
+      - ../crypto-config/ordererOrganizations/luther.systems/orderers/orderer0.luther.systems/tls/:/var/hyperledger/orderer/tls
       - orderer0.luther.systems:/var/hyperledger/production/orderer
     ports:
       - 7050:7050
@@ -57,8 +58,8 @@ services:
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_CHAINCODE_EXECUTETIMEOUT=30s
     volumes:
-      - ${DOCKER_PROJECT_DIR}/fabric/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/msp:/etc/hyperledger/fabric/msp
-      - ${DOCKER_PROJECT_DIR}/fabric/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls:/etc/hyperledger/fabric/tls
+      - ../crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/msp:/etc/hyperledger/fabric/msp
+      - ../crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls:/etc/hyperledger/fabric/tls
       - peer0.org1.luther.systems:/var/hyperledger/production
     ports:
       - 7051:7051
