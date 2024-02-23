@@ -17,7 +17,7 @@ PHYLUM_VERSION_FILE=./build/phylum_version
 # DOCKER_CHOWN_USER differs from CHOWN_USER because DOCKER_CHOWN_USER needs to
 # use identifier numbers (insider docker there is no user defined with the
 # proper name).
-DOCKER_CHOWN_USER=$(shell id -u ${USER}):$(shell id -g ${USER})
+DOCKER_CHOWN_USER ?= $(shell id -u ${USER}):$(shell id -g ${USER})
 
 # NETWORK_BUILDER is the entrypoint into the NETWORK_BUILDER_IMAGE for all
 # commands.
