@@ -28,12 +28,18 @@ MARTIN=$(make echo:RUN_MARTIN)
 MARTIN_BIND_SOURCE=$(make echo:MARTIN_BIND_SOURCE)
 MARTIN_BIND_DEST=$(make echo:MARTIN_BIND_DEST)
 
-docker network inspect byfn 1>/dev/null 2>/dev/null
-RESULT="$?"
-if [ $RESULT -eq 0 ]; then
-	echo ${MARTIN_NETWORK}
-	${MARTIN_NETWORK} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"
+if docker network inspect byfn 1>/dev/null 2>/dev/null; then
+    cmd="$MARTIN_NETWORK"
 else
-	echo ${MARTIN}
-	${MARTIN} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"
+    cmd="$MARTIN"
+fi
+
+echo ${cmd}
+if ! ${cmd} ${MARTIN_BIND_DEST}/tests/run-postman-collections.sh "$@"; then
+    set -x
+    docker ps
+    docker logs sandbox_oracle
+    docker logs shiroclient_gw_sandbox
+    docker logs fnb-sandbox-peer0-1
+    exit 1
 fi
