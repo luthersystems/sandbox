@@ -17,6 +17,7 @@ import (
 	"github.com/luthersystems/sandbox/phylum"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
 	"github.com/luthersystems/svc/grpclogging"
+	"github.com/luthersystems/svc/opttrace"
 	"github.com/sirupsen/logrus"
 )
 
@@ -82,6 +83,9 @@ type Config struct {
 	PhylumPath string `yaml:"phylum-path"`
 	// GatewayEndpoint is an address to the shiroclient gateway.
 	GatewayEndpoint string `yaml:"gateway-endpoint"`
+	// OTLPEndpoint optionally configures OTLP tracing and sends traces to
+	// the supplied OTLP endpoint
+	OTLPEndpoint string `yaml:"otlp-endpoint"`
 }
 
 // Valid validates an oracle configuration.
@@ -116,6 +120,9 @@ type Oracle struct {
 
 	// txConfigs generates default transaction configs
 	txConfigs func(context.Context, ...shiroclient.Config) []shiroclient.Config
+
+	// Optional application tracing provider
+	tracer *opttrace.Tracer
 }
 
 // Option provides additional configuration to the oracle. Primarily for
@@ -183,9 +190,17 @@ func New(config *Config, opts ...Option) (*Oracle, error) {
 			return nil, err
 		}
 	}
-
 	oracle.txConfigs = txConfigs()
-
+	traceOpts := []opttrace.Option{}
+	if config.OTLPEndpoint != "" {
+		traceOpts = append(traceOpts, opttrace.WithOTLPExporter(config.OTLPEndpoint))
+	}
+	t, err := opttrace.New(context.Background(), "oracle", traceOpts...)
+	if err != nil {
+		return nil, err
+	}
+	t.SetGlobalTracer()
+	oracle.tracer = t
 	return oracle, nil
 }
 

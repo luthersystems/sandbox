@@ -24,6 +24,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -130,11 +131,13 @@ func Run(config *Config) error {
 		"phylum_version":   config.PhylumVersion,
 		"phylum_path":      config.PhylumPath,
 		"gateway_endpoint": config.GatewayEndpoint,
+		"otlp_endpoint":    config.OTLPEndpoint,
 	}).Infof(oracleServiceName)
 
 	// Start a grpc server listening on the unix socket at grpcAddr
 	grpcAddr := "/tmp/oracle.grpc.sock"
 	grpcServer := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
 			grpclogging.LogrusMethodInterceptor(
 				oracle.logBase,

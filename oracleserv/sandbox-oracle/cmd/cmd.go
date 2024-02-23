@@ -23,6 +23,7 @@ const (
 	configPhylumVersion   = "phylum-version"
 	configPhylumPath      = "phylum-path"
 	configGatewayEndpoint = "gateway-endpoint"
+	configOTLPEndpoint    = "otlp-endpoint"
 )
 
 var myViper = viper.New()
@@ -35,6 +36,7 @@ func getConfig() *oracle.Config {
 		PhylumVersion:   myViper.GetString(configPhylumVersion),
 		PhylumPath:      myViper.GetString(configPhylumPath),
 		GatewayEndpoint: myViper.GetString(configGatewayEndpoint),
+		OTLPEndpoint:    myViper.GetString(configOTLPEndpoint),
 	}
 }
 
@@ -116,6 +118,7 @@ func Execute() {
 		// file with substitutions is non-deterministic.
 		{configPhylumPath, defaultConfig.PhylumPath, "Phylum path for emulation"},
 		{configGatewayEndpoint, defaultConfig.GatewayEndpoint, "Shiroclient gateway endpoint"},
+		{configOTLPEndpoint, defaultConfig.OTLPEndpoint, "OTLP tracing endpoint"},
 	}
 	stringSliceArgs := []struct {
 		flag string
