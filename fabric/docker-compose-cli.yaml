@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-version: '2'
+version: "2"
 
 volumes:
   orderer0.luther.systems:
@@ -15,7 +15,7 @@ networks:
 services:
   ca.org1.luther.systems:
     extends:
-      file:   docker-compose-e2e.yaml
+      file: docker-compose-e2e.yaml
       service: ca.org1.luther.systems
     container_name: ca_peerOrg1
     networks:
@@ -23,7 +23,7 @@ services:
 
   orderer0.luther.systems:
     extends:
-      file:   docker-compose-e2e.yaml
+      file: docker-compose-e2e.yaml
       service: orderer0.luther.systems
     container_name: orderer0.luther.systems
     networks:
@@ -32,14 +32,14 @@ services:
   peer0.org1.luther.systems:
     container_name: peer0.org1.luther.systems
     extends:
-      file:   docker-compose-e2e.yaml
+      file: docker-compose-e2e.yaml
       service: peer0.org1.luther.systems
     networks:
       - byfn
 
   cli:
     container_name: cli
-    image: $IMAGE_NS/fabric-tools:$IMAGE_TAG
+    image: luthersystems/fabric-snapshot-archiver:latest
     tty: true
     stdin_open: true
     environment:
@@ -56,14 +56,18 @@ services:
       - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
       - CORE_PEER_TLS_CLIENTCERT_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.crt
       - CORE_PEER_TLS_CLIENTKEY_FILE=/crypto-config/peerOrganizations/org1.luther.systems/peers/peer0.org1.luther.systems/tls/server.key
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: /bin/bash
+    entrypoint: /bin/bash
     volumes:
       - ./chaincodes:/chaincodes
       - ./crypto-config:/crypto-config/
       - ./scripts:/scripts
       - ./channel-artifacts:/channel-artifacts
       - ./collections.json:/collections.json
+      - peer0.org1.luther.systems:/var/hyperledger/production
     depends_on:
       - orderer0.luther.systems
       - peer0.org1.luther.systems

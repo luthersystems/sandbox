@@ -160,6 +160,9 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/gene
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
 		-e CHAINCODE_LOG_LEVEL \
+		-e AWS_ACCESS_KEY_ID \
+		-e AWS_SECRET_ACCESS_KEY \
+		-e AWS_SESSION_TOKEN \
 		-e CHAINCODE_OTLP_TRACER_ENDPOINT \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up \
 			--log-spec debug \
