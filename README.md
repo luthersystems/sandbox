@@ -413,3 +413,7 @@ platform are cleaned up by running the command:
 ```bash
 make down
 ```
+
+## Platform Releases
+
+See [Latest Platform Releases](https://docs.luthersystems.com/deployment/release-notes).
