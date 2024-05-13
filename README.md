@@ -1,11 +1,24 @@
-# Sandbox: Example Luther Application
+# Luther Application Starter Kit
 
-This repository contains an example backend app (oracle, API, and chaincode).
+This repository contains a working starter kit for developers to modifiy and
+specialize to their specific use case.
+
+## High-level File System Structure
+
+_Application Specific Code_: Add your specific process operations code to
+the `phylum/` directory.
+
+_Application Templates_: Edit the template code in `oracle/` and `api/` to
+specialize for your use case.
+
+_Platform_: The remaining files and directories are platform related code
+that should not be modified.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/luthersystems/sandbox?quickstart=1)
 
+## Component Diagram
 
-```
+```asciiart
                      FE Portal
                         +
                         |
@@ -37,34 +50,40 @@ This repository contains an example backend app (oracle, API, and chaincode).
 This repo includes an end-to-end "hello world" application described below.
 
 ## Luther Documentation
+
 Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-*IMPORTANT:* Place your license key in `.luther-license.yaml` in the project
+_IMPORTANT:_ Place your license key in `.luther-license.yaml` in the project
 root directory (This is a change from previous versions, in order to support
 parallel Docker containers.).
 
 If you receive a **403 forbidden Error** while connecting, ensure that
-`.luther-license.yaml` is in the ***project root directory***.
+`.luther-license.yaml` is in the **_project root directory_**.
 
 If that doesn't fix it run
- ```
- make clean
- ```
- then run
- ```
- make
- ```
+
+```bash
+make clean
+```
+
+then run
+
+```bash
+make
+```
 
 For devs using hardware that utilizes the Apple M1 chip, you may encounter an
 issue getting the sandbox environment up and running.
 To resolve this, ensure you have [Rosetta 2](https://support.apple.com/en-us/HT211861)
 installed on your computer.
 This can be done either running this command here:
-```
+
+```bash
 softwareupdate --install-rosetta
 ```
+
 or by installing any software that won't naturally run on the M1 chip (e.g. Zoom) and should appear
 as an additional prompt during the installation process.
 
@@ -85,41 +104,43 @@ uses.
 
 To use codespaces:
 
-* Select the Code pane on the repository main page, select the Codespaces tab,
- and select "New codespace".
-* The minimum machine size (2 core, 4GB RAM, 32 GB storage) is preferred.
-* Wait for initialization to complete; this will take less than 5 minutes.
-* Upload a license file to `.luther-license.yaml` in the project root directory.
+- Select the Code pane on the repository main page, select the Codespaces tab,
+  and select "New codespace".
+- The minimum machine size (2 core, 4GB RAM, 32 GB storage) is preferred.
+- Wait for initialization to complete; this will take less than 5 minutes.
+- Upload a license file to `.luther-license.yaml` in the project root directory.
 
 ### MacOS
 
 On MacOS you can use the commands, using [homebrew](https://brew.sh/):
 
-```
+```bash
 brew install make git go wget jq
 brew install --cask docker
 ```
 
-*IMPORTANT:* Make sure your `docker --version` is  >= 20.10.6 and
+_IMPORTANT:_ Make sure your `docker --version` is >= 20.10.6 and
 `docker-compose --version` is >= 1.29.1.
 
 If you are not using `brew`, make sure xcode tools are installed:
 
-```
+```bash
 xcode-select --install
 ```
 
 ### Ubuntu
 
 If you are running Ubuntu 20.04+ you can use the commands to install the dependencies:
-```
+
+```bash
 sudo apt update && sudo apt install make jq zip gcc python3-pip golang-1.16
 ```
 
 Install docker using the official [steps](https://docs.docker.com/engine/install/ubuntu/).
 
 Install docker-compose:
-```
+
+```bash
 sudo pip3 install docker-compose
 ```
 
@@ -134,38 +155,38 @@ instance.
 
 Clone this repo:
 
-```
+```bash
 git clone https://github.com/luthersystems/sandbox.git
 ```
 
 Run `make` to build all the services:
 
-```
+```bash
 make
 ```
 
 ### Running the Application
 
 First we'll run the sample application with a local instance of the Luther
-platform (gateway, chaincode, and a fabric network).  Run `make up` to bring up
+platform (gateway, chaincode, and a fabric network). Run `make up` to bring up
 a local docker network running the application and platform containers.
 
-```
+```bash
 make up
 ```
 
 After this completes successfully run `docker ps` which lists the running
-containers.  The REST/JSON API is accessible from your localhost on port 8080
+containers. The REST/JSON API is accessible from your localhost on port 8080
 which can be spot-tested using cURL and jq:
 
-```
+```bash
 curl -v http://localhost:8080/v1/health_check | jq .
 ```
 
 With the containers running we can also run the end-to-end integration tests.
 Once the tests complete `make down` will cleanup all the containers.
 
-```
+```bash
 make integration
 make down
 ```
@@ -175,12 +196,12 @@ Running `docker ps` again will show all the containers have been removed.
 ### Application tracing (OpenTelemetry)
 
 There is support for tracing of the application and the Luther platform using
-the OpenTelemetry protocol.  Each can optionally be configured by setting an
-environment variable to point at an OTLP endpoint (e.g. a Grafana agent).  When
+the OpenTelemetry protocol. Each can optionally be configured by setting an
+environment variable to point at an OTLP endpoint (e.g. a Grafana agent). When
 configured, trace spans will be created at key layers of the stack and delivered
 to the configured endpoint.
 
-```
+```bash
 SANDBOX_ORACLE_OTLP_ENDPOINT=http://otlp-hostname:4317
 SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
 CHAINCODE_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
@@ -192,7 +213,7 @@ To examine a graphical UI for the chaincodee transactions and blocks and look at
 the details of the work the sandbox network has done, build the Blockchain
 Explorer. With the full network running, run:
 
-```
+```bash
 make explorer
 ```
 
@@ -204,7 +225,7 @@ generate more activity, which can be viewed in the web app.
 If the `make` command fails, or if the Explorer runs but no new activity is
 detected, it has most likely failed to authenticate; run
 
-```
+```bash
 make explorer-clean
 make explorer-up
 ```
@@ -216,13 +237,13 @@ Explorer. This will reconnect it to the current network.
 
 Run `make` to build all the services:
 
-```
+```bash
 make
 ```
 
 Run the sample application with an in-memory instance of the Luther platform:
 
-```
+```bash
 make mem-up
 ```
 
@@ -240,9 +261,9 @@ the containers.
 This repo includes a small application for managing account balances. It serves
 a JSON API that provides endpoints to:
 
-1) create an account with a balance
-2) look up the balance for an account
-3) transfer between two accounts
+1. create an account with a balance
+2. look up the balance for an account
+3. transfer between two accounts
 
 > To simplify the sandbox, we have omitted authentication which we handle
 > using [lutherauth](https://docs.luthersystems.com/luther/application/modules/lutherauth).
@@ -253,7 +274,7 @@ a JSON API that provides endpoints to:
 
 Overview of the directory structure
 
-```
+```asciiart
 build/:
 	Temporary build artifacts (do not check into git).
 common.config.mk:
@@ -281,63 +302,63 @@ tests/:
 ### Developing the application
 
 The API is defined using protobuf objects and service definitions under the
-`api/` directory.  Learn more about how the API is defined and the data model
+`api/` directory. Learn more about how the API is defined and the data model
 definitions by reading the sandbox API's [documentation](api/).
 
 The application API is served by the "oracle", which interfaces with the Luther
-platform.  Learn more about the design of the oracle and how to extend its
+platform. Learn more about the design of the oracle and how to extend its
 functionality by reading the sandbox oracle's
 [documentation](oracleserv/sandbox-oracle/).
 
 The oracle interacts with the core business logic that is defined by the
 "phylum", [elps](https://github.com/luthersystems/elps) code that defines an
-application's business rules.  Learn more about writing phyla by reading the
+application's business rules. Learn more about writing phyla by reading the
 sandbox phylum's [documentation](phylum/).
 
 ### Testing Modifications
 
 There are 3 main types of tests in this project:
 
-1) Phylum _unit_ tests.  These tests excercise busines rules and logic around
-   storage of smart contract data model entities.  More information about
+1. Phylum _unit_ tests. These tests excercise busines rules and logic around
+   storage of smart contract data model entities. More information about
    writing and running unit tests can be found in the phylum
    [documentation](phylum/).
 
-2) Oracle _functional_ tests.  These tests exercise API endpoints and their
-   connectivity to the phylum application layer.  More information about writing
+2. Oracle _functional_ tests. These tests exercise API endpoints and their
+   connectivity to the phylum application layer. More information about writing
    and running functional tests can be found in the oracle
    [documentation](oracleserv/sandbox-oracle/).
 
-3) End-To-End _integration_ tests.  These tests use the `martin` tool.  These
+3. End-To-End _integration_ tests. These tests use the `martin` tool. These
    tests exercise realistic end-user functionality of the oracle REST/JSON APIs
    using [Postman](https://www.postman.com/product/api-client/) under the hood.
    More information about writing and running integration tests can be found in
    the test [documentation](tests/)
 
 After making some changes to the phylum's business logic, the oracle middleware,
-or the API it is a good idea to test those changes.  The quickest integrity
+or the API it is a good idea to test those changes. The quickest integrity
 check to detect errors in the application is to run the phylum unit tests and
-API functional tests from the phylum and oracle directories respectively.  This
+API functional tests from the phylum and oracle directories respectively. This
 can be done easily from the application's top level with the following command:
 
-```
+```bash
 make test
 ```
 
 Instead of running the above command the phylum and oracle can be tested
 individually with the following commands:
 
-```
+```bash
 make phylumtest
 make oraclegotest
 ```
 
 If these tests pass then one can move on to run the end-to-end integration tests
-against a real network of docker containers.  As done in the Getting Started
+against a real network of docker containers. As done in the Getting Started
 section, this will require running `make up` to create a network and `make
 integration` to actually run the tests.
 
-```
+```bash
 make up
 make integration
 ```
@@ -346,15 +367,15 @@ make integration
 
 During development application, particularly if developing an application with a
 UI, phylum bugs may be discovered while the application is running (i.e. `make
-up`).  After fixing bugs in the local phylum code, redeploy the code onto the
+up`). After fixing bugs in the local phylum code, redeploy the code onto the
 running fabric network with the following shell command:
 
-```
+```bash
 (cd fabric && make init)
 ```
 
 This uses the OTA Update module to immediately install the new business logic on
-to the fabric network.  The upgrade here is done the same way devops engineers
+to the fabric network. The upgrade here is done the same way devops engineers
 would perform the application upgrade when running the platform on production
 infrastructure.
 
@@ -362,33 +383,37 @@ infrastructure.
 
 Constantly running a local instance of the Luther platform can consume a lot of
 computer resources and running `make up` and `make down` frequently is time
-consuming.  Instead of running the complete platform it can be simulated
-locally, in-memory.  Running an in-memory version of the platform is much faster
-and less resource intensive.  In contrast to running the real platform which is
+consuming. Instead of running the complete platform it can be simulated
+locally, in-memory. Running an in-memory version of the platform is much faster
+and less resource intensive. In contrast to running the real platform which is
 done with `make up` running the application with an in-memory platform is done
 with the `make mem-up` command.
 
-```
+```bash
 make mem-up
 make integration
 ```
 
 Running `docker ps` at this point will show that only the application
-oracle/middleware is running.  Beyond starting fast and consuming fewer
-resources, the in-memory platform also features *live code reloading* where any
+oracle/middleware is running. Beyond starting fast and consuming fewer
+resources, the in-memory platform also features _live code reloading_ where any
 phylum code changes will immediately be reflected in the running application.
 
 If integration tests fail after making modifications you can diagnose them by
 reading the test output and comparing that with the application logs which are
 found by running the following command:
 
-```
+```bash
 docker logs sandbox_oracle
 ```
 
 As with running the real platform, the oracle docker container and the in-memory
 platform are cleaned up by running the command:
 
-```
+```bash
 make down
 ```
+
+## Platform Releases
+
+See [Latest Platform Releases](https://docs.luthersystems.com/deployment/release-notes).
