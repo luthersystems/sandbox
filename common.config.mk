@@ -13,12 +13,12 @@ SERVICE_DIR=oracleserv/sandbox-oracle
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=v0.0.81
+BUILDENV_TAG=v0.0.84
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.197.1
+SUBSTRATE_VERSION=v2.202.0
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 NETWORK_BUILDER_VERSION=${SUBSTRATE_VERSION}
