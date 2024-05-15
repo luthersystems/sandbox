@@ -1,5 +1,4 @@
 # Configuration for a local fabric network.
-version: '2.1'
 services:
   sandbox_oracle:
     extends:

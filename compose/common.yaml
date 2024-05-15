@@ -1,6 +1,5 @@
 # Common network configuration that is imported into all other compose
 # configurations.
-version: '2.1'
 services:
   sandbox_oracle:
     image: sandbox/oracle
