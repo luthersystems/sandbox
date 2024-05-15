@@ -17,9 +17,6 @@ PROJECT_ABS_DIR=$(abspath ${PROJECT_REL_DIR})
 include ${PROJECT_REL_DIR}/common.config.mk
 
 PROJECT_PATH=$(shell awk '$$1 == "module" {print $$2};' ${PROJECT_REL_DIR}/go.mod)
-LICENSE_FILE_ROOT=${DOCKER_PROJECT_DIR}/.luther-license.yaml
-LICENSE_FILE=${PROJECT_ABS_DIR}/.luther-license.yaml
-PRESIGNED_PATH=${PROJECT_REL_DIR}/build/presigned.json
 
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
@@ -80,9 +77,7 @@ DUMMY_TARGET=build/$(1)/$(2)/.dummy
 IMAGE_DUMMY=$(call DUMMY_TARGET,image,$(1))
 PUSH_DUMMY=$(call DUMMY_TARGET,push,$(1))
 PLUGIN_DUMMY=$(call DUMMY_TARGET,plugin,$(1))
-PRESIGN_DUMMY=$(call DUMMY_TARGET,presign,$(1))
 STATIC_PLUGINS_DUMMY=$(call PLUGIN_DUMMY,${SUBSTRATE_VERSION})
-STATIC_PRESIGN_DUMMY=$(abspath ${PROJECT_REL_DIR}/$(call PRESIGN_DUMMY,${SUBSTRATE_VERSION}))
 
 GIT_LS_FILES=$(shell git ls-files $(1))
 

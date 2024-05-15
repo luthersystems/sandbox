@@ -22,7 +22,18 @@ client:
         path: "/tmp/fabric/crypto-config/peerOrganizations/${ORG}.${DOMAIN_NAME}/users/Admin@${ORG}.${DOMAIN_NAME}/tls/client.key"
       cert:
         path: "/tmp/fabric/crypto-config/peerOrganizations/${ORG}.${DOMAIN_NAME}/users/Admin@${ORG}.${DOMAIN_NAME}/tls/client.crt"
-
+  global:
+    timeout:
+      query: 3m
+      execute: 3m
+      resmgmt: 3m
+    cache:
+      connectionIdle: 2m
+      eventServiceIdle: 2m
+      channelConfig: 2m
+      channelMembership: 2m
+      discovery: 2m
+      selection: 2m
 channels:
   luther:
     peers:

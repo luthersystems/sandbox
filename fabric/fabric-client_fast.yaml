@@ -1,7 +1,7 @@
 client:
   #organization: org1
   logging:
-    level: info
+    level: error
   discovery:
     timeout:
       connection: 10s
@@ -28,12 +28,12 @@ client:
       execute: 3m
       resmgmt: 3m
     cache:
-      connectionIdle: 30s
+      connectionIdle: 2m
       eventServiceIdle: 2m
-      channelConfig: 30m
-      channelMembership: 30s
-      discovery: 30s
-      selection: 30s
+      channelConfig: 2m
+      channelMembership: 2m
+      discovery: 2m
+      selection: 2m
   cryptoconfig:
     path: "/tmp/fabric/crypto-config"
   BCCSP:

@@ -55,25 +55,6 @@ Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-_IMPORTANT:_ Place your license key in `.luther-license.yaml` in the project
-root directory (This is a change from previous versions, in order to support
-parallel Docker containers.).
-
-If you receive a **403 forbidden Error** while connecting, ensure that
-`.luther-license.yaml` is in the **_project root directory_**.
-
-If that doesn't fix it run
-
-```bash
-make clean
-```
-
-then run
-
-```bash
-make
-```
-
 For devs using hardware that utilizes the Apple M1 chip, you may encounter an
 issue getting the sandbox environment up and running.
 To resolve this, ensure you have [Rosetta 2](https://support.apple.com/en-us/HT211861)
@@ -108,7 +89,6 @@ To use codespaces:
   and select "New codespace".
 - The minimum machine size (2 core, 4GB RAM, 32 GB storage) is preferred.
 - Wait for initialization to complete; this will take less than 5 minutes.
-- Upload a license file to `.luther-license.yaml` in the project root directory.
 
 ### MacOS
 
