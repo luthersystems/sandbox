@@ -1,15 +1,12 @@
-
 # SPDX-License-Identifier: Apache-2.0
-version: '2.1'
-
 volumes:
   pgdata:
   walletstore:
 
 networks:
   luther.systems:
-    external:
-      name: byfn
+    name: byfn
+    external: true
 
 services:
 

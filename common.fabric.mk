@@ -21,7 +21,7 @@ DOCKER_CHOWN_USER ?= $(shell id -u ${USER}):$(shell id -g ${USER})
 
 # NETWORK_BUILDER is the entrypoint into the NETWORK_BUILDER_IMAGE for all
 # commands.
-NETWORK_BUILDER_IMAGE ?= ${ECR_HOST}/luthersystems/fabric-network-builder
+NETWORK_BUILDER_IMAGE ?= luthersystems/fabric-network-builder
 NETWORK_BUILDER_TARGET ?= docker-pull/${NETWORK_BUILDER_IMAGE}\:${NETWORK_BUILDER_VERSION}
 NETWORK_BUILDER=${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION} --chown "${DOCKER_CHOWN_USER}"
 
@@ -45,7 +45,6 @@ FABRIC_ORG ?= org1
 FABRIC_DOMAIN ?= luther.systems
 
 FABRIC_IMAGE_NAMES=peer orderer ccenv
-#FABRIC_IMAGE_NS=${ECR_HOST}/luthersystems
 FABRIC_IMAGE_NS=hyperledger
 FABRIC_IMAGE_FQNS=$(patsubst %,${FABRIC_IMAGE_NS}/fabric-%,${FABRIC_IMAGE_NAMES})
 FABRIC_CA_IMAGE_FQN=${FABRIC_IMAGE_NS}/fabric-ca
@@ -57,7 +56,7 @@ FABRIC_IMAGE_TARGETS=$(addprefix docker-pull/,${FABRIC_IMAGES})
 
 FABRIC_DOCKER_NETWORK=byfn
 
-DOCKER_FABRIC_OPTS ?=
+DOCKER_FABRIC_OPTS ?= -e SHIROCLIENT_CLIENT_DEMO_MODE=true
 
 .PHONY: default
 default: images
@@ -67,9 +66,13 @@ default: images
 images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
+.PHONY: clean-chaincodes
+clean-chaincodes:
+	rm -rf chaincodes/*.{tar.gz,id} .env
+
 .PHONY: clean
-clean:
-	rm -rf build chaincodes/*.{tar.gz,id} .env
+clean: clean-chaincodes
+	rm -rf build
 
 .PHONY: pristine
 pristine: clean clean-generated
@@ -153,7 +156,7 @@ up: generate-chaincodes .env fnb-up gateway-up
 	@
 
 .PHONY: fnb-up
-fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} channel-artifacts/genesis.block
+fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \
@@ -249,7 +252,7 @@ couchdb-down: gateway-down fnb-down
 .PHONY: oracle-down
 
 .PHONY: down
-down: oracle-down gateway-down fnb-down
+down: oracle-down gateway-down fnb-down clean-chaincodes
 
 .PHONY: fnb-down
 fnb-down: ${NETWORK_BUILDER_TARGET}
@@ -271,7 +274,7 @@ sleep-%:
 	@sleep $*
 
 .PHONY: install
-install: ${NETWORK_BUILDER_TARGET} ${CC_PATH}
+install: ${NETWORK_BUILDER_TARGET}
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \
@@ -288,7 +291,7 @@ generate-chaincodes: generate-go-chaincodes generate-ccaas-chaincodes
 	@
 
 .PHONY: generate-go-chaincodes
-generate-go-chaincodes: ${NETWORK_BUILDER_TARGET} ${CC_PATH}
+generate-go-chaincodes: ${NETWORK_BUILDER_TARGET}
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \
@@ -351,7 +354,7 @@ call_cmd-%:
 		-e SHIROCLIENT_LOG_LEVEL \
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
-		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} -v \
+		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
 			--config ${SHIROCLIENT_FABRIC_CONFIG_FAST_BASENAME}_$*.yaml \
 			--chaincode.version ${CC_VERSION}_$* \
 			--phylum.version latest \

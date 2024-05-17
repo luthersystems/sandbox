@@ -159,19 +159,10 @@ pre-push:
 
 .PHONY:
 download: ${SUBSTRATE_PLUGIN}
-	cd fabric && $(MAKE) download
 
 .PHONY: print-export-path
 print-export-path:
 	echo "export SUBSTRATEHCP_FILE=${PWD}/${SUBSTRATE_PLUGIN_PLATFORM_TARGETED}"
-
-${STATIC_PRESIGN_DUMMY}: ${LICENSE_FILE}
-	${MKDIR_P} $(dir $@)
-	./scripts/obtain-presigned.sh
-	touch $@
-
-${PRESIGNED_PATH}: ${STATIC_PRESIGN_DUMMY}
-	@
 
 ${STATIC_PLUGINS_DUMMY}: ${PRESIGNED_PATH}
 	${MKDIR_P} $(dir $@)

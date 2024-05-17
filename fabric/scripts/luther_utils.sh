@@ -178,8 +178,6 @@ generateChaincode() {
     CC_SRC_DIR=$(dirname ${CC_SRC_PATH})
     CC_PATH=${CC_SRC_DIR}/${CC_LABEL}.tar.gz
 
-    tar -C /tmp -xf ${CC_SRC_PATH}
-
     if [ "$IS_EXTERNAL" == "True" ]; then
         cat >/tmp/connection.json <<EOF
   {
@@ -192,6 +190,8 @@ EOF
 	tar -zcf /tmp/code.tar.gz -C /tmp --mtime=$TIMESTAMP connection.json
 
 	CC_TYPE="ccaas"
+    else
+        tar -C /tmp -xf ${CC_SRC_PATH}
     fi
 
     echo '{"path":"main","type":"'"${CC_TYPE}"'","label":"'"${CC_LABEL}"'"}' >/tmp/metadata.json
