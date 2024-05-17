@@ -77,12 +77,6 @@ it into your own organization to use your organization's subscription to Github
 and the feature and apply the running costs to your spending limits, or you may
 contact Luther about receiving permission to use our subscription.
 
-Codespaces are initialized ready to use for most purposes, but have some
-limitations: they cannot presently create the full many-container Substrate
-network. However, they can create and run the in-memory network, which is
-sufficient for active development of the platform and the majority of other
-uses.
-
 To use codespaces:
 
 - Select the Code pane on the repository main page, select the Codespaces tab,
@@ -212,29 +206,6 @@ make explorer-up
 
 To wipe out the pre-existing database and recreate it empty, then re-build the
 Explorer. This will reconnect it to the current network.
-
-## Build in Codespaces
-
-Run `make` to build all the services:
-
-```bash
-make
-```
-
-Run the sample application with an in-memory instance of the Luther platform:
-
-```bash
-make mem-up
-```
-
-You can now
-use `docker ps` to see the containers running (`vsc-sandbox-*` for the codespace
-and `sandbox_oracle` for the in-memory network),
-spot-check the JSON REST api with `curl -v http://localhost:8080/v1/health_check | jq .`,
-and run all tests with `make test`.
-
-When finished, `make mem-down` or `make down` will stop the network and clean up
-the containers.
 
 ## "Hello World" Application
 

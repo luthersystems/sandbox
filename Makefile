@@ -9,10 +9,6 @@ PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 
-ifndef LOCAL_WORKSPACE_FOLDER # if not in codespace
-  include ${PROJECT_REL_DIR}/common.fullnetwork.mk
-endif
-
 GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
 GO_API_PACKAGES=./api/...
 GO_PACKAGES=${GO_SERVICE_PACKAGES} ${GO_API_PACKAGES}
@@ -88,44 +84,44 @@ clean: fabricclean
 fabricclean:
 	cd fabric && $(MAKE) clean
 
+.PHONY: storage-up
+storage-up:
+	cd fabric && $(MAKE) up install init
+
+.PHONY: storage-down
+storage-down:
+	-cd fabric && $(MAKE) down
+
+.PHONY: service-up
+service-up: api oracle
+	./blockchain_compose.py local up -d
+
+.PHONY: service-down
+service-down:
+	-./blockchain_compose.py local down
+
 .PHONY: up
-up: all
-ifdef LOCAL_WORKSPACE_FOLDER # if in codespace
-	$(error Target 'up' is for a full network, not supported in codespaces. Run 'mem-up' instead.)
-endif
+up: all service-down storage-down storage-up service-up
+	@
 
 .PHONY: down
-down: mem-down explorer-down
+down: explorer-down service-down storage-down
+	@
 
-.PHONY: explorer
-explorer: explorer-up-clean
+.PHONY: init
+init:
+	-cd fabric && $(MAKE) init
 
-.PHONY: explorer-up
-explorer-up:
-	cd ${PROJECT_REL_DIR}/explorer && make up
-
-.PHONY: explorer-up-clean
-explorer-up-clean:
-	cd ${PROJECT_REL_DIR}/explorer && make up-clean
-
-.PHONY: explorer-down
-explorer-down:
-	cd ${PROJECT_REL_DIR}/explorer && make down
-
-.PHONY: explorer-clean
-explorer-clean:
-	cd ${PROJECT_REL_DIR}/explorer && make down-clean
-
-.PHONY: explorer-watch
-explorer-watch:
-	cd ${PROJECT_REL_DIR}/explorer && make watch
+.PHONY: upgrade
+upgrade: all service-down init service-up
+	@
 
 .PHONY: mem-up
 mem-up: all mem-down
 	./blockchain_compose.py mem up -d
 
 .PHONY: mem-down
-mem-down:
+mem-down: explorer-down
 	-./blockchain_compose.py mem down
 
 # citest runs unit tests and integration tests within containers, like CI.
@@ -144,6 +140,19 @@ unit-other: phylumtest
 .PHONY: unit-oracle
 unit-oracle: oracletest
 	@echo "service tests passed"
+
+# NOTE:  The `citest` target manages creating/destroying a compose network.  To
+# run tests repeatedly execute the `integration` target directly.
+.PHONY: integrationcitest
+# The `down` wouldn't execute without this syntax
+integrationcitest:
+	$(MAKE) up
+	$(MAKE) integration
+	$(MAKE) down
+
+.PHONY: integration
+integration:
+	cd tests && $(MAKE) test-docker
 
 .PHONY: repl
 repl:
@@ -171,3 +180,26 @@ ${STATIC_PLUGINS_DUMMY}: ${PRESIGNED_PATH}
 
 ${SUBSTRATE_PLUGIN}: ${STATIC_PLUGINS_DUMMY}
 	@
+
+.PHONY: explorer
+explorer: explorer-up-clean
+
+.PHONY: explorer-up
+explorer-up:
+	cd ${PROJECT_REL_DIR}/explorer && make up
+
+.PHONY: explorer-up-clean
+explorer-up-clean:
+	cd ${PROJECT_REL_DIR}/explorer && make up-clean
+
+.PHONY: explorer-down
+explorer-down:
+	cd ${PROJECT_REL_DIR}/explorer && make down
+
+.PHONY: explorer-clean
+explorer-clean:
+	cd ${PROJECT_REL_DIR}/explorer && make down-clean
+
+.PHONY: explorer-watch
+explorer-watch:
+	cd ${PROJECT_REL_DIR}/explorer && make watch
