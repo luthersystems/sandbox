@@ -18,11 +18,11 @@ BUILDENV_TAG=v0.0.84
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.203.0
+SUBSTRATE_VERSION=v2.205.0
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
-NETWORK_BUILDER_VERSION=${SUBSTRATE_VERSION}
-MARTIN_VERSION=0.1.0-SNAPSHOT
+NETWORK_BUILDER_VERSION=v0.0.2
+MARTIN_VERSION=0.1.0
 
 # A golang module proxy server can greatly help speed up docker builds but the
 # official proxy at https://proxy.golang.org only works for public modules.
@@ -41,6 +41,6 @@ GONOSUMDB ?= ${GOPRIVATE}
 
 # These variables configure the Hyperledger Fabric image versions for running
 # the full test network.
-FABRIC_IMAGE_TAG=2.5.4
-FABRIC_CA_IMAGE_TAG=1.5.7
-BASE_IMAGE_TAG=0.4.20
+FABRIC_IMAGE_TAG=2.5.9
+FABRIC_CA_IMAGE_TAG=1.5.12
+BASE_IMAGE_TAG=0.4.22

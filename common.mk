@@ -32,7 +32,17 @@ SHIROTESTER_IMAGE=luthersystems/shirotester
 MARTIN_IMAGE=luthersystems/martin
 
 UNAME := $(shell uname)
-SUBSTRATE_PLUGIN_OS=${PROJECT_REL_DIR}/build/substratehcp-$(1)-amd64-${SUBSTRATE_VERSION}
+ARCH :=  $(shell uname -m)
+
+ifeq ($(ARCH),x86_64)
+  ARCH_SUFFIX := amd64
+else ifeq ($(ARCH),aarch64)
+  ARCH_SUFFIX := arm64
+else
+  ARCH_SUFFIX := $(ARCH)
+endif
+
+SUBSTRATE_PLUGIN_OS=${PROJECT_REL_DIR}/build/substratehcp-$(1)-${ARCH_SUFFIX}-${SUBSTRATE_VERSION}
 SUBSTRATE_PLUGIN_LINUX=$(call SUBSTRATE_PLUGIN_OS,linux)
 SUBSTRATE_PLUGIN_DARWIN=$(call SUBSTRATE_PLUGIN_OS,darwin)
 SUBSTRATE_PLUGIN=${SUBSTRATE_PLUGIN_DARWIN} ${SUBSTRATE_PLUGIN_LINUX}
