@@ -128,7 +128,6 @@ func Run(config *Config) error {
 		"version":          version.Version,
 		"emulate_cc":       config.EmulateCC,
 		"listen_address":   config.ListenAddress,
-		"phylum_version":   config.PhylumVersion,
 		"phylum_path":      config.PhylumPath,
 		"gateway_endpoint": config.GatewayEndpoint,
 		"otlp_endpoint":    config.OTLPEndpoint,

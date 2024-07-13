@@ -12,15 +12,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-const envPrefix = "SANDBOX_ORACLE"
-const defaultConfig = ".sandbox-oracle"
+const (
+	envPrefix     = "SANDBOX_ORACLE"
+	defaultConfig = ".sandbox-oracle"
+)
 
 // config parameters
 const (
 	configListenAddress   = "listen-address"
 	configVerbose         = "verbose"
 	configEmulateCC       = "emulate-cc"
-	configPhylumVersion   = "phylum-version"
 	configPhylumPath      = "phylum-path"
 	configGatewayEndpoint = "gateway-endpoint"
 	configOTLPEndpoint    = "otlp-endpoint"
@@ -33,7 +34,6 @@ func getConfig() *oracle.Config {
 		ListenAddress:   myViper.GetString(configListenAddress),
 		Verbose:         myViper.GetBool(configVerbose),
 		EmulateCC:       myViper.GetBool(configEmulateCC),
-		PhylumVersion:   myViper.GetString(configPhylumVersion),
 		PhylumPath:      myViper.GetString(configPhylumPath),
 		GatewayEndpoint: myViper.GetString(configGatewayEndpoint),
 		OTLPEndpoint:    myViper.GetString(configOTLPEndpoint),
@@ -112,7 +112,6 @@ func Execute() {
 		desc string
 	}{
 		{configListenAddress, defaultConfig.ListenAddress, "Listen address"},
-		{configPhylumVersion, defaultConfig.PhylumVersion, "Phylum version for emulation"},
 		// NOTE:  The default configPhylumPath does not have the version number
 		// or build identifier substituted in because the path for the phylum
 		// file with substitutions is non-deterministic.

@@ -25,12 +25,11 @@ func TestConfig(t *testing.T) {
 		Verbose:         true,
 		EmulateCC:       true,
 		ListenAddress:   "listen-address",
-		PhylumVersion:   "phylum-version",
 		PhylumPath:      "phylum-path",
 		GatewayEndpoint: "gateway-endpoint",
 		OTLPEndpoint:    "otlp-endpoint",
 	}
-	var yamlExample = []byte(pretty(expectCfg))
+	yamlExample := []byte(pretty(expectCfg))
 	err := myViper.ReadConfig(bytes.NewBuffer(yamlExample))
 	require.NoError(t, err)
 	gotCfg := getConfig()

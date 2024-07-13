@@ -29,35 +29,6 @@ var defaultConfigs = []func() (Config, error){
 	private.WithSeed,
 }
 
-// phylumMethod describes a json-rpc method defined in the phylum's router.
-// phylumMethod contains the method name and any special configuration to use
-// instead of the default config.
-type phylumMethod struct {
-	method string
-	config []func() (Config, error)
-}
-
-var (
-	phylumCreateAccount = &phylumMethod{
-		method: "create_account",
-	}
-	phylumUpdateAccount = &phylumMethod{
-		method: "update_account",
-	}
-	phylumGetAccount = &phylumMethod{
-		method: "get_account",
-	}
-	phylumGetUserAccounts = &phylumMethod{
-		method: "get_user_accounts",
-	}
-	phylumDeleteAccount = &phylumMethod{
-		method: "delete_account",
-	}
-	phylumTransfer = &phylumMethod{
-		method: "transfer",
-	}
-)
-
 func joinConfig(base []func() (Config, error), add []Config) (conf []Config, err error) {
 	nbase := len(base)
 	conf = make([]Config, nbase+len(add))
@@ -152,24 +123,12 @@ func NewMockFrom(phylumPath string, log *logrus.Entry, r io.Reader) (*Client, er
 	return client, nil
 }
 
-func (s *Client) callMethod(ctx context.Context, m *phylumMethod, params []interface{}, out proto.Message, config []Config) (err error) {
-	configBase := m.config
-	if configBase == nil {
-		configBase = defaultConfigs
-	}
-	config, err = joinConfig(configBase, config)
-	if err != nil {
-		return err
-	}
-	err = s.sdkCall(ctx, m.method, params, out, config)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // shiroCall is a helper to make RPC calls.
 func (s *Client) sdkCall(ctx context.Context, cmd string, params interface{}, rep proto.Message, clientConfigs []Config) error {
+	clientConfigs, err := joinConfig(defaultConfigs, clientConfigs)
+	if err != nil {
+		return err
+	}
 	configs := make([]Config, 0, len(clientConfigs)+2)
 	configs = append(configs, shiroclient.WithParams(params))
 	configs = append(configs, clientConfigs...)
@@ -214,7 +173,7 @@ func (s *Client) sdkCall(ctx context.Context, cmd string, params interface{}, re
 	if err != nil {
 		s.logEntry(ctx).
 			// IMPORTANT: we cannot log this since it may contain PII.
-			//WithField("debug_json", string(resp.ResultJSON())).
+			// WithField("debug_json", string(resp.ResultJSON())).
 			WithError(err).Errorf("Shiro RPC result could not be decoded")
 		return err
 	}
@@ -279,59 +238,12 @@ func convertHealthReport(report shiroclient.HealthCheckReport) *pb.HealthCheckRe
 	}
 }
 
-// CreateAccount is an example endpoint to create a resource.
-func (s *Client) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest, config ...Config) (*pb.CreateAccountResponse, error) {
-	resp := &pb.CreateAccountResponse{}
-	err := s.callMethod(ctx, phylumCreateAccount, cmdParams(req), resp, config)
+// Call sends requests to the phlyum, and returns a response.
+func Call[K proto.Message, R proto.Message](s *Client, ctx context.Context, methodName string, req K, resp R, config ...Config) (R, error) {
+	err := s.sdkCall(ctx, methodName, cmdParams(req), resp, config)
 	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// UpdateAccount is an example endpoint to update a resource.
-func (s *Client) UpdateAccount(ctx context.Context, req *pb.UpdateAccountRequest, config ...Config) (*pb.UpdateAccountResponse, error) {
-	resp := &pb.UpdateAccountResponse{}
-	err := s.callMethod(ctx, phylumUpdateAccount, cmdParams(req), resp, config)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// GetAccount is an example query endpoint
-func (s *Client) GetAccount(ctx context.Context, req *pb.GetAccountRequest, config ...Config) (*pb.GetAccountResponse, error) {
-	resp := &pb.GetAccountResponse{}
-	err := s.callMethod(ctx, phylumGetAccount, cmdParams(req), resp, config)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *Client) GetUserAccounts(ctx context.Context, req *pb.GetUserAccountsRequest, config ...Config) (*pb.GetUserAccountsResponse, error) {
-	resp := &pb.GetUserAccountsResponse{}
-	err := s.callMethod(ctx, phylumGetUserAccounts, cmdParams(req), resp, config)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *Client) DeleteAccount(ctx context.Context, req *pb.DeleteAccountRequest, config ...Config) (*pb.DeleteAccountResponse, error) {
-	resp := &pb.DeleteAccountResponse{}
-	err := s.callMethod(ctx, phylumDeleteAccount, cmdParams(req), resp, config)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *Client) Transfer(ctx context.Context, req *pb.TransferRequest, config ...Config) (*pb.TransferResponse, error) {
-	resp := &pb.TransferResponse{}
-	err := s.callMethod(ctx, phylumTransfer, cmdParams(req), resp, config)
-	if err != nil {
-		return nil, err
+		var empty R
+		return empty, err
 	}
 	return resp, nil
 }

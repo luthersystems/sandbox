@@ -63,7 +63,6 @@ func DefaultConfig() *Config {
 		// IMPORTANT: Phylum bootstrap expects ListenAddress on :8080 for
 		// FakeAuth IDP. Only change this if you know what you're doing!
 		ListenAddress:   ":8080",
-		PhylumVersion:   "test", // FIXME DELETEME
 		PhylumPath:      "./phylum",
 		GatewayEndpoint: "http://shiroclient_gw_sandbox:8082",
 	}
@@ -71,14 +70,8 @@ func DefaultConfig() *Config {
 
 // Config configures an oracle.
 type Config struct {
-	// Verbose increases logging.
-	Verbose bool `yaml:"verbose"`
-	// EmulateCC emulates chaincode in memory (for testing).
-	EmulateCC bool `yaml:"emulate-cc"`
 	// ListenAddress is an address the oracle HTTP listens on.
 	ListenAddress string `yaml:"listen-address"`
-	// PhylumVersion is the version of the phylum.
-	PhylumVersion string `yaml:"phylum-version"`
 	// PhylumPath is the the path for the business logic.
 	PhylumPath string `yaml:"phylum-path"`
 	// GatewayEndpoint is an address to the shiroclient gateway.
@@ -86,6 +79,10 @@ type Config struct {
 	// OTLPEndpoint optionally configures OTLP tracing and sends traces to
 	// the supplied OTLP endpoint
 	OTLPEndpoint string `yaml:"otlp-endpoint"`
+	// Verbose increases logging.
+	Verbose bool `yaml:"verbose"`
+	// EmulateCC emulates chaincode in memory (for testing).
+	EmulateCC bool `yaml:"emulate-cc"`
 }
 
 // Valid validates an oracle configuration.
@@ -95,9 +92,6 @@ func (c *Config) Valid() error {
 	}
 	if c.ListenAddress == "" {
 		return fmt.Errorf("missing listen address")
-	}
-	if c.PhylumVersion == "" {
-		return fmt.Errorf("missing phylum version")
 	}
 	if c.PhylumPath == "" {
 		return fmt.Errorf("missing phylum path")
@@ -227,7 +221,7 @@ func phylumHealthCheck(ctx context.Context, orc *Oracle) []*pb.HealthCheckReport
 	sopts := orc.txConfigs(ctx)
 	ccHealth, err := orc.phylum.HealthCheck(ctx, []string{"phylum"}, sopts...)
 	if err != nil && !errors.Is(err, context.Canceled) {
-		return []*pb.HealthCheckReport{&pb.HealthCheckReport{
+		return []*pb.HealthCheckReport{{
 			ServiceName:    phylumServiceName,
 			ServiceVersion: "",
 			Timestamp:      time.Now().Format(TimestampFormat),
@@ -281,40 +275,6 @@ func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) 
 	}
 
 	return resp, nil
-}
-
-// CreateAccount is an example resource creation endpoint.
-func (orc *Oracle) CreateAccount(ctx context.Context, in *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
-	sopts := orc.txConfigs(ctx)
-	return orc.phylum.CreateAccount(ctx, in, sopts...)
-}
-
-// UpdateAccount is an example resource update endpoint.
-func (orc *Oracle) UpdateAccount(ctx context.Context, in *pb.UpdateAccountRequest) (*pb.UpdateAccountResponse, error) {
-	sopts := orc.txConfigs(ctx)
-	return orc.phylum.UpdateAccount(ctx, in, sopts...)
-}
-
-// GetAccount is an example query endpoint.
-func (orc *Oracle) GetAccount(ctx context.Context, in *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	sopts := orc.txConfigs(ctx)
-	return orc.phylum.GetAccount(ctx, in, sopts...)
-}
-
-func (orc *Oracle) GetUserAccounts(ctx context.Context, in *pb.GetUserAccountsRequest) (*pb.GetUserAccountsResponse, error) {
-	sopts := orc.txConfigs(ctx)
-	return orc.phylum.GetUserAccounts(ctx, in, sopts...)
-}
-
-func (orc *Oracle) DeleteAccount(ctx context.Context, in *pb.DeleteAccountRequest) (*pb.DeleteAccountResponse, error) {
-	sopts := orc.txConfigs(ctx)
-	return orc.phylum.DeleteAccount(ctx, in, sopts...)
-}
-
-// Transfer is an example write operation.
-func (orc *Oracle) Transfer(ctx context.Context, in *pb.TransferRequest) (*pb.TransferResponse, error) {
-	sopts := orc.txConfigs(ctx)
-	return orc.phylum.Transfer(ctx, in, sopts...)
 }
 
 // Close blocks the caller until all spawned go routines complete, then closes the phylum

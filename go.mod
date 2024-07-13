@@ -1,8 +1,6 @@
 module github.com/luthersystems/sandbox
 
-go 1.21
-
-toolchain go1.21.4
+go 1.22
 
 require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
