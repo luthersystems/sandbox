@@ -355,7 +355,7 @@ call_cmd-%:
 		-w "/tmp/fabric" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} \
-			--config ${SHIROCLIENT_FABRIC_CONFIG_FAST_BASENAME}_$*.yaml \
+			--config ${SHIROCLIENT_FABRIC_CONFIG_BASENAME}_$*.yaml \
 			--chaincode.version ${CC_VERSION}_$* \
 			--phylum.version latest \
 			call
