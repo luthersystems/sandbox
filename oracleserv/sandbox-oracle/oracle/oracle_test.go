@@ -10,6 +10,7 @@ import (
 	"io"
 	"testing"
 
+	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -97,9 +98,9 @@ func TestSnapshot(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		server, stop = newTestOracleFrom(t, snap)
 		defer stop()
-		req := &pb.HealthCheckRequest{}
+		req := &healthcheck.GetHealthCheckRequest{}
 		ctx := context.Background()
-		resp, err := server.HealthCheck(ctx, req)
+		resp, err := server.GetHealthCheck(ctx, req)
 		require.NoError(t, err)
 		require.Nil(t, resp.GetException())
 	}
@@ -129,7 +130,7 @@ func TestHealthCheck(t *testing.T) {
 	server, stop := makeTestServer(t)
 	defer stop()
 	ctx := context.Background()
-	resp, err := server.HealthCheck(ctx, &pb.HealthCheckRequest{})
+	resp, err := server.GetHealthCheck(ctx, &healthcheck.GetHealthCheckRequest{})
 	require.NoError(t, err)
 	require.Equal(t, 2, len(resp.GetReports()))
 }

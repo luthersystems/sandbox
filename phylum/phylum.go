@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	pb "github.com/luthersystems/sandbox/api/pb/v1"
+	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/mock"
 	"github.com/luthersystems/shiroclient-sdk-go/shiroclient/private"
@@ -210,7 +210,7 @@ func (s *Client) logEntry(ctx context.Context) *logrus.Entry {
 }
 
 // HealthCheck performs health check on phylum.
-func (s *Client) HealthCheck(ctx context.Context, services []string, config ...Config) (*pb.HealthCheckResponse, error) {
+func (s *Client) GetHealthCheck(ctx context.Context, services []string, config ...Config) (*healthcheck.GetHealthCheckResponse, error) {
 	resp, err := shiroclient.RemoteHealthCheck(ctx, s.rpc, services, config...)
 	if err != nil {
 		return nil, err
@@ -218,10 +218,10 @@ func (s *Client) HealthCheck(ctx context.Context, services []string, config ...C
 	return convertHealthResponse(resp), nil
 }
 
-func convertHealthResponse(health shiroclient.HealthCheck) *pb.HealthCheckResponse {
+func convertHealthResponse(health shiroclient.HealthCheck) *healthcheck.GetHealthCheckResponse {
 	reports := health.Reports()
-	healthpb := &pb.HealthCheckResponse{
-		Reports: make([]*pb.HealthCheckReport, len(reports)),
+	healthpb := &healthcheck.GetHealthCheckResponse{
+		Reports: make([]*healthcheck.HealthCheckReport, len(reports)),
 	}
 	for i, report := range reports {
 		healthpb.Reports[i] = convertHealthReport(report)
@@ -229,8 +229,8 @@ func convertHealthResponse(health shiroclient.HealthCheck) *pb.HealthCheckRespon
 	return healthpb
 }
 
-func convertHealthReport(report shiroclient.HealthCheckReport) *pb.HealthCheckReport {
-	return &pb.HealthCheckReport{
+func convertHealthReport(report shiroclient.HealthCheckReport) *healthcheck.HealthCheckReport {
+	return &healthcheck.HealthCheckReport{
 		Timestamp:      report.Timestamp(),
 		Status:         report.Status(),
 		ServiceName:    report.ServiceName(),

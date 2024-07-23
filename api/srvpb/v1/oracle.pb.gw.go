@@ -13,9 +13,10 @@ import (
 	"io"
 	"net/http"
 
+	v1_0 "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
-	"github.com/luthersystems/sandbox/api/pb/v1"
+	v1_1 "github.com/luthersystems/sandbox/api/pb/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
@@ -33,50 +34,46 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 var (
-	filter_LedgerService_HealthCheck_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_LedgerService_GetHealthCheck_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_LedgerService_HealthCheck_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.HealthCheckRequest
+func request_LedgerService_GetHealthCheck_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq v1_0.GetHealthCheckRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_LedgerService_HealthCheck_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_LedgerService_GetHealthCheck_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.HealthCheck(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetHealthCheck(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_LedgerService_HealthCheck_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.HealthCheckRequest
+func local_request_LedgerService_GetHealthCheck_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq v1_0.GetHealthCheckRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_LedgerService_HealthCheck_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_LedgerService_GetHealthCheck_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.HealthCheck(ctx, &protoReq)
+	msg, err := server.GetHealthCheck(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
 func request_LedgerService_CreateAccount_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.CreateAccountRequest
+	var protoReq v1_1.CreateAccountRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Account); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Account); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -86,14 +83,10 @@ func request_LedgerService_CreateAccount_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_LedgerService_CreateAccount_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.CreateAccountRequest
+	var protoReq v1_1.CreateAccountRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Account); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Account); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -103,14 +96,10 @@ func local_request_LedgerService_CreateAccount_0(ctx context.Context, marshaler 
 }
 
 func request_LedgerService_UpdateAccount_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.UpdateAccountRequest
+	var protoReq v1_1.UpdateAccountRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Account); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Account); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -137,14 +126,10 @@ func request_LedgerService_UpdateAccount_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_LedgerService_UpdateAccount_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.UpdateAccountRequest
+	var protoReq v1_1.UpdateAccountRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Account); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Account); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -171,7 +156,7 @@ func local_request_LedgerService_UpdateAccount_0(ctx context.Context, marshaler 
 }
 
 func request_LedgerService_DeleteAccount_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.DeleteAccountRequest
+	var protoReq v1_1.DeleteAccountRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -197,7 +182,7 @@ func request_LedgerService_DeleteAccount_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_LedgerService_DeleteAccount_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.DeleteAccountRequest
+	var protoReq v1_1.DeleteAccountRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -223,7 +208,7 @@ func local_request_LedgerService_DeleteAccount_0(ctx context.Context, marshaler 
 }
 
 func request_LedgerService_GetAccount_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.GetAccountRequest
+	var protoReq v1_1.GetAccountRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -249,7 +234,7 @@ func request_LedgerService_GetAccount_0(ctx context.Context, marshaler runtime.M
 }
 
 func local_request_LedgerService_GetAccount_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.GetAccountRequest
+	var protoReq v1_1.GetAccountRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -275,7 +260,7 @@ func local_request_LedgerService_GetAccount_0(ctx context.Context, marshaler run
 }
 
 func request_LedgerService_GetUserAccounts_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.GetUserAccountsRequest
+	var protoReq v1_1.GetUserAccountsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -301,7 +286,7 @@ func request_LedgerService_GetUserAccounts_0(ctx context.Context, marshaler runt
 }
 
 func local_request_LedgerService_GetUserAccounts_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.GetUserAccountsRequest
+	var protoReq v1_1.GetUserAccountsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -327,14 +312,10 @@ func local_request_LedgerService_GetUserAccounts_0(ctx context.Context, marshale
 }
 
 func request_LedgerService_Transfer_0(ctx context.Context, marshaler runtime.Marshaler, client LedgerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.TransferRequest
+	var protoReq v1_1.TransferRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -344,14 +325,10 @@ func request_LedgerService_Transfer_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func local_request_LedgerService_Transfer_0(ctx context.Context, marshaler runtime.Marshaler, server LedgerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.TransferRequest
+	var protoReq v1_1.TransferRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -366,7 +343,7 @@ func local_request_LedgerService_Transfer_0(ctx context.Context, marshaler runti
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterLedgerServiceHandlerFromEndpoint instead.
 func RegisterLedgerServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server LedgerServiceServer) error {
 
-	mux.Handle("GET", pattern_LedgerService_HealthCheck_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LedgerService_GetHealthCheck_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -374,12 +351,12 @@ func RegisterLedgerServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.LedgerService/HealthCheck", runtime.WithHTTPPathPattern("/v1/health_check"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.LedgerService/GetHealthCheck", runtime.WithHTTPPathPattern("/v1/health_check"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_LedgerService_HealthCheck_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_LedgerService_GetHealthCheck_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -387,7 +364,7 @@ func RegisterLedgerServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 			return
 		}
 
-		forward_LedgerService_HealthCheck_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LedgerService_GetHealthCheck_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -547,21 +524,21 @@ func RegisterLedgerServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 // RegisterLedgerServiceHandlerFromEndpoint is same as RegisterLedgerServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterLedgerServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
-	conn, err := grpc.DialContext(ctx, endpoint, opts...)
+	conn, err := grpc.NewClient(endpoint, opts...)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		if err != nil {
 			if cerr := conn.Close(); cerr != nil {
-				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
+				grpclog.Errorf("Failed to close conn to %s: %v", endpoint, cerr)
 			}
 			return
 		}
 		go func() {
 			<-ctx.Done()
 			if cerr := conn.Close(); cerr != nil {
-				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
+				grpclog.Errorf("Failed to close conn to %s: %v", endpoint, cerr)
 			}
 		}()
 	}()
@@ -582,25 +559,25 @@ func RegisterLedgerServiceHandler(ctx context.Context, mux *runtime.ServeMux, co
 // "LedgerServiceClient" to call the correct interceptors.
 func RegisterLedgerServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client LedgerServiceClient) error {
 
-	mux.Handle("GET", pattern_LedgerService_HealthCheck_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LedgerService_GetHealthCheck_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.LedgerService/HealthCheck", runtime.WithHTTPPathPattern("/v1/health_check"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.LedgerService/GetHealthCheck", runtime.WithHTTPPathPattern("/v1/health_check"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_LedgerService_HealthCheck_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_LedgerService_GetHealthCheck_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_LedgerService_HealthCheck_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LedgerService_GetHealthCheck_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -740,7 +717,7 @@ func RegisterLedgerServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_LedgerService_HealthCheck_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "health_check"}, ""))
+	pattern_LedgerService_GetHealthCheck_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "health_check"}, ""))
 
 	pattern_LedgerService_CreateAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "accounts"}, ""))
 
@@ -756,7 +733,7 @@ var (
 )
 
 var (
-	forward_LedgerService_HealthCheck_0 = runtime.ForwardResponseMessage
+	forward_LedgerService_GetHealthCheck_0 = runtime.ForwardResponseMessage
 
 	forward_LedgerService_CreateAccount_0 = runtime.ForwardResponseMessage
 

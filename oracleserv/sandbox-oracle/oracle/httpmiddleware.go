@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/grpc-ecosystem/grpc-gateway/utilities"
-	pb "github.com/luthersystems/sandbox/api/pb/v1"
+	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/midware"
@@ -50,18 +50,18 @@ func addServerHeader() midware.Middleware {
 func healthCheckHandler(oracle *Oracle, client srv.LedgerServiceClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		sendResponse := func(resp *pb.HealthCheckResponse, responseCode int) {
+		sendResponse := func(resp *healthcheck.GetHealthCheckResponse, responseCode int) {
 			err := writeProtoHTTP(w, responseCode, resp)
 			if err != nil {
 				oracle.log(ctx).WithError(err).Errorf("health handler response error")
 			}
 		}
-		exceptionf := func(format string, v ...interface{}) *pb.HealthCheckResponse {
+		exceptionf := func(format string, v ...interface{}) *healthcheck.GetHealthCheckResponse {
 			ex := svcerr.BusinessException(ctx, fmt.Sprintf(format, v...))
-			return &pb.HealthCheckResponse{Exception: ex}
+			return &healthcheck.GetHealthCheckResponse{Exception: ex}
 		}
 
-		reqProto := &pb.HealthCheckRequest{}
+		reqProto := &healthcheck.GetHealthCheckRequest{}
 		if err := r.ParseForm(); err != nil {
 			sendResponse(exceptionf("invalid request: %s", err), http.StatusBadRequest)
 			return
@@ -72,7 +72,7 @@ func healthCheckHandler(oracle *Oracle, client srv.LedgerServiceClient) http.Han
 			return
 		}
 
-		resp, err := client.HealthCheck(ctx, reqProto)
+		resp, err := client.GetHealthCheck(ctx, reqProto)
 		if err != nil || len(resp.GetReports()) == 0 {
 			switch ctx.Err() {
 			case context.Canceled:
@@ -84,9 +84,9 @@ func healthCheckHandler(oracle *Oracle, client srv.LedgerServiceClient) http.Han
 			default:
 				oracle.log(ctx).WithError(err).Errorf("missing processor client healthcheck response")
 			}
-			resp = &pb.HealthCheckResponse{
-				Reports: []*pb.HealthCheckReport{
-					&pb.HealthCheckReport{
+			resp = &healthcheck.GetHealthCheckResponse{
+				Reports: []*healthcheck.HealthCheckReport{
+					{
 						ServiceName:    oracleServiceName,
 						ServiceVersion: version.Version,
 						Timestamp:      time.Now().Format(TimestampFormat),

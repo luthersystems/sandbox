@@ -1,9 +1,8 @@
-version: v1
+version: v2
 lint:
   use:
     - DEFAULT
-  ignore:
-    - common/
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/grpc-ecosystem/grpc-gateway
+  - buf.build/luthersystems/protos

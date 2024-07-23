@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/luthersystems/sandbox/api/pb/v1"
+	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
 	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/sandbox/phylum"
@@ -217,11 +217,11 @@ func txConfigs() func(context.Context, ...shiroclient.Config) []shiroclient.Conf
 	}
 }
 
-func phylumHealthCheck(ctx context.Context, orc *Oracle) []*pb.HealthCheckReport {
+func phylumHealthCheck(ctx context.Context, orc *Oracle) []*healthcheck.HealthCheckReport {
 	sopts := orc.txConfigs(ctx)
-	ccHealth, err := orc.phylum.HealthCheck(ctx, []string{"phylum"}, sopts...)
+	ccHealth, err := orc.phylum.GetHealthCheck(ctx, []string{"phylum"}, sopts...)
 	if err != nil && !errors.Is(err, context.Canceled) {
-		return []*pb.HealthCheckReport{{
+		return []*healthcheck.HealthCheckReport{{
 			ServiceName:    phylumServiceName,
 			ServiceVersion: "",
 			Timestamp:      time.Now().Format(TimestampFormat),
@@ -241,13 +241,13 @@ func phylumHealthCheck(ctx context.Context, orc *Oracle) []*pb.HealthCheckReport
 	return reports
 }
 
-// HealthCheck checks this service and all dependent services to construct a
+// GetHealthCheck checks this service and all dependent services to construct a
 // health report. Returns a grpc error code if a service is down.
-func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
+func (orc *Oracle) GetHealthCheck(ctx context.Context, req *healthcheck.GetHealthCheckRequest) (*healthcheck.GetHealthCheckResponse, error) {
 	// No ACL: Open to everyone
 	healthy := true
-	var reports []*pb.HealthCheckReport
-	if !req.GetOracleOnly() {
+	var reports []*healthcheck.HealthCheckReport
+	if !req.GetHttpOnly() {
 		reports = phylumHealthCheck(ctx, orc)
 		for _, report := range reports {
 			if !strings.EqualFold(report.GetStatus(), "UP") {
@@ -256,13 +256,13 @@ func (orc *Oracle) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) 
 			}
 		}
 	}
-	reports = append(reports, &pb.HealthCheckReport{
+	reports = append(reports, &healthcheck.HealthCheckReport{
 		ServiceName:    oracleServiceName,
 		ServiceVersion: version.Version,
 		Timestamp:      time.Now().Format(TimestampFormat),
 		Status:         "UP",
 	})
-	resp := &pb.HealthCheckResponse{
+	resp := &healthcheck.GetHealthCheckResponse{
 		Reports: reports,
 	}
 	if !healthy {

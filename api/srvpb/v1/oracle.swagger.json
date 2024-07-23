@@ -33,25 +33,25 @@
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -64,13 +64,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -132,25 +132,25 @@
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -163,13 +163,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -204,25 +204,25 @@
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -235,13 +235,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -278,25 +278,25 @@
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -309,13 +309,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -343,36 +343,36 @@
     "/v1/health_check": {
       "get": {
         "summary": "Check the health of the service. This is used by load balancers to check service health.",
-        "operationId": "LedgerService_HealthCheck",
+        "operationId": "LedgerService_GetHealthCheck",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1HealthCheckResponse"
+              "$ref": "#/definitions/v1GetHealthCheckResponse"
             }
           },
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -385,13 +385,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -403,8 +403,8 @@
         },
         "parameters": [
           {
-            "name": "oracleOnly",
-            "description": "Skip the chaincode healthcheck",
+            "name": "httpOnly",
+            "description": "Check only the http service",
             "in": "query",
             "required": false,
             "type": "boolean"
@@ -429,25 +429,25 @@
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -460,13 +460,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -506,25 +506,25 @@
           "400": {
             "description": "Bad request determined by business logic",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "401": {
             "description": "Authorization failed",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "403": {
             "description": "Permission denied",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "404": {
             "description": "Missing resource",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "405": {
@@ -537,13 +537,13 @@
           "500": {
             "description": "Unexpected internal server error",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "503": {
             "description": "Service not available",
             "schema": {
-              "$ref": "#/definitions/commonExceptionResponse"
+              "$ref": "#/definitions/v1ExceptionResponse"
             }
           },
           "default": {
@@ -568,58 +568,6 @@
     }
   },
   "definitions": {
-    "commonException": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "UUID for exception."
-        },
-        "type": {
-          "$ref": "#/definitions/commonExceptionType",
-          "description": "Type of exception."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp for when the exception occurred (RFC3339)."
-        },
-        "description": {
-          "type": "string",
-          "description": "Human readable description of exception."
-        },
-        "exceptionMetadata": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Additional metadata about the exception."
-        }
-      },
-      "description": "General message for exceptions."
-    },
-    "commonExceptionResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/commonException",
-          "description": "An exception if an error occurred during processing request."
-        }
-      },
-      "description": "Exception messages."
-    },
-    "commonExceptionType": {
-      "type": "string",
-      "enum": [
-        "INVALID_TYPE",
-        "BUSINESS",
-        "SERVICE_NOT_AVAILABLE",
-        "INFRASTRUCTURE",
-        "UNEXPECTED",
-        "SECURITY_VIOLATION"
-      ],
-      "default": "INVALID_TYPE",
-      "description": "Type of exception.\n\n - INVALID_TYPE: Default for no exception.\n - BUSINESS: Business logic error.\n - SERVICE_NOT_AVAILABLE: A service was unavailable.\n - INFRASTRUCTURE: Infrastructure was down.\n - UNEXPECTED: Catch-all for all other types.\n - SECURITY_VIOLATION: Security related error."
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -675,7 +623,7 @@
       "type": "object",
       "properties": {
         "exception": {
-          "$ref": "#/definitions/commonException"
+          "$ref": "#/definitions/v1Exception"
         }
       }
     },
@@ -683,26 +631,96 @@
       "type": "object",
       "properties": {
         "exception": {
-          "$ref": "#/definitions/commonException"
+          "$ref": "#/definitions/v1Exception"
         }
       }
+    },
+    "v1Exception": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID for exception."
+        },
+        "type": {
+          "$ref": "#/definitions/v1ExceptionType",
+          "description": "Type of exception."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp for when the exception occurred (RFC3339)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human readable description of exception."
+        },
+        "exceptionMetadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional metadata about the exception."
+        }
+      },
+      "description": "General message for exceptions."
+    },
+    "v1ExceptionResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/v1Exception",
+          "description": "An exception if an error occurred during processing request."
+        }
+      },
+      "description": "Exception messages."
+    },
+    "v1ExceptionType": {
+      "type": "string",
+      "enum": [
+        "INVALID_TYPE",
+        "BUSINESS",
+        "SERVICE_NOT_AVAILABLE",
+        "INFRASTRUCTURE",
+        "UNEXPECTED",
+        "SECURITY_VIOLATION"
+      ],
+      "default": "INVALID_TYPE",
+      "description": "Type of exception.\n\n - INVALID_TYPE: Default for no exception.\n - BUSINESS: Business logic error.\n - SERVICE_NOT_AVAILABLE: A service was unavailable.\n - INFRASTRUCTURE: Infrastructure was down.\n - UNEXPECTED: Catch-all for all other types.\n - SECURITY_VIOLATION: Security related error."
     },
     "v1GetAccountResponse": {
       "type": "object",
       "properties": {
         "exception": {
-          "$ref": "#/definitions/commonException"
+          "$ref": "#/definitions/v1Exception"
         },
         "account": {
           "$ref": "#/definitions/v1Account"
         }
       }
     },
+    "v1GetHealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1HealthCheckReport"
+          },
+          "description": "The status of the relevant sub services."
+        },
+        "exception": {
+          "$ref": "#/definitions/v1Exception",
+          "description": "An exception if an error occurred during processing request."
+        }
+      },
+      "description": "Health status of services."
+    },
     "v1GetUserAccountsResponse": {
       "type": "object",
       "properties": {
         "exception": {
-          "$ref": "#/definitions/commonException"
+          "$ref": "#/definitions/v1Exception"
         },
         "accounts": {
           "type": "array",
@@ -735,24 +753,6 @@
       },
       "description": "Health check status of an individual service."
     },
-    "v1HealthCheckResponse": {
-      "type": "object",
-      "properties": {
-        "reports": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1HealthCheckReport"
-          },
-          "description": "The status of the relevant sub services."
-        },
-        "exception": {
-          "$ref": "#/definitions/commonException",
-          "description": "An exception if an error occurred during processing request."
-        }
-      },
-      "description": "Health status of services."
-    },
     "v1TransferRequest": {
       "type": "object",
       "properties": {
@@ -776,7 +776,7 @@
       "type": "object",
       "properties": {
         "exception": {
-          "$ref": "#/definitions/commonException"
+          "$ref": "#/definitions/v1Exception"
         }
       }
     },
@@ -784,7 +784,7 @@
       "type": "object",
       "properties": {
         "exception": {
-          "$ref": "#/definitions/commonException"
+          "$ref": "#/definitions/v1Exception"
         }
       }
     }
