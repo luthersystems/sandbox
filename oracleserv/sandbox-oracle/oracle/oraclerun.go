@@ -153,9 +153,7 @@ func Run(config *Config) error {
 	}()
 
 	// Create a grpc client which connects to grpcAddr
-	dialctx, dialcancel := context.WithDeadline(ctx, time.Now().Add(time.Second))
-	defer dialcancel()
-	grpcConn, err := grpc.DialContext(dialctx, "unix://"+grpcAddr,
+	grpcConn, err := grpc.NewClient("unix://"+grpcAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(
 			grpc_prometheus.UnaryClientInterceptor)))

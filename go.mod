@@ -3,12 +3,12 @@ module github.com/luthersystems/sandbox
 go 1.22
 
 require (
-	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.34.2-20240723224916-b19f2105b224.2
+	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.34.2-20240723225114-9e2ac79af3a8.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
 	github.com/luthersystems/shiroclient-sdk-go v0.8.0
-	github.com/luthersystems/svc v0.13.3-0.20240723200522-cf97152dbd02
+	github.com/luthersystems/svc v0.14.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.1.1

@@ -1,7 +1,7 @@
 ARG BUILD_IMAGE
 ARG SERVICE_BASE_IMAGE
 
-FROM $BUILD_IMAGE as build
+FROM $BUILD_IMAGE AS build
 
 COPY . /src
 WORKDIR /src
@@ -13,7 +13,7 @@ ARG GONOSUMDB=""
 ARG GOPROXY=""
 RUN ["/src/scripts/build.sh"]
 
-FROM $SERVICE_BASE_IMAGE as prod
+FROM $SERVICE_BASE_IMAGE AS prod
 
 COPY --from=build /src/app /opt/app
 

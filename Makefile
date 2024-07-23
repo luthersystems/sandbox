@@ -124,9 +124,9 @@ mem-up: all mem-down
 mem-down: explorer-down
 	-./blockchain_compose.py mem down
 
-# citest runs unit tests and integration tests within containers, like CI.
+# citest runs all tests within containers, as in CI.
 .PHONY: citest
-citest: plugin unit
+citest: plugin unit integrationcitest
 	@
 
 .PHONY: unit
