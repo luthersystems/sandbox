@@ -7,7 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle"
+	portal "github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle"
+	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle/oracle"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -48,7 +49,7 @@ var RootCmd = &cobra.Command{
 Sandbox oracle.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := oracle.Run(getConfig())
+		err := portal.Run(getConfig())
 		if err != nil {
 			log.Printf("error: %v", err)
 			os.Exit(1)
@@ -93,8 +94,10 @@ func Execute() {
 
 	// Define global flags relevant to all subcommands and bind them to
 	// the viper configuration chaincode setttings:
+	cfg := &oracle.Config{}
+	cfg.SetDefaults()
 
-	defaultConfig := oracle.DefaultConfig()
+	defaultConfig := cfg
 
 	intArgs := []struct {
 		flag string

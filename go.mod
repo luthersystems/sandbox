@@ -7,7 +7,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
-	github.com/luthersystems/shiroclient-sdk-go v0.8.0
+	github.com/luthersystems/shiroclient-sdk-go v0.10.1-0.20240724001858-cf5928a51a3d
 	github.com/luthersystems/svc v0.14.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3

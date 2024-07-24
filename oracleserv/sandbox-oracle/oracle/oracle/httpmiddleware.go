@@ -1,4 +1,4 @@
-// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+// Copyright © 2024 Luther Systems, Ltd. All right reserved.
 
 /*
 Package oracle defines a simple system for http middleware built around
@@ -23,8 +23,6 @@ import (
 	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
-	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
 	"github.com/luthersystems/svc/midware"
 	"github.com/luthersystems/svc/svcerr"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -33,13 +31,13 @@ import (
 
 // addServerHeader includes the version of the oracle within the Server HTTP
 // response header.
-func addServerHeader() midware.Middleware {
+func (orc *Oracle) addServerHeader() midware.Middleware {
 	return midware.ServerResponseHeader(
-		midware.ServerFixed(oracleServiceName, version.Version),
+		midware.ServerFixed(orc.serviceName, orc.version),
 		func() string {
-			cachedPhylumVersion := getLastPhylumVersion()
+			cachedPhylumVersion := orc.getLastPhylumVersion()
 			if cachedPhylumVersion != "" {
-				return fmt.Sprintf("%s/%s", phylumServiceName, cachedPhylumVersion)
+				return fmt.Sprintf("%s/%s", orc.phylumServiceName, cachedPhylumVersion)
 			}
 			return ""
 		})
@@ -47,13 +45,13 @@ func addServerHeader() midware.Middleware {
 
 // healthCheckHandler intercepts the healthcheck endpoint to return 503 on
 // error.
-func healthCheckHandler(oracle *Oracle, client srv.LedgerServiceClient) http.Handler {
+func (orc *Oracle) healthCheckHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		sendResponse := func(resp *healthcheck.GetHealthCheckResponse, responseCode int) {
 			err := writeProtoHTTP(w, responseCode, resp)
 			if err != nil {
-				oracle.log(ctx).WithError(err).Errorf("health handler response error")
+				orc.log(ctx).WithError(err).Errorf("health handler response error")
 			}
 		}
 		exceptionf := func(format string, v ...interface{}) *healthcheck.GetHealthCheckResponse {
@@ -72,24 +70,24 @@ func healthCheckHandler(oracle *Oracle, client srv.LedgerServiceClient) http.Han
 			return
 		}
 
-		resp, err := client.GetHealthCheck(ctx, reqProto)
+		resp, err := orc.GetHealthCheck(ctx, reqProto)
 		if err != nil || len(resp.GetReports()) == 0 {
 			switch ctx.Err() {
 			case context.Canceled:
-				oracle.log(ctx).Infof("healthcheck: context canceled")
+				orc.log(ctx).Infof("healthcheck: context canceled")
 				// nothing more to do
 				return
 			case context.DeadlineExceeded:
-				oracle.log(ctx).WithError(err).Errorf("context deadline")
+				orc.log(ctx).WithError(err).Errorf("context deadline")
 			default:
-				oracle.log(ctx).WithError(err).Errorf("missing processor client healthcheck response")
+				orc.log(ctx).WithError(err).Errorf("missing processor client healthcheck response")
 			}
 			resp = &healthcheck.GetHealthCheckResponse{
 				Reports: []*healthcheck.HealthCheckReport{
 					{
-						ServiceName:    oracleServiceName,
-						ServiceVersion: version.Version,
-						Timestamp:      time.Now().Format(TimestampFormat),
+						ServiceName:    orc.serviceName,
+						ServiceVersion: orc.version,
+						Timestamp:      time.Now().Format(timestampFormat),
 						Status:         "DOWN",
 					},
 				},

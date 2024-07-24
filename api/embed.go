@@ -17,9 +17,9 @@ import (
 //go:embed srvpb/*/*.swagger.json
 var swaggerJSON embed.FS
 
-// HTTPHandler returns an endpoint handler that writes the specified swagger
+// httpHandler returns an endpoint handler that writes the specified swagger
 // service definition to w.
-func HTTPHandler(svc string) (http.Handler, error) {
+func httpHandler(svc string) (http.Handler, error) {
 	b, err := fs.ReadFile(swaggerJSON, string("srvpb/"+svc+".swagger.json"))
 	if err != nil {
 		return nil, err
@@ -28,6 +28,15 @@ func HTTPHandler(svc string) (http.Handler, error) {
 		return nil, fmt.Errorf("document does not contain a valid json object")
 	}
 	return svcHandler(b), nil
+}
+
+// SwaggerHandlerOrPanic
+func SwaggerHandlerOrPanic(svc string) http.Handler {
+	if h, err := httpHandler(svc); err != nil {
+		panic(err)
+	} else {
+		return h
+	}
 }
 
 type svcHandler []byte
