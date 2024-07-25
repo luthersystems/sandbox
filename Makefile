@@ -168,7 +168,7 @@ download: ${SUBSTRATE_PLUGIN}
 print-export-path:
 	@echo "export SUBSTRATEHCP_FILE=${SUBSTRATEHCP_FILE}"
 
-${STATIC_PLUGINS_DUMMY}: ${PRESIGNED_PATH}
+${STATIC_PLUGINS_DUMMY}:
 	${MKDIR_P} $(dir $@)
 	./scripts/obtain-plugin.sh
 	touch $@
