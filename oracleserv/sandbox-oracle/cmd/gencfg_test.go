@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle/oracle"
+	"github.com/luthersystems/svc/oracle"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )

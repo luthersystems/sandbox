@@ -10,7 +10,7 @@ import (
 
 	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle/oracle"
+	"github.com/luthersystems/svc/oracle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
