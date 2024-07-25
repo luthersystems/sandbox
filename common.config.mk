@@ -9,7 +9,7 @@
 # artifacts created during the build process.
 PROJECT=sandbox
 VERSION=0.1.0-SNAPSHOT
-SERVICE_DIR=oracleserv/sandbox-oracle
+SERVICE_DIR=portal
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.

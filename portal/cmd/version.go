@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
+	"github.com/luthersystems/sandbox/portal/version"
 )
 
 func init() {

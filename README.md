@@ -27,7 +27,7 @@ that should not be modified.
          |        Middleware API        |       api/swagger/oracle.swagger.json
          +--------------+---------------+
          |  Middleware Oracle Service   |
-         |  oracleserv/sandbox-oracle/  |
+         |             portal/          |
          +------------------+-----------+
                             |
                    JSON-RPC |
@@ -246,27 +246,27 @@ Overview of the directory structure
 
 ```asciiart
 build/:
-	Temporary build artifacts (do not check into git).
+ Temporary build artifacts (do not check into git).
 common.config.mk:
-	User-defined settings & overrides across the project.
+ User-defined settings & overrides across the project.
 api/:
-	API specification and artifacts. See README.
+ API specification and artifacts. See README.
 compose/:
-	Configuration for docker compose networks that are brought up during
-	testing. These configurations are used by the existing Make targets
-	and `blockchain_compose.py`.
+ Configuration for docker compose networks that are brought up during
+ testing. These configurations are used by the existing Make targets
+ and `blockchain_compose.py`.
 fabric/:
-	Configuration and scripts to launch a fabric network locally. Not used in
+ Configuration and scripts to launch a fabric network locally. Not used in
     codespaces.
-oracleserv/sandbox-oracle/:
-	The oracle service responsible for serving the REST/JSON APIs and
-	communicating with other microservices.
+portal/:
+ The portal service responsible for serving the REST/JSON APIs and
+ communicating with other microservices.
 phylum/:
-	Business logic that is executed "on-chain" using the platform (substrate).
+ Business logic that is executed "on-chain" using the platform (substrate).
 scripts/:
-	Helper scripts for the build process.
+ Helper scripts for the build process.
 tests/:
-	End-to-end API tests that use martin.
+ End-to-end API tests that use martin.
 ```
 
 ### Developing the application
@@ -278,7 +278,7 @@ definitions by reading the sandbox API's [documentation](api/).
 The application API is served by the "oracle", which interfaces with the Luther
 platform. Learn more about the design of the oracle and how to extend its
 functionality by reading the sandbox oracle's
-[documentation](oracleserv/sandbox-oracle/).
+[documentation](portal/).
 
 The oracle interacts with the core business logic that is defined by the
 "phylum", [elps](https://github.com/luthersystems/elps) code that defines an
@@ -297,7 +297,7 @@ There are 3 main types of tests in this project:
 2. Oracle _functional_ tests. These tests exercise API endpoints and their
    connectivity to the phylum application layer. More information about writing
    and running functional tests can be found in the oracle
-   [documentation](oracleserv/sandbox-oracle/).
+   [documentation](portal/).
 
 3. End-To-End _integration_ tests. These tests use the `martin` tool. These
    tests exercise realistic end-user functionality of the oracle REST/JSON APIs

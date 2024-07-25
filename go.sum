@@ -184,6 +184,8 @@ github.com/luthersystems/svc v0.14.0 h1:qOZ4ye1U5EIvJ9kTnGlsNOMmVjo8198Z5kZc6jd5
 github.com/luthersystems/svc v0.14.0/go.mod h1:kMLxn3pZ9vXFYnwCR3BRhxN+l/3Y11EW88pO6FADzq4=
 github.com/luthersystems/svc v0.14.1-0.20240725000506-6b3d2ecc1f0d h1:X1k4uZ8tgrhdCShzFY6qaytREGxpEiI1KcN6HiiKcGc=
 github.com/luthersystems/svc v0.14.1-0.20240725000506-6b3d2ecc1f0d/go.mod h1:/26rs+4Ketm7KcD1F5hHC+4E3/fOZZc4ppn9SZpm69Y=
+github.com/luthersystems/svc v0.14.1-0.20240725001828-058164744dd0 h1:zscNY38HhxjBQpwHEYQoGg+2DGGu03HT6Dhd0WebRVw=
+github.com/luthersystems/svc v0.14.1-0.20240725001828-058164744dd0/go.mod h1:/26rs+4Ketm7KcD1F5hHC+4E3/fOZZc4ppn9SZpm69Y=
 github.com/magiconair/properties v1.8.1 h1:ZC2Vc7/ZFkGmsVC9KvOjumD+G5lXy2RtTKyzRKO2BQ4=
 github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=

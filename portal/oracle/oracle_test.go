@@ -15,9 +15,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	phylumRelPath = "../../phylum"
+)
+
 func makeTestServerFrom(t *testing.T, bytes []byte) (*portal, func()) {
 	t.Helper()
-	orc, stop := oracle.NewTestOracleFrom(t, bytes)
+	orc, stop := oracle.NewTestOracleFrom(t, phylumRelPath, bytes)
 	return &portal{orc: orc}, stop
 }
 

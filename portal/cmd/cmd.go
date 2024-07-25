@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	portal "github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/oracle"
+	portal "github.com/luthersystems/sandbox/portal/oracle"
 	"github.com/luthersystems/svc/oracle"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

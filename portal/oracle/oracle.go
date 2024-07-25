@@ -10,7 +10,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/luthersystems/sandbox/api"
 	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/version"
+	"github.com/luthersystems/sandbox/portal/version"
 	"github.com/luthersystems/svc/oracle"
 	"google.golang.org/grpc"
 )

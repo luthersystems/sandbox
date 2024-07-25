@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/luthersystems/sandbox/oracleserv/sandbox-oracle/cmd"
+	"github.com/luthersystems/sandbox/portal/cmd"
 )
 
 func main() {
