@@ -16,9 +16,5 @@ jobs:
         uses: golangci/golangci-lint-action@v4
         with:
           version: v1.59
-      - name: Set license file
-        run: echo $LUTHER_LICENSE | base64 -d > .luther-license.yaml
-        env:
-          LUTHER_LICENSE: ${{ secrets.LUTHER_LICENSE }}
       - name: Run CI tests
         run: script -q -e -c "make citest"
