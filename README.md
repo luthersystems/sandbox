@@ -55,21 +55,6 @@ Check out the [docs](https://docs.luthersystems.com).
 
 ## Getting Started
 
-For devs using hardware that utilizes the Apple M1 chip, you may encounter an
-issue getting the sandbox environment up and running.
-To resolve this, ensure you have [Rosetta 2](https://support.apple.com/en-us/HT211861)
-installed on your computer.
-This can be done either running this command here:
-
-```bash
-softwareupdate --install-rosetta
-```
-
-or by installing any software that won't naturally run on the M1 chip (e.g. Zoom) and should appear
-as an additional prompt during the installation process.
-
-Ensure you have the [build dependencies and system requirements](https://docs.luthersystems.com/luther/application/start/local-system-requirements).
-
 ### Codespaces
 
 This repository can be used in the cloud using Github Codespaces. You may fork
