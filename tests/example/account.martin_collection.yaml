@@ -6,6 +6,9 @@ tests:
     - name: "Create Account 1"
       method: POST
       path: "v1/accounts"
+      headers:
+          - key: "x-profile-request"
+            value: "1"
       body: |
           {
             "account_id": "{{ACCT1}}",

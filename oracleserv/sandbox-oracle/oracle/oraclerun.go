@@ -40,6 +40,7 @@ var gatewayForwardedHeaders = [...]string{
 	"X-Forwarded-User-Agent",
 	"Referer",
 	HeaderReqID,
+	profilingHeader,
 }
 
 // getLastPhylumVersion retrieves the last set phylum version and is concurrency safe.

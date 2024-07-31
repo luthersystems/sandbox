@@ -193,7 +193,10 @@ func New(config *Config, opts ...Option) (*Oracle, error) {
 	oracle.txConfigs = txConfigs()
 	traceOpts := []opttrace.Option{}
 	if config.OTLPEndpoint != "" {
-		traceOpts = append(traceOpts, opttrace.WithOTLPExporter(config.OTLPEndpoint))
+		traceOpts = append(traceOpts,
+			opttrace.WithOTLPExporter(config.OTLPEndpoint),
+			opttrace.WithSampler(HeaderControlSampler()),
+		)
 	}
 	t, err := opttrace.New(context.Background(), "oracle", traceOpts...)
 	if err != nil {
