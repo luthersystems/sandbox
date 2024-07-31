@@ -181,6 +181,25 @@ SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
 CHAINCODE_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
 ```
 
+#### ELPS trace spans
+
+Phylum endpoints defined with `defendpoint` will automatically receive a span
+named after the endpoint.  Other functions in the phylum can be traced by adding
+a special ELPS doc keyword:
+
+```lisp
+(defun trace-this ()
+  "@trace"
+  (slow-function1)
+  (slow-function2))
+```
+
+Custom span names are also supported as follows:
+
+```
+"@trace{ custom span name }"
+```
+
 ### Run Blockchain Explorer
 
 To examine a graphical UI for the chaincodee transactions and blocks and look at
