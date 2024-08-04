@@ -141,30 +141,30 @@ func (c *GatewayConfig) serverTLSCertPath() string {
 	return fmt.Sprintf("%s/peers/%s/tls/ca.crt", c.cryptoPath(), c.gatewayPeer())
 }
 
-func (c *GatewayConfig) newGrpcConnection() *grpc.ClientConn {
+func (c *GatewayConfig) newGrpcConnection() (*grpc.ClientConn, error) {
 	certificatePEM, err := os.ReadFile(c.serverTLSCertPath())
 	if err != nil {
-		panic(fmt.Errorf("failed to read server TLS certifcate file: %w", err))
+		return nil, fmt.Errorf("failed to read server TLS certifcate file: %w", err)
 	}
 
 	clientCertPEM, err := os.ReadFile(c.clientTLSCertPath())
 	if err != nil {
-		panic(fmt.Errorf("failed to read client TLS certificate file: %w", err))
+		return nil, fmt.Errorf("failed to read client TLS certificate file: %w", err)
 	}
 
 	clientKeyPEM, err := os.ReadFile(c.clientTLSKeyPath())
 	if err != nil {
-		panic(fmt.Errorf("failed to read client TLS key file: %w", err))
+		return nil, fmt.Errorf("failed to read client TLS key file: %w", err)
 	}
 
 	clientCACertPEM, err := os.ReadFile(c.clientTLSCACertPath())
 	if err != nil {
-		panic(fmt.Errorf("failed to read client TLS CA certificate file: %w", err))
+		return nil, fmt.Errorf("failed to read client TLS CA certificate file: %w", err)
 	}
 
 	clientCertificate, err := tls.X509KeyPair(clientCertPEM, clientKeyPEM)
 	if err != nil {
-		panic(fmt.Errorf("failed to load client certificate and key: %w", err))
+		return nil, fmt.Errorf("failed to load client certificate and key: %w", err)
 	}
 
 	certPool := x509.NewCertPool()
@@ -183,10 +183,10 @@ func (c *GatewayConfig) newGrpcConnection() *grpc.ClientConn {
 
 	connection, err := grpc.NewClient(c.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
 	if err != nil {
-		panic(fmt.Errorf("failed to create gRPC connection: %w", err))
+		return nil, fmt.Errorf("failed to create gRPC connection: %w", err)
 	}
 
-	return connection
+	return connection, nil
 }
 
 // newIdentity creates a client identity for this Gateway connection using an X.509 certificate.
@@ -263,12 +263,15 @@ func hashCert(certFilePath string) ([]byte, error) {
 	return clientCertHash[:], nil
 }
 
+// Callback represents a callback function.
+type Callback func(string, json.RawMessage) error
+
 type eventBus struct {
 	cfg              *GatewayConfig
 	clientConnection *grpc.ClientConn
 	network          *client.Network
 	gateway          *client.Gateway
-	respCallback     func(json.RawMessage) error
+	respCallback     Callback
 }
 
 // makeEventBus returns an event bus.
@@ -276,7 +279,10 @@ func makeEventBus(cfg *GatewayConfig, eventsCfg *eventsConfig) (*eventBus, error
 	if err := cfg.valid(); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
-	clientConnection := cfg.newGrpcConnection()
+	clientConnection, err := cfg.newGrpcConnection()
+	if err != nil {
+		return nil, fmt.Errorf("new grpc connection: %w", err)
+	}
 
 	id, err := cfg.newIdentity()
 	if err != nil {
@@ -323,19 +329,34 @@ func (s *eventBus) makeCallbackContext() context.Context {
 	return context.TODO()
 }
 
-func (s *eventBus) defaultCallback(rep json.RawMessage) error {
+func (s *eventBus) defaultCallback(reqID string, rep json.RawMessage) error {
 	c := s.network.GetContract(s.cfg.ChaincodeID)
 	ctx := s.makeCallbackContext()
 
-	req, err := shirorpc.MakeRequest(rep)
+	req, err := shirorpc.MakeRequest(reqID, rep)
 	if err != nil {
 		return fmt.Errorf("make shiro response: %w", err)
 	}
+
+	argBytes, err := req.ArgumentsBytes()
+	if err != nil {
+		return fmt.Errorf("make shiro args: %w", err)
+	}
+
+	transient, err := req.Transient()
+	if err != nil {
+		return fmt.Errorf("make shiro tranisent: %w", err)
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"transient": transient.String(),
+		"args":      string(argBytes),
+	}).Debug("construct response tx")
 	proposal, err := c.NewProposal(
 		"Invoke",
 		client.WithEndorsingOrganizations(s.cfg.MSPID),
-		client.WithBytesArguments(req.ArgumentsBytes()),
-		client.WithTransient(req.Transient()),
+		client.WithBytesArguments(argBytes),
+		client.WithTransient(transient),
 	)
 	if err != nil {
 		return fmt.Errorf("new proposal: %w", err)
@@ -348,8 +369,11 @@ func (s *eventBus) defaultCallback(rep json.RawMessage) error {
 
 	if res, err := shirorpc.MakeResponse(tx.Result()); err != nil {
 		return fmt.Errorf("invalid tx format: %w", err)
-	} else if err := res.Valid(); err != nil {
+		// TODO: this error checking is not working
+	} else if err := res.Error(); err != nil {
 		return fmt.Errorf("invalid tx: %w", err)
+	} else {
+		logrus.Debugf("response from callback: [%s]", string(res.ResultJSON()))
 	}
 
 	commit, err := tx.SubmitWithContext(ctx)
@@ -479,7 +503,7 @@ func unmarshalLutherEvents(blkPvt *peer.BlockAndPrivateData, ccIDFilter string) 
 // Events capture requests raised by phylum transactions.
 type Event struct {
 	unmarshalError error
-	respCallback   func(json.RawMessage) error
+	respCallback   Callback
 	header         EventHeader
 	request        json.RawMessage
 	respCount      int
@@ -583,7 +607,7 @@ func (e *Event) Callback(resp json.RawMessage, err error) error {
 
 	if e.respCallback != nil {
 		logrus.Debug("passing event response to registered callback")
-		err = e.respCallback(respRaw)
+		err = e.respCallback(e.Header().RequestID, respRaw)
 		if err != nil {
 			return fmt.Errorf("callback: %w", err)
 		}
@@ -636,7 +660,7 @@ func (s *EventStream) Done() error {
 }
 
 type eventsConfig struct {
-	callback       func(json.RawMessage) error
+	callback       Callback
 	checkpointFile string
 	startBlock     uint64
 }
@@ -646,7 +670,7 @@ type Option func(*eventsConfig)
 
 // WithEventCallback configures a function that's responsible for processing
 // event responses.
-func WithEventCallback(callback func(json.RawMessage) error) Option {
+func WithEventCallback(callback Callback) Option {
 	return func(cfg *eventsConfig) {
 		cfg.callback = callback
 	}

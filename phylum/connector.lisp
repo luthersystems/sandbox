@@ -15,9 +15,11 @@
 
        [register-request-callback
          (req-id handler-name &optional ctx)
-         (let ([callback-state (sorted-map
+         (let* ([ctx (default ctx (sorted-map))]
+                [callback-state (sorted-map
                                "handler_name" handler-name)])
-           (when ctx (assoc! callback-state "ctx" ctx))
+           (assoc! ctx "request_id" req-id)
+           (assoc! callback-state "ctx" ctx)
            (sidedb:put (mk-request-key req-id) callback-state))]
 
        [unregister-request
@@ -31,14 +33,16 @@
 
        [call-handler
          (resp)
-         (let ([req-id (get resp "request_id") ])
+         (let* ([req-id (get resp "request_id")]
+                [resp-body (transient:get "$ch_rep")])
            (unless req-id (error 'missing-req-id "missing request ID"))
-           (let ([callback-state (get-callback-state req-id)]
-                 [handler-name (get callback-state "handler_name")]
-                 [callback-ctx (get callback-state "ctx")]
-                 [handler-fn (get state handler-name)])
+           (unless resp-body (error 'missing-resp "missing response"))
+           (let* ([callback-state (get-callback-state req-id)]
+                  [handler-name (get callback-state "handler_name")]
+                  [callback-ctx (get callback-state "ctx")]
+                  [handler-fn (get state handler-name)])
              (if handler-fn
-               (apply handler-fn resp callback-ctx)
+               (handler-fn resp-body callback-ctx)
                (error 'missing-handler 
                       (format "missing connector handler: {}" handler-name)))
              ;; TODO: handle multiple responses for single request_id (optional) 
@@ -56,7 +60,9 @@
 
 ;; internal handler called by the connector hub
 (defendpoint "$ch_callback" (resp)
-  (connector-handlers 'call-handler resp))
+  (cc:infof resp "connectorhub callback")
+  (connector-handlers 'call-handler resp)
+  (route-success (sorted-map "status" "OK")))
 
 (defun denil-map (m)
   ;; remove keys with nil entries from map
@@ -109,17 +115,17 @@
   (obj-factory)
   (let ([obj-handler-name (or (obj-factory 'name)
                              (error 'missing-name "factory missing name"))])
-    (connector-handlers 
-      'register-handler 
-      obj-handler-name 
-      (lambda (resp &optional ctx) 
-        (let ([obj-id (or (get ctx "id") 
-                          'missing-obj-id "callback missing object ID")] 
-              [obj (obj-factory 'get obj-id)] 
-              [transition (obj 'handle resp)] 
-              [new-obj (get transition "new")] 
-              [del-obj (get transition "del")] 
-              [events (get transition "events")]) 
+    (connector-handlers
+      'register-handler
+      obj-handler-name
+      (lambda (resp ctx)
+        (let* ([obj-id (or (get ctx "id")
+                          'missing-obj-id "callback missing object ID")]
+               [obj (obj-factory 'get obj-id)]
+               [transition (obj 'handle resp)]
+               [new-obj (get transition "new")]
+               [del-obj (get transition "del")]
+               [events (get transition "events")])
           (when new-obj 
             (obj-factory 'put new-obj)) 
           (when del-obj 

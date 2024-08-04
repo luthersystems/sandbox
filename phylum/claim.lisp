@@ -7,11 +7,18 @@
 (defun mk-claim (claim)
   (unless claim (error 'missing-claim "missing claim"))
   (labels
-    ;; TODO: handle returns a transition (new obj to save, events)
-    ;; TODO: implement claim state machine
     ([handle
        (resp)
-       (cc:infof resp "got connector resp")])
+       (let* ([resp-body (get resp "response")]
+              [resp-err (get resp "error")])
+         (if resp-err
+           (cc:errorf reps-err "response error") 
+           (cc:infof resp "got connector resp"))
+         ;; TODO: implement claim state machine
+         (sorted-map 
+           "new" ()
+           "del" false
+           "events" ()))])
 
     (lambda (op &rest args)
         (cond ((equal? op 'resp) (apply handle args))
