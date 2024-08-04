@@ -19,6 +19,7 @@ import (
 	rwset "github.com/hyperledger/fabric-protos-go-apiv2/ledger/rwset"
 	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/luthersystems/sandbox/connectorhub/internal/chaininfo"
+	"github.com/luthersystems/sandbox/connectorhub/internal/shirorpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -317,25 +318,24 @@ func makeEventBus(cfg *GatewayConfig, eventsCfg *eventsConfig) (*eventBus, error
 	return eb, nil
 }
 
-func validShiroResp(result []byte) error {
-	if len(result) == 0 {
-		return fmt.Errorf("missing result")
-	}
-	// TODO
-	return nil
+func (s *eventBus) makeCallbackContext() context.Context {
+	// TODO: set timeout
+	return context.TODO()
 }
 
-func (s *eventBus) defaultCallback(r json.RawMessage) error {
+func (s *eventBus) defaultCallback(rep json.RawMessage) error {
 	c := s.network.GetContract(s.cfg.ChaincodeID)
-	// TODO: set timeout
-	ctx := context.Background()
+	ctx := s.makeCallbackContext()
 
-	transient := make(map[string][]byte) // TODO
-
-	proposal, err := c.NewProposal("Invoke",
-		client.WithArguments("{}"),
+	req, err := shirorpc.MakeRequest(rep)
+	if err != nil {
+		return fmt.Errorf("make shiro response: %w", err)
+	}
+	proposal, err := c.NewProposal(
+		"Invoke",
 		client.WithEndorsingOrganizations(s.cfg.MSPID),
-		client.WithTransient(transient),
+		client.WithBytesArguments(req.ArgumentsBytes()),
+		client.WithTransient(req.Transient()),
 	)
 	if err != nil {
 		return fmt.Errorf("new proposal: %w", err)
@@ -346,7 +346,9 @@ func (s *eventBus) defaultCallback(r json.RawMessage) error {
 		return fmt.Errorf("endorse: %w", err)
 	}
 
-	if err := validShiroResp(tx.Result()); err != nil {
+	if res, err := shirorpc.MakeResponse(tx.Result()); err != nil {
+		return fmt.Errorf("invalid tx format: %w", err)
+	} else if err := res.Valid(); err != nil {
 		return fmt.Errorf("invalid tx: %w", err)
 	}
 
