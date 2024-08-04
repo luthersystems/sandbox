@@ -21,7 +21,7 @@
            (sidedb:put (mk-request-key req-id) callback-state))]
 
        [unregister-request
-         (req-id handler-name)
+         (req-id)
          (sidedb:purge (mk-request-key req-id))]
 
        [get-callback-state
@@ -123,7 +123,7 @@
       'register-handler
       obj-handler-name
       (lambda (resp ctx)
-        (let* ([obj-id (or (get ctx "id")
+        (let* ([obj-id (or (get ctx "oid")
                           'missing-obj-id "callback missing object ID")]
                [obj (obj-factory 'get obj-id)]
                [transition (obj 'handle resp)]
@@ -134,4 +134,4 @@
             (obj-factory 'put new-obj)) 
           (when del-obj 
             (obj-factory 'del obj-id)) 
-          (map #^(add-connector-event % obj-handler-name) events))))))
+          (map () #^(add-connector-event % obj-handler-name) events))))))

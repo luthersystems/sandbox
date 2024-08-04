@@ -609,7 +609,7 @@ func (e *Event) Callback(resp json.RawMessage, err error) error {
 		logrus.Debug("passing event response to registered callback")
 		err = e.respCallback(e.Header().RequestID, respRaw)
 		if err != nil && errors.Is(err, shirorpc.ErrTxInvalid) {
-			logrus.Debug("tx invalidated, nothing to do")
+			return fmt.Errorf("invalid tx: %w", err)
 		} else if err != nil {
 			return fmt.Errorf("callback: %w", err)
 		}

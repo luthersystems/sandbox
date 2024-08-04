@@ -21,7 +21,7 @@
            "events" ()))])
 
     (lambda (op &rest args)
-        (cond ((equal? op 'resp) (apply handle args))
+        (cond ((equal? op 'handle) (apply handle args))
               (:else (error 'unknown-operation op))))))
 
 ;; mk-claims implements factory
