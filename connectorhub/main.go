@@ -2,7 +2,7 @@
 //
 // Bring up the local network `make up` and start the service running:
 //
-//	go run . run
+//	go run . start
 //
 // The service will listen for events, retrieve the request, process the
 // request using a stub, and return a stub response.
@@ -49,10 +49,10 @@ type baseCmd struct {
 }
 
 type cli struct {
-	Run runCmd `cmd:"" help:"Run the connector hub"`
+	Start g `cmd:"" help:"Start the connector hub"`
 }
 
-type runCmd struct {
+type g struct {
 	baseCmd
 	runSettings
 }
@@ -88,7 +88,7 @@ func main() {
 	setupInterruptHandler(cancel)
 
 	cli := &cli{
-		Run: runCmd{baseCmd: baseCmd{ctx: ctx}},
+		Start: g{baseCmd: baseCmd{ctx: ctx}},
 	}
 
 	kctx := kong.Parse(cli)
@@ -124,7 +124,7 @@ func processRequest(ctx context.Context, req json.RawMessage, reqErr error) (jso
 	return respJSON, nil
 }
 
-func (s *runCmd) Run() error {
+func (s *g) Run() error {
 	if s.Verbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
