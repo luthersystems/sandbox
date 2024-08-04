@@ -27,9 +27,13 @@ var gatewayCfg = &events.GatewayConfig{
 	PeerName:             "peer0",
 	PeerEndpoint:         "dns:///localhost:7051",
 	ChannelName:          "luther",
+	ChaincodeID:          "sandbox",
 }
 
-const startBlock int = 1
+const (
+	startBlock     int = 1
+	checkpointFile     = "/tmp/checkpoint.tmp"
+)
 
 // processRequest receives a request from the phylum, and returns a response, or error.
 // TODO: route request to connector, and return connector response, instead of stub.
@@ -71,6 +75,9 @@ func main() {
 	if startBlock > 0 {
 		gatewayOpts = append(gatewayOpts, events.WithStartBlock(uint64(startBlock)))
 	}
+	if checkpointFile != "" {
+		gatewayOpts = append(gatewayOpts, events.WithCheckpointFile(checkpointFile))
+	}
 	logrus.WithContext(ctx).Info("connecting to gateway")
 
 	stream, err := events.GatewayEvents(gatewayCfg, gatewayOpts...)
@@ -103,6 +110,8 @@ func main() {
 				resp, err := processRequest(ctx, req, err)
 				if err := event.Callback(resp, err); err != nil {
 					logrus.WithContext(ctx).WithError(err).Error("event callback failed")
+				} else {
+					logrus.WithContext(ctx).Info("callback successful")
 				}
 			case <-ctx.Done():
 				logrus.WithContext(ctx).Info("event listener shutting down...")

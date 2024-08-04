@@ -91,7 +91,7 @@
                    (to-string))]
                [event-ref-key (format-string "$connector_events:{}" ctr)]
                [event-body-bytes (json:dump-bytes event-body)])
-          (when (>= get-num 10)
+          (when (>= ctr 10)
             (error 'too-many-events "too many events"))
           (when handler-name
             (connector-handlers 

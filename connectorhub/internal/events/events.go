@@ -33,6 +33,7 @@ type GatewayConfig struct {
 	PeerName             string
 	PeerEndpoint         string
 	ChannelName          string
+	ChaincodeID          string
 }
 
 func (c *GatewayConfig) valid() error {
@@ -64,6 +65,9 @@ func (c *GatewayConfig) valid() error {
 	}
 	if c.ChannelName == "" {
 		return fmt.Errorf("missing channel name")
+	}
+	if c.ChaincodeID == "" {
+		return fmt.Errorf("missing chaincode ID")
 	}
 
 	return nil
@@ -259,6 +263,7 @@ func hashCert(certFilePath string) ([]byte, error) {
 }
 
 type eventBus struct {
+	cfg              *GatewayConfig
 	clientConnection *grpc.ClientConn
 	network          *client.Network
 	gateway          *client.Gateway
@@ -297,12 +302,68 @@ func makeEventBus(cfg *GatewayConfig, eventsCfg *eventsConfig) (*eventBus, error
 	}
 
 	network := gateway.GetNetwork(cfg.ChannelName)
-	return &eventBus{
+
+	eb := &eventBus{
+		cfg:              cfg,
 		clientConnection: clientConnection,
 		network:          network,
 		gateway:          gateway,
 		respCallback:     eventsCfg.callback,
-	}, nil
+	}
+
+	if eb.respCallback == nil {
+		eb.respCallback = eb.defaultCallback
+	}
+	return eb, nil
+}
+
+func validShiroResp(result []byte) error {
+	if len(result) == 0 {
+		return fmt.Errorf("missing result")
+	}
+	// TODO
+	return nil
+}
+
+func (s *eventBus) defaultCallback(r json.RawMessage) error {
+	c := s.network.GetContract(s.cfg.ChaincodeID)
+	// TODO: set timeout
+	ctx := context.Background()
+
+	transient := make(map[string][]byte) // TODO
+
+	proposal, err := c.NewProposal("Invoke",
+		client.WithArguments("{}"),
+		client.WithEndorsingOrganizations(s.cfg.MSPID),
+		client.WithTransient(transient),
+	)
+	if err != nil {
+		return fmt.Errorf("new proposal: %w", err)
+	}
+
+	tx, err := proposal.EndorseWithContext(ctx)
+	if err != nil {
+		return fmt.Errorf("endorse: %w", err)
+	}
+
+	if err := validShiroResp(tx.Result()); err != nil {
+		return fmt.Errorf("invalid tx: %w", err)
+	}
+
+	commit, err := tx.SubmitWithContext(ctx)
+	if err != nil {
+		return fmt.Errorf("commit: %w", err)
+	}
+
+	if stat, err := commit.StatusWithContext(ctx); err != nil {
+		return fmt.Errorf("commit status: %w", err)
+	} else if !stat.Successful {
+		return fmt.Errorf("invalid status: [%s]", stat.Code)
+	} else {
+		logrus.Debugf("response commited in tx [%s], block [%d]", stat.TransactionID, stat.BlockNumber)
+	}
+
+	return nil
 }
 
 // close frees resources for an event bus.
@@ -332,7 +393,7 @@ func (s *eventBus) close() error {
 	return retErr
 }
 
-func unmarshalLutherEvents(blkPvt *peer.BlockAndPrivateData) ([]*Event, error) {
+func unmarshalLutherEvents(blkPvt *peer.BlockAndPrivateData, ccIDFilter string) ([]*Event, error) {
 	if blkPvt == nil {
 		return nil, nil
 	}
@@ -344,23 +405,24 @@ func unmarshalLutherEvents(blkPvt *peer.BlockAndPrivateData) ([]*Event, error) {
 	blockNum := block.GetBlockNum()
 	events := make([]*Event, 0, len(block.GetTransactions()))
 	for txSeqNo, tx := range block.GetTransactions() {
-		fmt.Printf("WTF: tx [%d]\n", txSeqNo)
 		if !block.GetValidation(txSeqNo).Valid() {
 			continue
 		}
-		fmt.Printf("WTF2: tx [%d]\n", txSeqNo)
 		chainEvent := tx.GetDetails().GetEvent()
 		if !chainEvent.IsLutherEvent() {
 			continue
 		}
 
-		fmt.Printf("WTF3: tx [%d]\n", txSeqNo)
 		ccID := chainEvent.GetChaincodeId()
 		if ccID == "" {
 			return nil, fmt.Errorf("missing chaincode ID")
 		}
 
-		fmt.Printf("WTF4: tx [%d:%s]\n", txSeqNo, ccID)
+		if ccIDFilter != "" && ccID != ccIDFilter {
+			logrus.Debugf("ignoring chaincode event from ccid: [%s], want: [%s]", ccID, ccIDFilter)
+			continue
+		}
+
 		lutherEvent, err := chainEvent.ToLutherEvent()
 		if err != nil {
 			return nil, fmt.Errorf("invalid luther event: %w", err)
@@ -572,8 +634,9 @@ func (s *EventStream) Done() error {
 }
 
 type eventsConfig struct {
-	callback   func(json.RawMessage) error
-	startBlock uint64
+	callback       func(json.RawMessage) error
+	checkpointFile string
+	startBlock     uint64
 }
 
 // Option configures the event service.
@@ -591,6 +654,61 @@ func WithEventCallback(callback func(json.RawMessage) error) Option {
 func WithStartBlock(blockNum uint64) Option {
 	return func(cfg *eventsConfig) {
 		cfg.startBlock = blockNum
+	}
+}
+
+func WithCheckpointFile(file string) Option {
+	return func(cfg *eventsConfig) {
+		cfg.checkpointFile = file
+	}
+}
+
+// BlockCheckpointer provides the current position for event processing,
+// and records the last processed block.
+type BlockCheckpointer interface {
+	// BlockNumber in which the next event is expected.
+	BlockNumber() uint64
+	// TransactionID of the last successfully processed event within the current block.
+	TransactionID() string
+	// CheckpointBlock records a successfully processed block.
+	CheckpointBlock(blockNumber uint64) error
+	// Close releases resources.
+	Close() error
+}
+
+type inMemoryCheckpoint struct {
+	checkpoint *client.InMemoryCheckpointer
+}
+
+func (s *inMemoryCheckpoint) BlockNumber() uint64 {
+	if s == nil || s.checkpoint == nil {
+		return 0
+	}
+	return s.checkpoint.BlockNumber()
+}
+
+func (s *inMemoryCheckpoint) TransactionID() string {
+	if s == nil || s.checkpoint == nil {
+		return ""
+	}
+	return s.checkpoint.TransactionID()
+}
+
+func (s *inMemoryCheckpoint) CheckpointBlock(blockNumber uint64) error {
+	if s == nil || s.checkpoint == nil {
+		return nil
+	}
+	s.checkpoint.CheckpointBlock(blockNumber)
+	return nil
+}
+
+func (s *inMemoryCheckpoint) Close() error {
+	return nil
+}
+
+func newInMemoryCheckpoint() BlockCheckpointer {
+	return &inMemoryCheckpoint{
+		&client.InMemoryCheckpointer{},
 	}
 }
 
@@ -620,9 +738,21 @@ func GatewayEvents(cfg *GatewayConfig, opts ...Option) (*EventStream, error) {
 	}
 	stream.wg.Add(1)
 
+	var checkpointer BlockCheckpointer
+	if eventsCfg.checkpointFile != "" {
+		checkpointer, err = client.NewFileCheckpointer(eventsCfg.checkpointFile)
+		if err != nil {
+			return nil, fmt.Errorf("file checkpointer: %w", err)
+		}
+		logrus.WithContext(ctx).Info("loaded checkpoint file")
+	} else {
+		checkpointer = newInMemoryCheckpoint()
+	}
+
 	var networkEventsOpt []client.BlockEventsOption
 	if eventsCfg.startBlock > 0 {
 		networkEventsOpt = append(networkEventsOpt, client.WithStartBlock(eventsCfg.startBlock))
+		networkEventsOpt = append(networkEventsOpt, client.WithCheckpoint(checkpointer))
 	}
 
 	logrus.WithContext(ctx).Debug("listen to fabric events")
@@ -638,7 +768,7 @@ func GatewayEvents(cfg *GatewayConfig, opts ...Option) (*EventStream, error) {
 			close(events)
 			stream.wg.Done()
 			if err := bus.close(); err != nil {
-				logrus.WithContext(ctx).WithError(err).Error("close")
+				logrus.WithContext(ctx).WithError(err).Error("bus close")
 			} else {
 				logrus.WithContext(ctx).Debug("event hub closed")
 			}
@@ -651,8 +781,9 @@ func GatewayEvents(cfg *GatewayConfig, opts ...Option) (*EventStream, error) {
 					logrus.WithContext(ctx).Info("nil event, exiting...")
 					return
 				}
-				logrus.WithContext(ctx).WithField("block_no", event.GetBlock().GetHeader().GetNumber()).Debug("received event")
-				lutherEvents, err := unmarshalLutherEvents(event)
+				blockNum := event.GetBlock().GetHeader().GetNumber()
+				logrus.WithContext(ctx).WithField("block_no", blockNum).Debug("received event")
+				lutherEvents, err := unmarshalLutherEvents(event, cfg.ChaincodeID)
 				if err != nil {
 					logrus.WithContext(ctx).WithError(err).Error("unmarshal luther event")
 					continue
@@ -670,6 +801,9 @@ func GatewayEvents(cfg *GatewayConfig, opts ...Option) (*EventStream, error) {
 					}
 					event.respCallback = bus.respCallback
 					events <- event
+				}
+				if err := checkpointer.CheckpointBlock(blockNum); err != nil {
+					logrus.WithContext(ctx).WithError(err).Error("failed to checkpoint block")
 				}
 				logrus.WithContext(ctx).
 					Info("done processing luther events")
