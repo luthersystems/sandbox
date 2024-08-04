@@ -1,7 +1,5 @@
 (in-package 'sandbox)
 
-;; TODO: move all methods into single class
-
 (defun mk-connector-handler ()
   (let ([state (sorted-map)])
     (labels
@@ -50,8 +48,8 @@
 
     (lambda (op &rest args)
         (cond ((equal? op 'register-handler) (apply register-handler args))
-              ((equal? op 'register-request-callback) (apply 
-                                                        register-request-callback 
+              ((equal? op 'register-request-callback) (apply
+                                                        register-request-callback
                                                         args))
               ((equal? op 'call-handler) (apply call-handler args))
               (:else (error 'unknown-operation op)))))))
@@ -64,11 +62,6 @@
   (connector-handlers 'call-handler resp)
   (route-success (sorted-map "status" "OK")))
 
-(defun denil-map (m)
-  ;; remove keys with nil entries from map
-  (let ([keep-keys (reject 'list (lambda (k) (nil? (get m k))) (keys m))])
-    (foldl (lambda (acc v) (assoc! acc v (get m v))) (sorted-map) keep-keys)))
-
 (set 'add-connector-event
   ((lambda ()
     (let ([state (sorted-map "ctr" 0)])
@@ -78,20 +71,28 @@
                [event-body (get event "req")]
                [event-req-id (or
                                (get event-body "request_id")
-                               (error 'missing-request-id 
+                               (error 'missing-request-id
                                       "missing request ID"))]
-               [event-body-msp (get event "msp")] ; msp ID for responsible connector
-               [event-body-key (get event "key")] ; fabric key containing req
-               [event-body-pdc (get event "pdc")] ; pdc storing key with req
+               [event-header-msp (get event "msp")] ; msp ID for the connector
+               [event-header-key (or                ; fabric key containing req
+                                   (get event "key")
+                                   (error 'missing-key
+                                          "missing request key"))]
+               [event-header-pdc (get event "pdc")] ; pdc storing key with req
+               [event-header-oid (or ; ID of the object
+                                   (get event "oid")
+                                   (error 'missing-oid
+                                          "missing object id"))]
+               [ctx (sorted-map "oid" event-header-oid)]
                [event-ref-str
                  (thread-first
                    (sorted-map
                      ;; NOTE: we can't use the std tx req_id, b/c we need
                      ;; a unique one for each event (there are multiple per tx)
                      "rid" event-req-id
-                     "msp" event-body-msp
-                     "key" event-body-key
-                     "pdc" event-body-pdc)
+                     "msp" event-header-msp
+                     "key" event-header-key
+                     "pdc" event-header-pdc)
                    (denil-map)
                    (json:dump-bytes)
                    (to-string))]
@@ -101,13 +102,16 @@
             (error 'too-many-events "too many events"))
           (when handler-name
             (connector-handlers 
-              'register-request-callback event-req-id handler-name))
+              'register-request-callback
+              event-req-id
+              handler-name
+              ctx))
           (cc:set-tx-metadata event-ref-key event-ref-str)
-          (if event-body-pdc
-            (cc:storage-put-private event-body-pdc 
-                                    event-body-key 
+          (if event-header-pdc
+            (cc:storage-put-private event-header-pdc
+                                    event-header-key
                                     event-body-bytes)
-            (cc:storage-put event-body-key event-body-bytes))
+            (cc:storage-put event-header-key event-body-bytes))
           (assoc! state "ctr" (+ event-num 1))))))))
 
 (export 'register-connector-factory)

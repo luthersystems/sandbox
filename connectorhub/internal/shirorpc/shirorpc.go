@@ -178,10 +178,26 @@ type JSONRPCResponse struct {
 	Result   json.RawMessage `json:"result"`
 }
 
+// ErrTxInvalid indicates the tx was invalidated
+var ErrTxInvalid = fmt.Errorf("tx invalid")
+
 // NewJSONRPCResonse constructs a response from bytes.
 func MakeResponse(respBytes []byte) (*JSONRPCResponse, error) {
+	var envelope Envelope
+
+	err := json.Unmarshal(respBytes, &envelope)
+	if err != nil {
+		return nil, fmt.Errorf("response envelope: %w", err)
+	}
+
+	respBody := envelope.Payload
+
+	if !envelope.Dirty {
+		return nil, ErrTxInvalid
+	}
+
 	resp := &JSONRPCResponse{}
-	err := json.Unmarshal(respBytes, resp)
+	err = json.Unmarshal(respBody, resp)
 	if err != nil {
 		return nil, err
 	}

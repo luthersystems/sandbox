@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -368,8 +369,7 @@ func (s *eventBus) defaultCallback(reqID string, rep json.RawMessage) error {
 	}
 
 	if res, err := shirorpc.MakeResponse(tx.Result()); err != nil {
-		return fmt.Errorf("invalid tx format: %w", err)
-		// TODO: this error checking is not working
+		return fmt.Errorf("response: %w", err)
 	} else if err := res.Error(); err != nil {
 		return fmt.Errorf("invalid tx: %w", err)
 	} else {
@@ -608,7 +608,9 @@ func (e *Event) Callback(resp json.RawMessage, err error) error {
 	if e.respCallback != nil {
 		logrus.Debug("passing event response to registered callback")
 		err = e.respCallback(e.Header().RequestID, respRaw)
-		if err != nil {
+		if err != nil && errors.Is(err, shirorpc.ErrTxInvalid) {
+			logrus.Debug("tx invalidated, nothing to do")
+		} else if err != nil {
 			return fmt.Errorf("callback: %w", err)
 		}
 	} else {

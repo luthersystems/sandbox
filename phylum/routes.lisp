@@ -49,11 +49,16 @@
 
 ;; example endpoint triggering an event in sideDB
 (defendpoint "start-pvt" (event-req)
-  (let* ([event (sorted-map
+  (let* ([oid "123"]
+         [event (sorted-map
+                  "oid" oid
                   "msp" "Org1MSP"
                   "key" "fnord"
                   "pdc" "private"
                   "req" event-req)])
+    ;; create a new claim object
+    (claims 'put (sorted-map "claim_id" oid))
+    ;; raise event for the new claim to be processed by connector
     (add-connector-event event "claim")
     (route-success event)))
 

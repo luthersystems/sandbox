@@ -1,7 +1,6 @@
 // Package connectorhub demonstrates usage of the events lib.
 package main
 
-// TODO: create shiroclient-sdk (or direct gateway) WithEventCallback
 // TODO: persist last block height state
 // TODO: reliability (e.g., "best effort" delivery to connector and back)
 // TODO: connetor router logic (replace processRequest)
