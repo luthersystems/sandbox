@@ -1,10 +1,25 @@
 // Package connectorhub demonstrates usage of the events lib.
+//
+// Bring up the local network `make up` and start the service running:
+//
+//	go run . run
+//
+// The service will listen for events, retrieve the request, process the
+// request using a stub, and return a stub response.
+//
+// You can trigger events using this script in `fabric/` dir:
+//
+//	./client.sh start-pvt '[{"request_id": "456", "fnord":"eris"}]'
+//
+// By default the service uses a file checkpointer, stored at
+// `/tmp/checkpoint.tmp`. If you wipe your network make sure you also
+// wipe your checkpoint file, otherwise the service gets stuck trying to
+// fetch future blocks.
 package main
 
 // TODO: persist last block height state
 // TODO: reliability (e.g., "best effort" delivery to connector and back)
 // TODO: connetor router logic (replace processRequest)
-// test using: cd fabric && ./client.sh start '[{"request_id": "123"}]'
 
 import (
 	"context"
@@ -12,8 +27,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 
+	"github.com/alecthomas/kong"
 	"github.com/luthersystems/sandbox/connectorhub/internal/events"
 	"github.com/sirupsen/logrus"
 )
@@ -29,10 +44,57 @@ var gatewayCfg = &events.GatewayConfig{
 	ChaincodeID:          "sandbox",
 }
 
-const (
-	startBlock     int = 1
-	checkpointFile     = "/tmp/checkpoint.tmp"
-)
+type baseCmd struct {
+	ctx context.Context
+}
+
+type cli struct {
+	Run runCmd `cmd:"" help:"Run the connector hub"`
+}
+
+type runCmd struct {
+	baseCmd
+	runSettings
+}
+
+type runSettings struct {
+	CheckpointFile   string `short:"c" type:"path" help:"Path to checkpoint file" default:"/tmp/checkpoint.tmp" env:"CH_CHECKPOINT_FILE"`
+	StartBlockNumber uint64 `short:"b" help:"Block to start playing events from" default:"1"`
+	Verbose          bool   `short:"v" help:"Verbose logs" default:"true"`
+}
+
+func init() {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
+	})
+}
+
+func setupInterruptHandler(cancel context.CancelFunc) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			fmt.Println("\nReceived an interrupt, stopping tasks...")
+			cancel()
+		}
+	}()
+}
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	setupInterruptHandler(cancel)
+
+	cli := &cli{
+		Run: runCmd{baseCmd: baseCmd{ctx: ctx}},
+	}
+
+	kctx := kong.Parse(cli)
+	err := kctx.Run()
+	kctx.FatalIfErrorf(err)
+}
 
 // processRequest receives a request from the phylum, and returns a response, or error.
 // TODO: route request to connector, and return connector response, instead of stub.
@@ -62,36 +124,28 @@ func processRequest(ctx context.Context, req json.RawMessage, reqErr error) (jso
 	return respJSON, nil
 }
 
-func main() {
-	logrus.SetLevel(logrus.DebugLevel)
+func (s *runCmd) Run() error {
+	if s.Verbose {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx := s.ctx
 
 	var gatewayOpts []events.Option
-	if startBlock > 0 {
-		gatewayOpts = append(gatewayOpts, events.WithStartBlock(uint64(startBlock)))
+	if s.StartBlockNumber > 0 {
+		gatewayOpts = append(gatewayOpts, events.WithStartBlock(uint64(s.StartBlockNumber)))
 	}
-	if checkpointFile != "" {
-		gatewayOpts = append(gatewayOpts, events.WithCheckpointFile(checkpointFile))
+	if s.CheckpointFile != "" {
+		gatewayOpts = append(gatewayOpts, events.WithCheckpointFile(s.CheckpointFile))
 	}
 	logrus.WithContext(ctx).Info("connecting to gateway")
 
 	stream, err := events.GatewayEvents(gatewayCfg, gatewayOpts...)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("gateway events: %w", err)
 	}
 
-	go func() {
-		<-sigs
-		logrus.WithContext(ctx).Info("signal handler called")
-		cancel()
-		if err := stream.Done(); err != nil {
-			panic(err)
-		}
-	}()
+	ctx, cancel := context.WithCancel(s.ctx)
 
 	go func() {
 		logrus.WithContext(ctx).Info("listening for events")
@@ -120,6 +174,13 @@ func main() {
 	}()
 
 	<-ctx.Done()
+	logrus.WithContext(ctx).Info("signal handler called")
+	cancel()
+	if err := stream.Done(); err != nil {
+		logrus.WithError(err).Error("steam done")
+	}
 
 	logrus.WithContext(ctx).Info("connectorhub exited!")
+
+	return nil
 }
