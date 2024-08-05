@@ -145,7 +145,8 @@ class compose(object):
         prefix = []
         if sudo:
             prefix.extend(['sudo', '-E'])
-        prefix.append('docker-compose')
+        prefix.append('docker')
+        prefix.append('compose')
         prefix.extend(['-f', self._docker_compose_file()])
         return prefix
 
