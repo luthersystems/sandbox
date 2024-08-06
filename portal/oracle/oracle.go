@@ -1,4 +1,4 @@
-// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+// Copyright © 2024 Luther Systems, Ltd. All right reserved.
 
 // Package oracle implements the sandbox UI portal.
 package oracle
@@ -8,18 +8,18 @@ import (
 	"fmt"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/luthersystems/sandbox/api"
 	srv "github.com/luthersystems/sandbox/api/srvpb/v1"
-	"github.com/luthersystems/sandbox/portal/version"
 	"github.com/luthersystems/svc/oracle"
 	"google.golang.org/grpc"
 )
 
-var swaggerHandler = api.SwaggerHandlerOrPanic("v1/oracle")
+// Config configures the portal.
+type Config struct {
+	oracle.Config
+}
 
 type portal struct {
 	srv.UnimplementedLedgerServiceServer
-
 	orc *oracle.Oracle
 }
 
@@ -32,17 +32,10 @@ func (p *portal) RegisterServiceClient(ctx context.Context, grpcConn *grpc.Clien
 }
 
 // Run starts an oracle and blocks the caller until it completes.
-func Run(config *oracle.Config) error {
-	config.SetSwaggerHandler(swaggerHandler)
-	config.PhylumServiceName = "sandbox-cc"
-	config.ServiceName = "sandbox-oracle"
-	config.Version = version.Version
-	config.GatewayEndpoint = "http://shiroclient_gw_sandbox:8082"
-
-	orc, err := oracle.NewOracle(config)
-	if err != nil {
+func Run(ctx context.Context, config *Config) error {
+	if orc, err := oracle.NewOracle(&config.Config); err != nil {
 		return fmt.Errorf("new oracle: %w", err)
+	} else {
+		return orc.StartGateway(ctx, &portal{orc: orc})
 	}
-
-	return orc.Run(&portal{orc: orc})
 }

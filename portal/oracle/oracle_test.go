@@ -15,13 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	phylumRelPath = "../../phylum"
-)
+// phylumRelPath is the path to the phylum dir relative to this file.
+const phylumRelPath = "../../phylum"
 
-func makeTestServerFrom(t *testing.T, bytes []byte) (*portal, func()) {
+func makeTestServerFrom(t *testing.T, b []byte) (*portal, func()) {
 	t.Helper()
-	orc, stop := oracle.NewTestOracleFrom(t, phylumRelPath, bytes)
+	cfg := &Config{Config: *oracle.DefaultConfig()}
+	cfg.PhylumPath = phylumRelPath
+	orc, stop := oracle.NewTestOracle(t, &cfg.Config, oracle.WithSnapshot(b))
 	return &portal{orc: orc}, stop
 }
 
