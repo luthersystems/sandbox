@@ -20,3 +20,5 @@
 
 (load-file "utils.lisp")
 (load-file "routes.lisp")
+(load-file "connector.lisp")
+(load-file "claim.lisp")
