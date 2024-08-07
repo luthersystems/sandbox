@@ -5,16 +5,16 @@ on:
       - main
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4.1.5
+      - uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v5.0.1
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.21.x"
-      - name: Set license file
-        run: echo $LUTHER_LICENSE | base64 -d > .luther-license.yaml
-        env:
-          LUTHER_LICENSE: ${{ secrets.LUTHER_LICENSE }}
+          go-version: "1.22.x"
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: v1.59
       - name: Run CI tests
         run: script -q -e -c "make citest"

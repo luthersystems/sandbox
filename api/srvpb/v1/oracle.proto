@@ -7,6 +7,7 @@ syntax = "proto3";
 package srvpb.v1;
 
 import "google/api/annotations.proto";
+import "healthcheck/v1/healthcheck.proto";
 import "pb/v1/oracle.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
@@ -35,7 +36,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     value: {
       description: "Authorization failed"
       schema: {
-        json_schema: {ref: ".common.ExceptionResponse"}
+        json_schema: {ref: ".common.v1.ExceptionResponse"}
       }
     }
   }
@@ -44,7 +45,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     value: {
       description: "Bad request determined by business logic"
       schema: {
-        json_schema: {ref: ".common.ExceptionResponse"}
+        json_schema: {ref: ".common.v1.ExceptionResponse"}
       }
     }
   }
@@ -53,7 +54,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     value: {
       description: "Missing resource"
       schema: {
-        json_schema: {ref: ".common.ExceptionResponse"}
+        json_schema: {ref: ".common.v1.ExceptionResponse"}
       }
     }
   }
@@ -62,7 +63,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     value: {
       description: "Permission denied"
       schema: {
-        json_schema: {ref: ".common.ExceptionResponse"}
+        json_schema: {ref: ".common.v1.ExceptionResponse"}
       }
     }
   }
@@ -80,7 +81,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     value: {
       description: "Unexpected internal server error"
       schema: {
-        json_schema: {ref: ".common.ExceptionResponse"}
+        json_schema: {ref: ".common.v1.ExceptionResponse"}
       }
     }
   }
@@ -89,7 +90,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     value: {
       description: "Service not available"
       schema: {
-        json_schema: {ref: ".common.ExceptionResponse"}
+        json_schema: {ref: ".common.v1.ExceptionResponse"}
       }
     }
   }
@@ -98,7 +99,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 // REST-JSON API Docs for the ledger project.
 service LedgerService {
   // Check the health of the service. This is used by load balancers to check service health.
-  rpc HealthCheck(pb.v1.HealthCheckRequest) returns (pb.v1.HealthCheckResponse) {
+  rpc GetHealthCheck(healthcheck.v1.GetHealthCheckRequest) returns (healthcheck.v1.GetHealthCheckResponse) {
     option (google.api.http) = {get: "/v1/health_check"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }

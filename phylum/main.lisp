@@ -12,7 +12,7 @@
 (use-package 'utils)
 
 ;; service-name can be used to identify the service in health checks and longs.
-(set 'service-name "sandbox-cc")
+(set 'service-name "sandbox")
 
 (set 'version "LUTHER_PROJECT_VERSION")  ; overridden during build
 (set 'build-id "LUTHER_PROJECT_BUILD_ID")  ; overridden during build

@@ -26,11 +26,6 @@ GO_PKG_VOLUME_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,volume,${GO_PKG_VOLUM
 
 GO_BUILD_TAGS ?= osusergo,netgo,cgo,timetzdata
 GO_BUILD_FLAGS="-installsuffix ${GO_BUILD_TAGS} -tags ${GO_BUILD_TAGS} -buildvcs=false"
-GO_TEST_FLAGS ?= -cover
-
-GO_TEST_BASE=${GO_HOST_EXTRA_ENV} SUBSTRATEHCP_FILE=${PWD}/${SUBSTRATE_PLUGIN_PLATFORM_TARGETED} go test ${GO_TEST_FLAGS}
-GO_TEST_TIMEOUT_10=${GO_TEST_BASE} -timeout 10m
-GO_TEST_TIMEOUT_35=${GO_TEST_BASE} -timeout 35m
 
 .PHONY: default
 default: docker-build
@@ -48,10 +43,6 @@ clean:
 	# make sure it's really gone
 	sh -c '! ${DOCKER} volume inspect ${GO_PKG_VOLUME}'
 
-.PHONY: go-test
-go-test:
-	${GO_TEST_TIMEOUT_10} ./...
-
 ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk ${PROJECT_REL_DIR}/Dockerfile
 	${MKDIR_P} $(dir $@)
 	@echo "Building image ${DOCKER_IMAGE}"
@@ -67,21 +58,6 @@ ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 		-t ${DOCKER_IMAGE}:${VERSION} \
 		-f ${PROJECT_REL_DIR}/Dockerfile ${PROJECT_REL_DIR}
 	${TOUCH} $@
-
-.PHONY: test
-test: static-checks go-test
-
-.PHONY: static-checks
-static-checks: ${GO_PKG_DUMMY}
-	${TIME_P} ${DOCKER_RUN} \
-		${GO_PKG_MOUNT} \
-		-e "GONOSUMDB=${GONOSUMDB}" \
-		-e "GOPROXY=${GOPROXY}" \
-		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
-		-e CGO_LDFLAGS_ALLOW=-I/usr/local/share/libtool \
-		--entrypoint ${BUILD_IMAGE_PROJECT_DIR}/scripts/static-checks.sh \
-		-w ${BUILD_WORKDIR} \
-		${BUILD_IMAGE}
 
 ${GO_PKG_DUMMY}:
 	${DOCKER} volume inspect ${GO_PKG_VOLUME} || ${DOCKER} volume create ${GO_PKG_VOLUME}

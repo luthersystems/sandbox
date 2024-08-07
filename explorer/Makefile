@@ -1,11 +1,11 @@
-# Copyright © 2022 Luther Systems, Ltd. All rights reserved.
+# Copyright © 2024 Luther Systems, Ltd. All rights reserved.
 
 .DEFAULT_GOAL := up-clean
 
 .PHONY: up
 up: down
 	./check_for_peers.sh
-	docker-compose up -d
+	docker compose up -d
 
 .PHONY: up-clean
 up-clean: #this needs to be recipe, not a prereq, for ordering purposes
@@ -14,8 +14,8 @@ up-clean: #this needs to be recipe, not a prereq, for ordering purposes
 
 .PHONY: down
 down:
-	docker-compose down
+	docker compose down
 
 .PHONY: down-clean
 down-clean:
-	docker-compose down -v
+	docker compose down -v

@@ -9,9 +9,13 @@ PROJECT_REL_DIR=.
 include ${PROJECT_REL_DIR}/common.mk
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 
-GO_SERVICE_PACKAGES=./oracleserv/... ./phylum/...
+GO_SERVICE_PACKAGES=./portal/... ./phylum/...
 GO_API_PACKAGES=./api/...
 GO_PACKAGES=${GO_SERVICE_PACKAGES} ${GO_API_PACKAGES}
+
+SUBSTRATEHCP_FILE ?= ${PWD}/${SUBSTRATE_PLUGIN_PLATFORM_TARGETED}
+
+export SUBSTRATEHCP_FILE
 
 .DEFAULT_GOAL := default
 .PHONY: default
@@ -56,24 +60,14 @@ clean: phylumclean
 phylumclean:
 	cd phylum && $(MAKE) clean
 
-all: oracle
-.PHONY: oracle
-oracle: plugin
+all: portal
+.PHONY: portal
+portal: plugin
 	cd ${SERVICE_DIR} && $(MAKE)
-clean: oracleclean
-.PHONY: oracleclean
-oracleclean:
+clean: portalclean
+.PHONY: portalclean
+portalclean:
 	cd ${SERVICE_DIR} && $(MAKE) clean
-.PHONY: oraclestaticchecks
-oraclestaticchecks:
-	cd ${SERVICE_DIR} && $(MAKE) static-checks
-.PHONY: oracletest
-oracletest: plugin
-	cd ${SERVICE_DIR} && $(MAKE) test
-test: oraclegotest
-.PHONY: oraclegotest
-oraclegotest: plugin
-	cd ${SERVICE_DIR} && $(MAKE) go-test
 
 .PHONY: fabric
 all: fabric
@@ -93,7 +87,7 @@ storage-down:
 	-cd fabric && $(MAKE) down
 
 .PHONY: service-up
-service-up: api oracle
+service-up: api portal
 	./blockchain_compose.py local up -d
 
 .PHONY: service-down
@@ -124,22 +118,23 @@ mem-up: all mem-down
 mem-down: explorer-down
 	-./blockchain_compose.py mem down
 
-# citest runs unit tests and integration tests within containers, like CI.
+# citest runs all tests within containers, as in CI.
 .PHONY: citest
-citest: plugin unit
+citest: plugin unit integrationcitest
 	@
 
+.PHONY: unit-portal
+unit-portal:
+	go test -v ./...
+
 .PHONY: unit
-unit: unit-oracle unit-other
+unit: unit-portal unit-other
 	@echo "all tests passed"
 
 .PHONY: unit-other
 unit-other: phylumtest
 	@echo "phylum tests passed"
 
-.PHONY: unit-oracle
-unit-oracle: oracletest
-	@echo "service tests passed"
 
 # NOTE:  The `citest` target manages creating/destroying a compose network.  To
 # run tests repeatedly execute the `integration` target directly.
@@ -171,9 +166,9 @@ download: ${SUBSTRATE_PLUGIN}
 
 .PHONY: print-export-path
 print-export-path:
-	echo "export SUBSTRATEHCP_FILE=${PWD}/${SUBSTRATE_PLUGIN_PLATFORM_TARGETED}"
+	@echo "export SUBSTRATEHCP_FILE=${SUBSTRATEHCP_FILE}"
 
-${STATIC_PLUGINS_DUMMY}: ${PRESIGNED_PATH}
+${STATIC_PLUGINS_DUMMY}:
 	${MKDIR_P} $(dir $@)
 	./scripts/obtain-plugin.sh
 	touch $@

@@ -31,12 +31,8 @@ clean:
 	rm -rf build
 
 .PHONY: test
-test: go-test shiro-test
+test: shiro-test
 	@
-
-.PHONY: go-test
-go-test:
-	go test -v -race -cover ./...
 
 .PHONY: shiro-test
 shiro-test: build

@@ -6,37 +6,9 @@ syntax = "proto3";
 
 package pb.v1;
 
-import "common/exception.proto";
+import "common/v1/exception.proto";
 
 option go_package = "github.com/luthersystems/sandbox/api/pb/v1";
-
-//import "google/protobuf/wrappers.proto";
-
-// Get health status of services.
-message HealthCheckRequest {
-  // Skip the chaincode healthcheck
-  bool oracle_only = 1;
-}
-
-// Health status of services.
-message HealthCheckResponse {
-  // The status of the relevant sub services.
-  repeated HealthCheckReport reports = 1;
-  // An exception if an error occurred during processing request.
-  common.Exception exception = 2;
-}
-
-// Health check status of an individual service.
-message HealthCheckReport {
-  // Timestamp of when the report was generated (RFC3339).
-  string timestamp = 1;
-  // Status of the service.
-  string status = 2;
-  // Name of the service.
-  string service_name = 3;
-  // Version of the service.
-  string service_version = 4;
-}
 
 // Request structure for the create_request endponit
 message CreateAccountRequest {
@@ -44,7 +16,7 @@ message CreateAccountRequest {
 }
 
 message CreateAccountResponse {
-  common.Exception exception = 1;
+  common.v1.Exception exception = 1;
 }
 
 message DeleteAccountRequest {
@@ -52,7 +24,7 @@ message DeleteAccountRequest {
 }
 
 message DeleteAccountResponse {
-  common.Exception exception = 1;
+  common.v1.Exception exception = 1;
 }
 
 message UpdateAccountRequest {
@@ -60,7 +32,7 @@ message UpdateAccountRequest {
 }
 
 message UpdateAccountResponse {
-  common.Exception exception = 1;
+  common.v1.Exception exception = 1;
 }
 
 message GetAccountRequest {
@@ -68,7 +40,7 @@ message GetAccountRequest {
 }
 
 message GetAccountResponse {
-  common.Exception exception = 1;
+  common.v1.Exception exception = 1;
   Account account = 2;
 }
 
@@ -77,7 +49,7 @@ message GetUserAccountsRequest {
 }
 
 message GetUserAccountsResponse {
-  common.Exception exception = 1;
+  common.v1.Exception exception = 1;
   repeated Account accounts = 2;
 }
 
@@ -92,7 +64,7 @@ message TransferRequest {
 }
 
 message TransferResponse {
-  common.Exception exception = 1;
+  common.v1.Exception exception = 1;
 }
 
 // Account represents a balance for an indiviudal denominated in a unit asset. An account holder may have multiple accounts.

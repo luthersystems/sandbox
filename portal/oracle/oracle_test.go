@@ -5,107 +5,51 @@
 package oracle
 
 import (
-	"bytes"
 	"context"
-	"io"
 	"testing"
 
+	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
-	"github.com/sirupsen/logrus"
+	"github.com/luthersystems/svc/oracle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type testWriter struct {
-	t *testing.T
-	b *bytes.Buffer
-}
+// phylumRelPath is the path to the phylum dir relative to this file.
+const phylumRelPath = "../../phylum"
 
-func newTestWriter(t *testing.T) *testWriter {
-	var b bytes.Buffer
-	return &testWriter{t: t, b: &b}
-}
-
-func (tw testWriter) Write(p []byte) (n int, err error) {
-	for _, b := range p {
-		if b == '\n' {
-			tw.t.Log(tw.b.String())
-			tw.b.Reset()
-			continue
-		}
-		// bytes.Buffer panics on error
-		tw.b.WriteByte(b)
-	}
-	return n, nil
-}
-
-func makeTestServer(t *testing.T, opts ...Option) (*Oracle, func()) {
-	t.Parallel()
+func makeTestServerFrom(t *testing.T, b []byte) (*portal, func()) {
 	t.Helper()
-	return newTestOracle(t, opts...)
+	cfg := &Config{Config: *oracle.DefaultConfig()}
+	cfg.PhylumPath = phylumRelPath
+	orc, stop := oracle.NewTestOracle(t, &cfg.Config, oracle.WithSnapshot(b))
+	return &portal{orc: orc}, stop
 }
 
-func newTestOracle(t *testing.T, opts ...Option) (*Oracle, func()) {
-	return newTestOracleFrom(t, nil, opts...)
-}
-
-func newTestOracleFrom(t *testing.T, snapshot []byte, opts ...Option) (*Oracle, func()) {
-	cfg := DefaultConfig()
-	cfg.Verbose = testing.Verbose()
-	logger := logrus.New()
-	logger.SetOutput(newTestWriter(t))
-	var r io.Reader
-	if snapshot != nil {
-		r = bytes.NewReader(snapshot)
-	}
-	finalOpts := []Option{
-		WithLogBase(logger.WithFields(nil)),
-		WithMockPhylumFrom("../../../phylum", r),
-	}
-	finalOpts = append(finalOpts, opts...)
-	server, err := New(cfg, finalOpts...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if cfg.Verbose {
-		logger.SetLevel(logrus.DebugLevel)
-	}
-
-	orcStop := func() {
-		err := server.Close()
-		require.NoError(t, err)
-	}
-
-	return server, orcStop
-}
-
-func snapshotServer(t *testing.T, oracle *Oracle) []byte {
-	var snapshot bytes.Buffer
-	err := oracle.phylum.MockSnapshot(&snapshot)
-	require.NoError(t, err)
-	return snapshot.Bytes()
+func makeTestServer(t *testing.T) (*portal, func()) {
+	t.Helper()
+	return makeTestServerFrom(t, nil)
 }
 
 func TestSnapshot(t *testing.T) {
 	server, stop := makeTestServer(t)
 	// Take a snapshot of the current server state, then shut it down
-	snap := snapshotServer(t, server)
+	snap := server.orc.Snapshot(t)
 	stop()
 
 	// Start a new oracle, restoring state from the snapshot (twice)
 	for i := 0; i < 2; i++ {
-		server, stop = newTestOracleFrom(t, snap)
+		server, stop = makeTestServerFrom(t, snap)
 		defer stop()
-		req := &pb.HealthCheckRequest{}
+		req := &healthcheck.GetHealthCheckRequest{}
 		ctx := context.Background()
-		resp, err := server.HealthCheck(ctx, req)
+		resp, err := server.GetHealthCheck(ctx, req)
 		require.NoError(t, err)
 		require.Nil(t, resp.GetException())
 	}
 }
 
-func createAccount(t *testing.T, server *Oracle, id string, balance int64) bool {
+func createAccount(t *testing.T, server *portal, id string, balance int64) bool {
 	t.Helper()
 	resp, err := server.CreateAccount(context.Background(), &pb.CreateAccountRequest{
 		Account: &pb.Account{
@@ -116,7 +60,7 @@ func createAccount(t *testing.T, server *Oracle, id string, balance int64) bool 
 	return assert.Nil(t, err) && assert.NotNil(t, resp)
 }
 
-func getAccount(t *testing.T, server *Oracle, id string, dst **pb.Account) bool {
+func getAccount(t *testing.T, server *portal, id string, dst **pb.Account) bool {
 	t.Helper()
 	resp, err := server.GetAccount(context.Background(), &pb.GetAccountRequest{
 		AccountId: id,
@@ -129,7 +73,7 @@ func TestHealthCheck(t *testing.T) {
 	server, stop := makeTestServer(t)
 	defer stop()
 	ctx := context.Background()
-	resp, err := server.HealthCheck(ctx, &pb.HealthCheckRequest{})
+	resp, err := server.GetHealthCheck(ctx, &healthcheck.GetHealthCheckRequest{})
 	require.NoError(t, err)
 	require.Equal(t, 2, len(resp.GetReports()))
 }
