@@ -18,3 +18,11 @@
       (lambda (&rest args)
         (unless r (set! r (fn)))
         (apply r args))))))
+
+(defun valid-msp? (expect-msp &optional expect-attributes)
+  (let ([expect-attributes (default expect-attributes (sorted-map))])
+    (and (equal? expect-msp (cc:creator))
+         (all? (lambda (key)
+                 (equal? (get expect-attributes key)
+                         (cc:creator-attribute key)))
+               (keys expect-attributes)))))

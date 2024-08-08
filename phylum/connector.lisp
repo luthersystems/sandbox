@@ -37,8 +37,11 @@
            (unless resp-body (error 'missing-resp "missing response"))
            (let* ([callback-state (get-callback-state req-id)]
                   [handler-name (get callback-state "handler_name")]
-                  [callback-ctx (get callback-state "ctx")]
+                  [callback-ctx (default (get callback-state "ctx") (sorted-map))]
+                  [msp-id (get callback-ctx "msp")]
                   [handler-fn (get state handler-name)])
+             (when msp-id
+               (valid-msp? msp-id))
              (if handler-fn
                (handler-fn resp-body callback-ctx)
                (error 'missing-handler 
@@ -83,7 +86,8 @@
                                    (get event "oid")
                                    (error 'missing-oid
                                           "missing object id"))]
-               [ctx (sorted-map "oid" event-header-oid)]
+               [ctx (sorted-map "oid" event-header-oid
+                                "msp" event-header-msp)]
                [event-ref-str
                  (thread-first
                    (sorted-map

@@ -39,9 +39,18 @@
 
 (set 'chaincode-version-key (format-string "{}:version" service-name))
 
+(defendpoint "create_claim" (req)
+  (let* ([event (sorted-map
+                  "key" "fnord"
+                  "req" event-req)])
+    (add-connector-event event "claim")
+    (route-success event)))
+
 ;; example endpoint triggering an event in stateDB
 (defendpoint "start" (event-req)
-  (let* ([event (sorted-map
+  (let* ([oid "123"]
+         [event (sorted-map
+                  "oid" oid
                   "key" "fnord" 
                   "req" event-req)])
     (add-connector-event event "claim")

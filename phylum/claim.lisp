@@ -12,7 +12,7 @@
        (let* ([resp-body (get resp "response")]
               [resp-err (get resp "error")])
          (if resp-err
-           (cc:errorf reps-err "response error") 
+           (cc:errorf resp-err "response error")
            (cc:infof resp "got connector resp"))
          ;; TODO: implement claim state machine
          (sorted-map 
