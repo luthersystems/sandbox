@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Ledger API",
+    "title": "Sandbox API",
     "version": "1.0"
   },
   "tags": [
     {
-      "name": "LedgerService"
+      "name": "SandboxService"
     }
   ],
   "schemes": [
@@ -19,114 +19,15 @@
     "application/json"
   ],
   "paths": {
-    "/v1/account/{account.accountId}": {
-      "patch": {
-        "summary": "Update an account.",
-        "operationId": "LedgerService_UpdateAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateAccountResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request determined by business logic",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "401": {
-            "description": "Authorization failed",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "404": {
-            "description": "Missing resource",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "405": {
-            "description": "Method not allowed",
-            "schema": {
-              "type": "string",
-              "format": "string"
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "503": {
-            "description": "Service not available",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "account.accountId",
-            "description": "Unique ID for the account. Immutable.",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "account",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "balance": {
-                  "type": "string",
-                  "format": "int64",
-                  "description": "Current balance in the account denominated in the underlying asset. Cannot be negative."
-                },
-                "assetId": {
-                  "type": "string",
-                  "description": "ID for the underlying asset that current balance is denominated in. Immutable."
-                },
-                "userId": {
-                  "type": "string",
-                  "description": "ID of the primary account owner."
-                }
-              },
-              "description": "Account represents a balance for an indiviudal denominated in a unit asset. An account holder may have multiple accounts."
-            }
-          }
-        ],
-        "tags": [
-          "Service"
-        ]
-      }
-    },
-    "/v1/account/{accountId}": {
+    "/v1/claim/{claimId}": {
       "get": {
-        "summary": "Retrieve account details.",
-        "operationId": "LedgerService_GetAccount",
+        "summary": "Retrieve claim details.",
+        "operationId": "SandboxService_GetClaim",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetAccountResponse"
+              "$ref": "#/definitions/v1GetClaimResponse"
             }
           },
           "400": {
@@ -181,79 +82,7 @@
         },
         "parameters": [
           {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Service"
-        ]
-      },
-      "delete": {
-        "summary": "Delete an account.",
-        "operationId": "LedgerService_DeleteAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1DeleteAccountResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request determined by business logic",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "401": {
-            "description": "Authorization failed",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "404": {
-            "description": "Missing resource",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "405": {
-            "description": "Method not allowed",
-            "schema": {
-              "type": "string",
-              "format": "string"
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "503": {
-            "description": "Service not available",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "accountId",
+            "name": "claimId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -264,15 +93,15 @@
         ]
       }
     },
-    "/v1/accounts": {
+    "/v1/claims": {
       "post": {
-        "summary": "Create a new account denominated in an underlying asset.",
-        "operationId": "LedgerService_CreateAccount",
+        "summary": "Create claim initiates the creation of the claim.",
+        "operationId": "SandboxService_CreateClaim",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1CreateAccountResponse"
+              "$ref": "#/definitions/v1CreateClaimResponse"
             }
           },
           "400": {
@@ -327,11 +156,11 @@
         },
         "parameters": [
           {
-            "name": "account",
+            "name": "claim",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1Account"
+              "$ref": "#/definitions/v1Claim"
             }
           }
         ],
@@ -343,7 +172,7 @@
     "/v1/health_check": {
       "get": {
         "summary": "Check the health of the service. This is used by load balancers to check service health.",
-        "operationId": "LedgerService_GetHealthCheck",
+        "operationId": "SandboxService_GetHealthCheck",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -414,157 +243,6 @@
           "Service"
         ]
       }
-    },
-    "/v1/transfer": {
-      "post": {
-        "summary": "Transfer between accounts denominated in the same underlying asset.",
-        "operationId": "LedgerService_Transfer",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1TransferResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request determined by business logic",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "401": {
-            "description": "Authorization failed",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "404": {
-            "description": "Missing resource",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "405": {
-            "description": "Method not allowed",
-            "schema": {
-              "type": "string",
-              "format": "string"
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "503": {
-            "description": "Service not available",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": "Transfer funds from payer account to payee account. Accounts must have same denomination (asset ID). Transfer amount cannot be negative.",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1TransferRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Service"
-        ]
-      }
-    },
-    "/v1/user/{userId}/accounts": {
-      "get": {
-        "summary": "Get accounts for a user.",
-        "operationId": "LedgerService_GetUserAccounts",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetUserAccountsResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request determined by business logic",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "401": {
-            "description": "Authorization failed",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "404": {
-            "description": "Missing resource",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "405": {
-            "description": "Method not allowed",
-            "schema": {
-              "type": "string",
-              "format": "string"
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "503": {
-            "description": "Service not available",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Service"
-        ]
-      }
     }
   },
   "definitions": {
@@ -596,38 +274,36 @@
         }
       }
     },
-    "v1Account": {
+    "v1Claim": {
       "type": "object",
       "properties": {
-        "accountId": {
+        "claimId": {
           "type": "string",
-          "description": "Unique ID for the account. Immutable."
+          "description": "Unique ID for the claim. Immutable. Set by backend."
         },
-        "balance": {
-          "type": "string",
-          "format": "int64",
-          "description": "Current balance in the account denominated in the underlying asset. Cannot be negative."
-        },
-        "assetId": {
-          "type": "string",
-          "description": "ID for the underlying asset that current balance is denominated in. Immutable."
-        },
-        "userId": {
-          "type": "string",
-          "description": "ID of the primary account owner."
+        "state": {
+          "$ref": "#/definitions/v1ClaimState",
+          "description": "State of the claim."
         }
       },
-      "description": "Account represents a balance for an indiviudal denominated in a unit asset. An account holder may have multiple accounts."
+      "description": "Claim represents an insurance claim."
     },
-    "v1CreateAccountResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/v1Exception"
-        }
-      }
+    "v1ClaimState": {
+      "type": "string",
+      "enum": [
+        "CLAIM_STATE_UNSPECIFIED",
+        "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS",
+        "CLAIM_STATE_LOECLAIM_ID_VERIFIED",
+        "CLAIM_STATE_OOECLAIM_REVIEWED",
+        "CLAIM_STATE_OOECLAIM_VALIDATED",
+        "CLAIM_STATE_LOEFIN_INVOICE_ISSUED",
+        "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED",
+        "CLAIM_STATE_OOEFIN_INVOICE_APPROVED",
+        "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"
+      ],
+      "default": "CLAIM_STATE_UNSPECIFIED"
     },
-    "v1DeleteAccountResponse": {
+    "v1CreateClaimResponse": {
       "type": "object",
       "properties": {
         "exception": {
@@ -687,14 +363,14 @@
       "default": "INVALID_TYPE",
       "description": "Type of exception.\n\n - INVALID_TYPE: Default for no exception.\n - BUSINESS: Business logic error.\n - SERVICE_NOT_AVAILABLE: A service was unavailable.\n - INFRASTRUCTURE: Infrastructure was down.\n - UNEXPECTED: Catch-all for all other types.\n - SECURITY_VIOLATION: Security related error."
     },
-    "v1GetAccountResponse": {
+    "v1GetClaimResponse": {
       "type": "object",
       "properties": {
         "exception": {
           "$ref": "#/definitions/v1Exception"
         },
-        "account": {
-          "$ref": "#/definitions/v1Account"
+        "claim": {
+          "$ref": "#/definitions/v1Claim"
         }
       }
     },
@@ -715,21 +391,6 @@
         }
       },
       "description": "Health status of services."
-    },
-    "v1GetUserAccountsResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/v1Exception"
-        },
-        "accounts": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1Account"
-          }
-        }
-      }
     },
     "v1HealthCheckReport": {
       "type": "object",
@@ -752,41 +413,6 @@
         }
       },
       "description": "Health check status of an individual service."
-    },
-    "v1TransferRequest": {
-      "type": "object",
-      "properties": {
-        "payerId": {
-          "type": "string",
-          "description": "Account debited. Required."
-        },
-        "payeeId": {
-          "type": "string",
-          "description": "Account credited. Required."
-        },
-        "transferAmount": {
-          "type": "string",
-          "format": "int64",
-          "description": "Amount transfered from payer account to payee account. Required."
-        }
-      },
-      "description": "Transfer funds from payer account to payee account. Accounts must have same denomination (asset ID). Transfer amount cannot be negative."
-    },
-    "v1TransferResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/v1Exception"
-        }
-      }
-    },
-    "v1UpdateAccountResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/v1Exception"
-        }
-      }
     }
   },
   "securityDefinitions": {
