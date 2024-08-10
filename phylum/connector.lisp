@@ -136,6 +136,8 @@
   (connector-handlers 'call-handler resp)
   (route-success (sorted-map "status" "OK")))
 
+;; add-connector-event inspects an event and sets up the data structures to 
+;; register callbacks.
 (set 'add-connector-event
   ((lambda ()
     (let ([state (sorted-map "ctr" 0)])
@@ -182,6 +184,20 @@
             (cc:storage-put event-header-key event-body-bytes))
           (assoc! state "ctr" (+ event-num 1))))))))
 
+(export 'do-transition)
+(defun do-transition (obj-factory transition)
+  (let* ([obj-handler-name (or (obj-factory 'name)
+                             (error 'missing-name "factory missing name"))]
+         [put-obj (get transition "put")] 
+         [del-obj (get transition "del")] 
+         [events (get transition "events")]) 
+    (when put-obj 
+      (obj-factory 'put put-obj))
+    (when del-obj 
+      (obj-factory 'del obj-id)) 
+    (map () #^(add-connector-event % obj-handler-name) events)
+    put-obj))
+
 (export 'register-connector-factory)
 (defun register-connector-factory 
   (obj-factory)
@@ -192,14 +208,8 @@
       obj-handler-name
       (lambda (resp ctx)
         (let* ([obj-id (or (get ctx "oid")
-                          'missing-obj-id "callback missing object ID")]
-               [obj (obj-factory 'get obj-id)]
-               [transition (obj 'handle resp)]
-               [put-obj (get transition "put")]
-               [del-obj (get transition "del")]
-               [events (get transition "events")])
-          (when put-obj 
-            (obj-factory 'put new-obj)) 
-          (when del-obj 
-            (obj-factory 'del obj-id)) 
-          (map () #^(add-connector-event % obj-handler-name) events))))))
+                           (error 'missing-obj-id "callback missing object ID"))]
+               [obj (or (obj-factory 'get obj-id)
+                           (error 'missing-obj "callback missing object"))]
+               [transition (obj 'handle resp)])
+          (do-transition obj-factory transition))))))

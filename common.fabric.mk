@@ -343,6 +343,8 @@ shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp bui
 			--chaincode.version ${CC_VERSION}_$* \
 			init "$(shell cat ${PHYLUM_VERSION_FILE})" /tmp/phylum.zip
 
+SEED=$(shell head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32)
+
 call_cmd-%:
 	@echo ${DOCKER_RUN} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
@@ -358,7 +360,8 @@ call_cmd-%:
 			--config ${SHIROCLIENT_FABRIC_CONFIG_BASENAME}_$*.yaml \
 			--chaincode.version ${CC_VERSION}_$* \
 			--phylum.version latest \
-			call
+			call \
+			--seed
 
 enable_logging-%:
 	./logging-pbool-ctl.sh true \

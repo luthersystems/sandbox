@@ -9,12 +9,26 @@
 //
 // You can trigger events using this script in `fabric/` dir:
 //
-//	./client.sh start-pvt '[{"request_id": "456", "fnord":"eris"}]'
+// > cd fabric && ./client.sh create_claim '[{}]'
+//
+//	{
+//	 "claim": {
+//	   "claim_id": "9b195776-961e-4d2b-9820-efc421f8959a",
+//	   "state": "CLAIM_STATE_NEW"
+//	 }
+//	}
 //
 // By default the service uses a file checkpointer, stored at
 // `/tmp/checkpoint.tmp`. If you wipe your network make sure you also
 // wipe your checkpoint file, otherwise the service gets stuck trying to
 // fetch future blocks.
+//
+// NOTE: there's something not quite right with the shiroclient-gw
+// notify and phylum version. When running ./client.sh if you get
+// "Method not found", you can try running `make init`, or deleting
+// build/phylum_version and running `make init`. If that still doesn't
+// fix it, run `make down up`, wait a few seconds, and
+// `cd fabric && make init` again.
 package main
 
 // TODO: persist last block height state

@@ -3,6 +3,7 @@
 package shirorpc
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -35,6 +36,20 @@ func (s *transient) String() string {
 	return fmt.Sprintf("%v", p)
 }
 
+const (
+	hkdfSeedSize = 32
+)
+
+// seedGen generates random secret keys.
+var seedGen = func() ([]byte, error) {
+	key := make([]byte, hkdfSeedSize)
+	_, err := rand.Read(key)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
+
 // Transient returns the transient data for the request.
 func (s *shiroConnectorRequest) Transient() (transient, error) {
 	m := make(map[string][]byte)
@@ -44,6 +59,11 @@ func (s *shiroConnectorRequest) Transient() (transient, error) {
 		reqKey := fmt.Sprintf("%s%d", repTransientKeyPrefix, i)
 		m[reqKey] = reqCopy
 	}
+	seed, err := seedGen()
+	if err != nil {
+		return nil, fmt.Errorf("seed gen: %w", err)
+	}
+	m["csprng_seed_private"] = seed
 	return m, nil
 }
 

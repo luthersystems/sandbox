@@ -1,4 +1,4 @@
-// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+// Copyright © 2024 Luther Systems, Ltd. All right reserved.
 
 // API Models and Documentation.
 
@@ -16,6 +16,7 @@ message CreateClaimRequest {
 
 message CreateClaimResponse {
   common.v1.Exception exception = 1;
+  Claim claim = 2;
 }
 
 message GetClaimRequest {
@@ -29,14 +30,15 @@ message GetClaimResponse {
 
 enum ClaimState {
   CLAIM_STATE_UNSPECIFIED = 0;
-  CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS = 1;
-  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 2;
-  CLAIM_STATE_OOECLAIM_REVIEWED = 3;
-  CLAIM_STATE_OOECLAIM_VALIDATED = 4;
-  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 5;
-  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 6;
-  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 7;
-  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 8;
+  CLAIM_STATE_NEW = 1;
+  CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS = 2;
+  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 3;
+  CLAIM_STATE_OOECLAIM_REVIEWED = 4;
+  CLAIM_STATE_OOECLAIM_VALIDATED = 5;
+  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 6;
+  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 7;
+  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 8;
+  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 9;
 }
 
 // Claim represents an insurance claim.

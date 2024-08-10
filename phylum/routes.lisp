@@ -24,7 +24,8 @@
 (defmacro defendpoint (name args &rest exprs)
   (quasiquote
     (router:defendpoint (unquote name) (unquote args)
-                        (sandbox:wrap-endpoint (lambda () (unquote-splicing exprs))))))
+                        (sandbox:wrap-endpoint 
+                          (lambda () (unquote-splicing exprs))))))
 
 ;; defendpoint-get defines a readonly endpoint, transactions of which are not
 ;; allowed to be committed.  The shiroclient should automatically detect
@@ -34,42 +35,10 @@
 (defmacro defendpoint-get (name args &rest exprs)
   (quasiquote
     (sandbox:defendpoint (unquote name) (unquote args)
-                         (cc:force-no-commit-tx) ; get route cannot update statedb
+                         (cc:force-no-commit-tx) ; get route cannot update 
                          (unquote-splicing exprs))))
 
 (set 'chaincode-version-key (format-string "{}:version" service-name))
-
-(defendpoint "create_claim" (req)
-  (let* ([event (sorted-map
-                  "key" "fnord"
-                  "req" event-req)])
-    (add-connector-event event "claim")
-    (route-success event)))
-
-;; example endpoint triggering an event in stateDB
-(defendpoint "start" (event-req)
-  (let* ([oid "123"]
-         [event (sorted-map
-                  "oid" oid
-                  "key" "fnord" 
-                  "req" event-req)])
-    (add-connector-event event "claim")
-    (route-success event)))
-
-;; example endpoint triggering an event in sideDB
-(defendpoint "start-pvt" (event-req)
-  (let* ([oid "123"]
-         [event (sorted-map
-                  "oid" oid
-                  "msp" "Org1MSP"
-                  "key" "fnord"
-                  "pdc" "private"
-                  "req" event-req)])
-    ;; create a new claim object
-    (claims 'put (sorted-map "claim_id" oid))
-    ;; raise event for the new claim to be processed by connector
-    (add-connector-event event "claim")
-    (route-success event)))
 
 (defendpoint "init" ()
   (let* ([prev-version (statedb:get chaincode-version-key)]
@@ -93,3 +62,17 @@
                           "service_version" service-version
                           "service_name"    service-name
                           "timestamp"       (cc:timestamp (cc:now)))))))
+
+(defendpoint "create_claim" (req)
+  (let* ([claim (create-claim)]
+         [data (claim 'data)])
+    (route-success (sorted-map "claim" data))))
+
+(defendpoint "get_claim" (req) 
+  (let* ([claim-id (or (get req "claim_id")
+                       (set-exception-business "missing claim_id"))]
+         [claim (or (claims 'get claim-id)
+                    (set-exception-business 
+                      (format-string "missing claim {}" claim-id)))]
+         [data (claim 'data)])
+    (route-success (sorted-map "claim" data))))

@@ -1,68 +1,115 @@
 (in-package 'sandbox)
 
-;; TODO: set MSPID on request
-;; TODO move methods into single class
-;;
-;; State Machine:
-;;
-;;  CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS = 1;
-;;  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 2;
-;;  CLAIM_STATE_OOECLAIM_REVIEWED = 3;
-;;  CLAIM_STATE_OOECLAIM_VALIDATED = 4;
-;;  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 5;
-;;  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 6;
-;;  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 7;
-;;  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 8;
-;;
+(set 'claim-next-state 
+  ;; claim is a linear state machine that executes in the defined order:
+  (sorted-map 
+    "CLAIM_STATE_UNSPECIFIED"                "CLAIM_STATE_UNSPECIFIED"
+    "CLAIM_STATE_NEW"                        "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS"
+    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" "CLAIM_STATE_LOECLAIM_ID_VERIFIED" 
+    "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       "CLAIM_STATE_OOECLAIM_REVIEWED"
+    "CLAIM_STATE_OOECLAIM_REVIEWED"          "CLAIM_STATE_OOECLAIM_VALIDATED"
+    "CLAIM_STATE_OOECLAIM_VALIDATED"         "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"
+    "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"      "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED"
+    "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED"    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"
+    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"
+    "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"   "CLAIM_STATE_DONE"
+    "CLAIM_STATE_DONE"                        ()))
 
-;; mk-claim implements handler
+(set 'claims-state-event-desc
+  ;; human description of the triggered event for the state:
+  (sorted-map 
+    "CLAIM_STATE_UNSPECIFIED"                ()
+    "CLAIM_STATE_NEW"                        "CLAIMS_PORTAL_UI"
+    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" "EQUIFAX_ID_VERIFY" 
+    "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       "POSTGRES_CLAIMS_DB"
+    "CLAIM_STATE_OOECLAIM_REVIEWED"          "CAMUNDA_WORKFLOW"
+    "CLAIM_STATE_OOECLAIM_VALIDATED"         "OPENKODA_INVOICE"
+    "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"      "CAMUNDA_TASKLIST"
+    "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED"    "EMAIL"
+    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    "GOCARDLESS_PAYMENT"
+    "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"   ()
+    "CLAIM_STATE_DONE"                       ()))
+
 (defun mk-claim (claim)
+  ;; mk-claim implements claims handler logic
   (unless claim (error 'missing-claim "missing claim"))
-  (labels
-    ([handle
-       (resp)
-       (let* ([resp-body (get resp "response")]
-              [resp-err (get resp "error")])
-         (if resp-err
-           (cc:errorf resp-err "response error")
-           (cc:infof resp "got connector resp"))
-         ;; TODO: implement claim state machine
-         (sorted-map 
-           "put" ()
-           "del" false
-           "events" ()))])
+  (let* ([claim-id (get claim "claim_id")]
+         [state (or (get claim "state") "CLAIM_STATE_UNSPECIFIED")]
+         [events (vector)])
+    (labels
+      ([add-event (event-req &optional msp)
+         (let* ([req-id (mk-uuid)]
+                [event-req (sorted-map "request_id" req-id)]
+                [event (sorted-map 
+                         "oid" claim-id 
+                         "msp" (default msp "Org1MSP")
+                         "key" req-id 
+                         "pdc" "private" 
+                         "req" event-req)])
+           (append! events event))]
 
-    (lambda (op &rest args)
-        (cond ((equal? op 'handle) (apply handle args))
-              (:else (error 'unknown-operation op))))))
+       [ret-save ()
+         (sorted-map "put" claim
+                     "events" events)]
+
+       [next-state! ()
+         (let* ([new-state (get claim-next-state state)])
+           (assoc! claim "state" new-state)
+           new-state)]
+
+       [init ()
+         (let* ([state "CLAIM_STATE_NEW"] 
+                [_ (assoc! claim "state" state)]
+                [desc (get claims-state-event-desc state)] 
+                [req (sorted-map "desc" desc)])
+           (add-event req))
+         (ret-save)]
+       
+       [data () claim]
+
+       [handle (resp) 
+         (let* ([new-state (or (next-state!) "")]
+                [resp-body (get resp "response")]
+                [resp-err (get resp "error")]
+                [desc (or(get claims-state-event-desc new-state) "")]
+                [req (sorted-map "desc" desc)])
+           (when resp-err 
+             (set-exception-unexpected "unhandled response error"))
+           (cc:infof resp-body "got connector resp")
+           ;; TODO: do something with the actual response
+           (unless (empty? new-state )
+             (progn 
+               (add-event req) 
+               (ret-save))))])
+
+      (lambda (op &rest args) 
+        (cond ((equal? op 'init) (apply init args))
+              ((equal? op 'handle) (apply handle args))
+              ((equal? op 'data) (apply data args))
+              (:else (error 'unknown-operation op)))))))
 
 ;; mk-claims implements factory
 (defun mk-claims ()
   (labels
     ([name () "claim"]
 
-     [mk-claim-storage-key
-       (claim-id)
+     [mk-claim-storage-key (claim-id)
        (join-index-cols "sandbox" "claim"  claim-id)]
 
-     [storage-put-claim
-       (claim)
+     [storage-put-claim (claim)
        (sidedb:put (mk-claim-storage-key (get claim "claim_id")) claim)]
 
-     [new-claim ()
-                (let ([claim (sorted-map "claim_id" (mk-uuid))])
-                  (storage-put-claim)
-                  claim)]
+     [new-claim () 
+       (let* ([claim-data (sorted-map "claim_id" (mk-uuid))]
+              [claim (mk-claim claim-data)]) 
+         (claim 'init))]
 
-     [storage-get-claim
-       (claim-id)
-       (thread-first
-         (mk-claim-storage-key claim-id)
-         (sidedb:get)
-         (mk-claim))]
-
-     [storage-del-claim
-       (claim-id)
+     [storage-get-claim (claim-id)
+       (let* ([key (mk-claim-storage-key claim-id)]
+              [claim-data (sidedb:get key)]) 
+         (when claim-data (mk-claim claim-data)))]
+ 
+     [storage-del-claim (claim-id)
        (sidedb:del (mk-claim-storage-key claim-id))])
 
     (lambda (op &rest args)
@@ -77,17 +124,7 @@
 
 (register-connector-factory claims)
 
-;;(defun create-claim ()
-;;(let ([claim (claims 'new')]
-;;      [id (get claim "claim_id")]
-;;      [req-id (mk-uuid)]
-;;      [event-req (sorted-map
-;;                   "request_id" req-id)]
-;;      [event (sorted-map
-;;               "oid" id
-;;               "msp" "Org1MSP"
-;;               "key" req-id
-;;               "pdc" "private"
-;;               "req" event-req)])
-;;  (add-connector-event event "claim")
-;;  claim))
+(defun create-claim ()
+  ; create claim allocates storage for a new claim, sets the ID and state, and
+  ; raises an event to trigger processing.
+  (mk-claim (do-transition claims (claims 'new))))

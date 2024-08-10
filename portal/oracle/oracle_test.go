@@ -49,9 +49,10 @@ func TestSnapshot(t *testing.T) {
 	}
 }
 
-func createClaim(t *testing.T, server *portal) bool {
+func createClaim(t *testing.T, server *portal, id *string) bool {
 	t.Helper()
 	resp, err := server.CreateClaim(context.Background(), &pb.CreateClaimRequest{})
+	*id = resp.GetClaim().GetClaimId()
 	return assert.Nil(t, err) && assert.NotNil(t, resp)
 }
 
@@ -73,28 +74,15 @@ func TestHealthCheck(t *testing.T) {
 	require.Equal(t, 2, len(resp.GetReports()))
 }
 
-func TestCreateAccount(t *testing.T) {
-	server, stop := makeTestServer(t)
-	defer stop()
-	if createClaim(t, server) {
-		ctx := context.Background()
-		resp, err := server.CreateClaim(ctx, &pb.CreateClaimRequest{})
-		if assert.Nil(t, err) {
-			if assert.NotNil(t, resp) {
-				assert.NotNil(t, resp.Exception)
-			}
-		}
-	}
-}
-
 func TestGetAccount(t *testing.T) {
 	server, stop := makeTestServer(t)
 	defer stop()
-	if !createClaim(t, server) {
+	var id string
+	if !createClaim(t, server, &id) {
 		return
 	}
 	var claim *pb.Claim
-	if getClaim(t, server, "abc", &claim) {
+	if getClaim(t, server, id, &claim) {
 		resp, err := server.GetClaim(context.Background(), &pb.GetClaimRequest{
 			ClaimId: "xyz",
 		})

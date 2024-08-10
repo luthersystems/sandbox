@@ -14,9 +14,9 @@ tests:
           console.log(data);
           pm.response.to.have.status(200);
           pm.expect(data).to.not.have.property("exception");
-          pm.expect(data).to.have.property("claim");"
-          pm.expect(data.claim).to.have.property("claim_id");"
-          pm.environment.set("CLAIM_ID", data.claim.claim_id);"
+          pm.expect(data).to.have.property("claim");
+          pm.expect(data.claim).to.have.property("claim_id");
+          pm.environment.set("CLAIM_ID", data.claim.claim_id);
       });
   - name: "Get claim"
     method: GET
@@ -27,6 +27,6 @@ tests:
           console.log(data);
           pm.response.to.have.status(200);
           pm.expect(data).to.not.have.property("exception");
-          pm.expect(data).to.have.property("claim");"
-          pm.expect(data.claim).to.have.property("status");"
+          pm.expect(data).to.have.property("claim");
+          pm.expect(data.claim).to.have.property("state");
       });
