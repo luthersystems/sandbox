@@ -1,4 +1,5 @@
-// Package chaininfo is a library for processing fabric protobufs.
+// Package chaininfo is a library for processing fabric protobufs, and Luther
+// specific data structures maintained on-chain.
 package chaininfo
 
 import (
@@ -17,12 +18,14 @@ import (
 )
 
 const (
-	LutherEventKey             = "luther"
-	LutherEventName            = "txEventName"
-	LutherEventRequestID       = "txRequestID"
-	LutherEventTxTimestamp     = "txTimestamp"
-	LutherConnectorEventPrefix = "$connector_events:"
-	MaxConnectorEventsPerTx    = 10
+	LutherEventKey                    = "luther"
+	LutherEventName                   = "txEventName"
+	LutherEventRequestID              = "txRequestID"
+	LutherEventTxTimestamp            = "txTimestamp"
+	LutherConnectorEventPrefix        = "$connector_events:"
+	LutherConnectorEventContextPrefix = "$cr:"
+	LutherConnectorEventContextPDC    = "private"
+	MaxConnectorEventsPerTx           = 10
 )
 
 var skipLifecycleRWSet = true
@@ -314,81 +317,6 @@ func (s *lutherEvent) GetRequestID() string {
 	return value
 }
 
-type connectorEvent struct {
-	Key       string `json:"key"`
-	RequestID string `json:"rid"`
-	PDC       string `json:"pdc"`
-	MSPID     string `json:"msp"`
-}
-
-func (s *connectorEvent) String() string {
-	if s == nil {
-		return ""
-	}
-	if s.PDC != "" {
-		return fmt.Sprintf("{rid: %s, key: %s, pdc: %s, msp: %s}", s.RequestID, s.Key, s.PDC, s.MSPID)
-	}
-	return fmt.Sprintf("{rid: %s, key: %s}", s.RequestID, s.Key)
-}
-
-type connectorEvents []connectorEvent
-
-func join(elems []string, sep string) string {
-	switch len(elems) {
-	case 0:
-		return ""
-	case 1:
-		return elems[0]
-	}
-	n := len(sep) * (len(elems) - 1)
-	for i := 0; i < len(elems); i++ {
-		n += len(elems[i])
-	}
-
-	b := make([]byte, n)
-	bp := copy(b, elems[0])
-	for _, s := range elems[1:] {
-		bp += copy(b[bp:], sep)
-		bp += copy(b[bp:], s)
-	}
-	return string(b)
-}
-
-func (s connectorEvents) String() string { // Changed receiver to non-pointer type
-	events := make([]string, len(s))
-	for i, event := range s {
-		events[i] = event.String()
-	}
-	return fmt.Sprintf("[%s]", join(events, ", "))
-}
-
-func (s *lutherEvent) GetConnectorEvents() connectorEvents {
-	if s == nil {
-		return nil
-	}
-
-	var events []connectorEvent
-
-	for i := 0; i <= MaxConnectorEventsPerTx; i++ {
-		eventKey := fmt.Sprintf("%s%d", LutherConnectorEventPrefix, i)
-		value, exists := (*s)[eventKey]
-		if !exists {
-			return events
-		}
-
-		event := connectorEvent{}
-		if err := json.Unmarshal([]byte(value), &event); err != nil {
-			logrus.WithError(err).Error("invalid event format")
-		} else {
-			events = append(events, event)
-		}
-	}
-
-	logrus.Warn("too many events")
-
-	return events
-}
-
 func (s *lutherEvent) GetTimestamp() string {
 	if s == nil {
 		return ""
@@ -432,7 +360,7 @@ func (s *Event) String() string {
 	if lutherEvent, err := s.ToLutherEvent(); err != nil {
 		return "<corrupt>"
 	} else {
-		return fmt.Sprintf("%s@%s [%s: %s]", lutherEvent.GetName(), lutherEvent.GetTimestamp(), lutherEvent.GetRequestID(), lutherEvent.GetConnectorEvents())
+		return fmt.Sprintf("%s@%s [%s: %s]", lutherEvent.GetName(), lutherEvent.GetTimestamp(), lutherEvent.GetRequestID(), lutherEvent.getConnectorEventHeaders())
 	}
 }
 
@@ -882,4 +810,259 @@ func NewTransaction(envelopeBytes []byte) (*Transaction, error) {
 	}
 
 	return retTx, nil
+}
+
+// ConnectorEventHeader captures metadata about a request.
+type ConnectorEventHeader struct {
+	RequestID string `json:"rid"`
+}
+
+func (s *ConnectorEventHeader) String() string {
+	if s == nil {
+		return ""
+	}
+	return fmt.Sprintf("{rid: %s}", s.RequestID)
+}
+
+type connectorEventHeaders []ConnectorEventHeader
+
+func join(elems []string, sep string) string {
+	switch len(elems) {
+	case 0:
+		return ""
+	case 1:
+		return elems[0]
+	}
+	n := len(sep) * (len(elems) - 1)
+	for i := 0; i < len(elems); i++ {
+		n += len(elems[i])
+	}
+
+	b := make([]byte, n)
+	bp := copy(b, elems[0])
+	for _, s := range elems[1:] {
+		bp += copy(b[bp:], sep)
+		bp += copy(b[bp:], s)
+	}
+	return string(b)
+}
+
+func (s connectorEventHeaders) String() string { // Changed receiver to non-pointer type
+	events := make([]string, len(s))
+	for i, event := range s {
+		events[i] = event.String()
+	}
+	return fmt.Sprintf("[%s]", join(events, ", "))
+}
+
+func (s *lutherEvent) getConnectorEventHeaders() connectorEventHeaders {
+	if s == nil {
+		return nil
+	}
+
+	var events []ConnectorEventHeader
+
+	for i := 0; i <= MaxConnectorEventsPerTx; i++ {
+		eventKey := fmt.Sprintf("%s%d", LutherConnectorEventPrefix, i)
+		value, exists := (*s)[eventKey]
+		if !exists {
+			return events
+		}
+
+		event := ConnectorEventHeader{}
+		if err := json.Unmarshal([]byte(value), &event); err != nil {
+			logrus.WithError(err).Error("invalid event format, ignoring...")
+		} else {
+			events = append(events, event)
+		}
+	}
+
+	logrus.Warn("too many events")
+
+	return events
+}
+
+// CallbackState wraps a context.
+type CallbackState struct {
+	Context ConnectorEventContext `json:"ctx"`
+}
+
+// ConnetorEventContext stores the context of the request.c:w
+type ConnectorEventContext struct {
+	ObjectID     string `json:"oid"`
+	RequestMSPID string `json:"msp"`
+	RequestKey   string `json:"key"`
+	RequestPDC   string `json:"pdc"`
+}
+
+func (s *ConnectorEventContext) String() string {
+	if s == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("{ oid: %s, msp: %s, key: %s, pdc: %s", s.ObjectID, s.RequestMSPID, s.RequestKey, s.RequestPDC)
+}
+
+// Valid determines if the event contect has the minimum set of fields
+// to proceed with processing.
+func (s *ConnectorEventContext) Valid() error {
+	if s == nil {
+		return fmt.Errorf("nil context")
+	}
+	if s.RequestKey == "" {
+		return fmt.Errorf("missing request key")
+	}
+	return nil
+}
+
+// Event models an on-chain event.
+type ConnectorEvent struct {
+	unmarshalError error // TODO: not currently implemented
+	context        ConnectorEventContext
+	header         ConnectorEventHeader
+	requestBody    json.RawMessage
+}
+
+// UnmarshalError returns an error encountered while extracting the particular
+// connector event. This allows the caller to handle errors at the individual
+// request level.
+func (s *ConnectorEvent) UnmarshalError() error {
+	if s == nil {
+		return fmt.Errorf("nil event")
+	}
+	return s.unmarshalError
+}
+
+// RequestBody returns a copy of the request.
+func (s *ConnectorEvent) RequestBody() json.RawMessage {
+	if s == nil {
+		return nil
+	}
+	reqCopy := make([]byte, len(s.requestBody))
+	copy(reqCopy, s.requestBody)
+	return reqCopy
+}
+
+// RequestID returns the ID of the request within the connector event.
+func (s *ConnectorEvent) RequestID() string {
+	if s == nil {
+		return ""
+	}
+	return s.header.RequestID
+}
+
+func getConnectorEventContext(ns string, reqID string, pvtData *rwset.TxPvtReadWriteSet) (*ConnectorEventContext, error) {
+	callbackState := &CallbackState{}
+	if b, err := GetPvtWriteSetValue(ns, LutherConnectorEventContextPDC, fmt.Sprintf("%s%s", LutherConnectorEventContextPrefix, reqID), pvtData); err != nil {
+		return nil, fmt.Errorf("missing event context: %w", err)
+	} else if err := json.Unmarshal(b, callbackState); err != nil {
+		return nil, fmt.Errorf("unmarshal context: %w", err)
+	} else {
+		return &callbackState.Context, nil
+	}
+}
+
+func getConnectorEvent(ns string, header ConnectorEventHeader, tx *Transaction, pvtData *rwset.TxPvtReadWriteSet) (*ConnectorEvent, error) {
+	reqID := header.RequestID
+	eventCtx, err := getConnectorEventContext(ns, reqID, pvtData)
+	if err != nil {
+		return nil, fmt.Errorf("connector event context: %w", err)
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"req_id": reqID,
+		"ns":     ns,
+	}).Debugf("event context: [%s]", eventCtx)
+
+	if err := eventCtx.Valid(); err != nil {
+		return nil, fmt.Errorf("invalid event context: %w", err)
+	}
+
+	event := &ConnectorEvent{
+		header:  header,
+		context: *eventCtx,
+	}
+
+	var req []byte
+	if eventCtx.RequestPDC != "" {
+		req, err = GetPvtWriteSetValue(ns, eventCtx.RequestPDC, eventCtx.RequestKey, pvtData)
+	} else {
+		req, err = tx.GetDetails().GetWriteSetValue(ns, eventCtx.RequestKey)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("request body: %w", err)
+	}
+	event.requestBody = req
+	return event, nil
+}
+
+// ConnectorEventUnmarshaler unmarshals connector events within a block with
+// private data.
+type ConnectorEventUnmarshaler struct {
+	// CCIDFilter selects which chaincode to retrieve events from.
+	CCIDFilter string
+	MSPFilter  string
+}
+
+// Unmarshal returns connector events.
+func (s *ConnectorEventUnmarshaler) Unmarshal(blkPvt *fabricpeer.BlockAndPrivateData) ([]*ConnectorEvent, error) {
+	if blkPvt == nil {
+		return nil, nil
+	}
+	block, err := NewBlock(blkPvt.GetBlock())
+	if err != nil {
+		return nil, fmt.Errorf("new block: %w", err)
+	}
+
+	events := make([]*ConnectorEvent, 0, len(block.GetTransactions()))
+	for txSeqNo, tx := range block.GetTransactions() {
+		if !block.GetValidation(txSeqNo).Valid() {
+			continue
+		}
+		chainEvent := tx.GetDetails().GetEvent()
+		if !chainEvent.IsLutherEvent() {
+			continue
+		}
+
+		ccID := chainEvent.GetChaincodeId()
+		if ccID == "" {
+			return nil, fmt.Errorf("missing chaincode ID")
+		}
+		if s.CCIDFilter != "" && ccID != s.CCIDFilter {
+			logrus.Debugf("ignoring chaincode event from ccid: [%s], want: [%s]", ccID, s.CCIDFilter)
+			continue
+		}
+
+		lutherEvent, err := chainEvent.ToLutherEvent()
+		if err != nil {
+			return nil, fmt.Errorf("invalid luther event: %w", err)
+		}
+
+		if len(lutherEvent.getConnectorEventHeaders()) == 0 {
+			logrus.Debugf("ignoring chaincode event, no connector events")
+			continue
+		}
+
+		var txPvtData *rwset.TxPvtReadWriteSet
+		hasTxPvtData := false
+		if len(blkPvt.GetPrivateDataMap()) > 0 {
+			txPvtData, hasTxPvtData = blkPvt.GetPrivateDataMap()[uint64(txSeqNo)]
+		}
+		if !hasTxPvtData {
+			return nil, fmt.Errorf("connector event missing private data")
+		}
+
+		for _, header := range lutherEvent.getConnectorEventHeaders() {
+			event, err := getConnectorEvent(ccID, header, tx, txPvtData)
+			if err != nil {
+				return nil, fmt.Errorf("connector event: %w", err)
+			}
+			if s.MSPFilter != "" && event.context.RequestMSPID != "" && s.MSPFilter != event.context.RequestMSPID {
+				logrus.Debugf("ignoring chaincode event for msp: [%s], want: [%s]", event.context.RequestMSPID, s.MSPFilter)
+				continue
+			}
+			events = append(events, event)
+		}
+	}
+
+	return events, nil
 }

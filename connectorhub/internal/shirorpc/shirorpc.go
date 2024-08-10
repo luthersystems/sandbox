@@ -7,19 +7,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
 const (
-	// TODO: why is this connector endpoint not being called!?
-	connectorEndpoint = "$ch_callback"
-	repTransientKey   = "$ch_rep"
+	connectorEndpoint     = "$ch_callback"
+	repTransientKeyPrefix = "$ch_rep:"
 )
 
-type shiroRequest struct {
-	requestID string
-	r         json.RawMessage
+type shiroConnectorRequest struct {
+	reqs []json.RawMessage
 }
 
 type transient map[string][]byte
@@ -37,23 +36,22 @@ func (s *transient) String() string {
 }
 
 // Transient returns the transient data for the request.
-func (s *shiroRequest) Transient() (transient, error) {
+func (s *shiroConnectorRequest) Transient() (transient, error) {
 	m := make(map[string][]byte)
-	reqCopy := make([]byte, len(s.r))
-	copy(reqCopy, s.r)
-	m[repTransientKey] = reqCopy
+	for i, r := range s.reqs {
+		reqCopy := make([]byte, len(r))
+		copy(reqCopy, r)
+		reqKey := fmt.Sprintf("%s%d", repTransientKeyPrefix, i)
+		m[reqKey] = reqCopy
+	}
 	return m, nil
 }
 
 // ArgumentsBytes returns the arguments for the request.
-func (s *shiroRequest) ArgumentsBytes() ([]byte, error) {
-	type Body struct {
-		RequestID string `json:"request_id"`
-	}
+func (s *shiroConnectorRequest) ArgumentsBytes() ([]byte, error) {
+	type Body struct{} // Keep all data private, in transientc
 
-	body := &Body{
-		RequestID: s.requestID,
-	}
+	body := &Body{}
 
 	args := []*Body{body}
 
@@ -61,14 +59,13 @@ func (s *shiroRequest) ArgumentsBytes() ([]byte, error) {
 		"$shiro_phylum": "latest",
 	}
 
-	return jsonRPCBytes(connectorEndpoint, s.requestID, args, metas)
+	return jsonRPCBytes(connectorEndpoint, uuid.New(), args, metas)
 }
 
-// MakeRequest constructs a shiroclient request message.
-func MakeRequest(reqID string, r json.RawMessage) (*shiroRequest, error) {
-	return &shiroRequest{
-		requestID: reqID,
-		r:         r,
+// MakeConnectorEventResponse constructs a shiroclient request message.
+func MakeConnectorEventResponse(r json.RawMessage) (*shiroConnectorRequest, error) {
+	return &shiroConnectorRequest{
+		reqs: []json.RawMessage{r},
 	}, nil
 }
 

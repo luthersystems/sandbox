@@ -17,8 +17,6 @@ import (
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
-	rwset "github.com/hyperledger/fabric-protos-go-apiv2/ledger/rwset"
-	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/luthersystems/sandbox/connectorhub/internal/chaininfo"
 	"github.com/luthersystems/sandbox/connectorhub/internal/shirorpc"
 	"github.com/sirupsen/logrus"
@@ -334,7 +332,7 @@ func (s *eventBus) defaultCallback(reqID string, rep json.RawMessage) error {
 	c := s.network.GetContract(s.cfg.ChaincodeID)
 	ctx := s.makeCallbackContext()
 
-	req, err := shirorpc.MakeRequest(reqID, rep)
+	req, err := shirorpc.MakeConnectorEventResponse(rep)
 	if err != nil {
 		return fmt.Errorf("make shiro response: %w", err)
 	}
@@ -419,130 +417,14 @@ func (s *eventBus) close() error {
 	return retErr
 }
 
-func unmarshalLutherEvents(blkPvt *peer.BlockAndPrivateData, ccIDFilter string) ([]*Event, error) {
-	if blkPvt == nil {
-		return nil, nil
-	}
-	block, err := chaininfo.NewBlock(blkPvt.GetBlock())
-	if err != nil {
-		return nil, fmt.Errorf("new block: %w", err)
-	}
-
-	blockNum := block.GetBlockNum()
-	events := make([]*Event, 0, len(block.GetTransactions()))
-	for txSeqNo, tx := range block.GetTransactions() {
-		if !block.GetValidation(txSeqNo).Valid() {
-			continue
-		}
-		chainEvent := tx.GetDetails().GetEvent()
-		if !chainEvent.IsLutherEvent() {
-			continue
-		}
-
-		ccID := chainEvent.GetChaincodeId()
-		if ccID == "" {
-			return nil, fmt.Errorf("missing chaincode ID")
-		}
-
-		if ccIDFilter != "" && ccID != ccIDFilter {
-			logrus.Debugf("ignoring chaincode event from ccid: [%s], want: [%s]", ccID, ccIDFilter)
-			continue
-		}
-
-		lutherEvent, err := chainEvent.ToLutherEvent()
-		if err != nil {
-			return nil, fmt.Errorf("invalid luther event: %w", err)
-		}
-
-		var txPvtData *rwset.TxPvtReadWriteSet
-		hasTxPvtData := false
-		if len(blkPvt.GetPrivateDataMap()) > 0 {
-			txPvtData, hasTxPvtData = blkPvt.GetPrivateDataMap()[uint64(txSeqNo)]
-		}
-
-		for _, connectorEvent := range lutherEvent.GetConnectorEvents() {
-			var request json.RawMessage
-			event := &Event{
-				header: EventHeader{
-					BlockNum:     blockNum,
-					RequestID:    connectorEvent.RequestID,
-					RequestKey:   connectorEvent.Key,
-					RequestPDC:   connectorEvent.PDC,
-					RequestMSPID: connectorEvent.MSPID,
-				},
-				request: request,
-			}
-			if err := event.header.valid(); err != nil {
-				event.unmarshalError = err
-			} else if connectorEvent.PDC != "" {
-				if !hasTxPvtData {
-					event.unmarshalError = fmt.Errorf("missing private data")
-				} else if req, err := chaininfo.GetPvtWriteSetValue(ccID, connectorEvent.PDC, connectorEvent.Key, txPvtData); err != nil {
-					event.unmarshalError = err
-				} else {
-					event.request = req
-				}
-			} else {
-				if req, err := tx.GetDetails().GetWriteSetValue(ccID, connectorEvent.Key); err != nil {
-					event.unmarshalError = err
-				} else {
-					event.request = req
-				}
-			}
-			if len(event.request) == 0 && event.unmarshalError == nil {
-				event.unmarshalError = fmt.Errorf("empty request")
-			}
-
-			events = append(events, event)
-		}
-	}
-
-	return events, nil
-}
-
 // Events capture requests raised by phylum transactions.
 type Event struct {
 	unmarshalError error
 	respCallback   Callback
-	header         EventHeader
+	reqID          string
 	request        json.RawMessage
 	respCount      int
 	callbackMutex  sync.Mutex
-}
-
-// EventHeader captures metadata about a request.
-type EventHeader struct {
-	RequestID    string
-	RequestMSPID string
-	RequestKey   string
-	RequestPDC   string
-	BlockNum     uint64
-}
-
-// valid determines if the header has all the required fields.
-func (e *EventHeader) valid() error {
-	if e == nil {
-		return fmt.Errorf("event missing header")
-	}
-	if e.BlockNum == 0 {
-		return fmt.Errorf("event missing block num")
-	}
-	if e.RequestID == "" {
-		return fmt.Errorf("event missing request ID")
-	}
-	if e.RequestKey == "" {
-		return fmt.Errorf("event missing request key")
-	}
-
-	return nil
-}
-
-// Header returns the metadata for the event.
-func (e *Event) Header() EventHeader {
-	if e == nil {
-		return EventHeader{}
-	}
-	return e.header
 }
 
 // RequestBody returns the request, or an error if the request
@@ -570,7 +452,7 @@ func (e *Event) makeCallbackMessage(resp json.RawMessage, err error) (json.RawMe
 	}
 
 	callbackMessage := CallbackMessage{
-		RequestID: e.header.RequestID,
+		RequestID: e.reqID,
 		Response:  resp,
 		Error:     errMsg,
 	}
@@ -607,7 +489,7 @@ func (e *Event) Callback(resp json.RawMessage, err error) error {
 
 	if e.respCallback != nil {
 		logrus.Debug("passing event response to registered callback")
-		err = e.respCallback(e.Header().RequestID, respRaw)
+		err = e.respCallback(e.reqID, respRaw)
 		if err != nil && errors.Is(err, shirorpc.ErrTxInvalid) {
 			return fmt.Errorf("invalid tx: %w", err)
 		} else if err != nil {
@@ -801,34 +683,35 @@ func GatewayEvents(cfg *GatewayConfig, opts ...Option) (*EventStream, error) {
 				logrus.WithContext(ctx).Debug("event hub closed")
 			}
 		}()
+		unmarshaler := &chaininfo.ConnectorEventUnmarshaler{
+			CCIDFilter: cfg.ChaincodeID,
+			MSPFilter:  cfg.MSPID,
+		}
 		for {
 			logrus.WithContext(ctx).Debug("selecting on events")
 			select {
-			case event := <-fabEvents:
-				if event == nil {
+			case bEvent := <-fabEvents:
+				if bEvent == nil {
 					logrus.WithContext(ctx).Info("nil event, exiting...")
 					return
 				}
-				blockNum := event.GetBlock().GetHeader().GetNumber()
+				blockNum := bEvent.GetBlock().GetHeader().GetNumber()
 				logrus.WithContext(ctx).WithField("block_no", blockNum).Debug("received event")
-				lutherEvents, err := unmarshalLutherEvents(event, cfg.ChaincodeID)
+				cEvents, err := unmarshaler.Unmarshal(bEvent)
 				if err != nil {
-					logrus.WithContext(ctx).WithError(err).Error("unmarshal luther event")
+					logrus.WithContext(ctx).WithError(err).Error("unmarshal connector events")
 					continue
 				}
 				logrus.WithContext(ctx).
-					WithField("num_events", len(lutherEvents)).
+					WithField("num_events", len(cEvents)).
 					Info("processing luther events")
-				for _, event := range lutherEvents {
-					if event.Header().RequestMSPID != "" && event.Header().RequestMSPID != cfg.MSPID {
-						logrus.WithContext(ctx).WithFields(logrus.Fields{
-							"req_msp": event.Header().RequestMSPID,
-							"gw_msp":  cfg.MSPID,
-						}).Debug("skipping event for other MSP")
-						continue
+				for _, cEvent := range cEvents {
+					events <- &Event{
+						reqID:          cEvent.RequestID(),
+						request:        cEvent.RequestBody(),
+						unmarshalError: cEvent.UnmarshalError(),
+						respCallback:   bus.respCallback,
 					}
-					event.respCallback = bus.respCallback
-					events <- event
 				}
 				if err := checkpointer.CheckpointBlock(blockNum); err != nil {
 					logrus.WithContext(ctx).WithError(err).Error("failed to checkpoint block")

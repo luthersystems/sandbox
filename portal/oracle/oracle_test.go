@@ -49,23 +49,18 @@ func TestSnapshot(t *testing.T) {
 	}
 }
 
-func createAccount(t *testing.T, server *portal, id string, balance int64) bool {
+func createClaim(t *testing.T, server *portal) bool {
 	t.Helper()
-	resp, err := server.CreateAccount(context.Background(), &pb.CreateAccountRequest{
-		Account: &pb.Account{
-			AccountId: id,
-			Balance:   balance,
-		},
-	})
+	resp, err := server.CreateClaim(context.Background(), &pb.CreateClaimRequest{})
 	return assert.Nil(t, err) && assert.NotNil(t, resp)
 }
 
-func getAccount(t *testing.T, server *portal, id string, dst **pb.Account) bool {
+func getClaim(t *testing.T, server *portal, id string, dst **pb.Claim) bool {
 	t.Helper()
-	resp, err := server.GetAccount(context.Background(), &pb.GetAccountRequest{
-		AccountId: id,
+	resp, err := server.GetClaim(context.Background(), &pb.GetClaimRequest{
+		ClaimId: id,
 	})
-	*dst = resp.GetAccount()
+	*dst = resp.GetClaim()
 	return assert.Nil(t, err) && assert.NotNil(t, resp) && assert.Nil(t, resp.GetException())
 }
 
@@ -81,14 +76,9 @@ func TestHealthCheck(t *testing.T) {
 func TestCreateAccount(t *testing.T) {
 	server, stop := makeTestServer(t)
 	defer stop()
-	if createAccount(t, server, "abc", 100) {
+	if createClaim(t, server) {
 		ctx := context.Background()
-		resp, err := server.CreateAccount(ctx, &pb.CreateAccountRequest{
-			Account: &pb.Account{
-				AccountId: "abc",
-				Balance:   100,
-			},
-		})
+		resp, err := server.CreateClaim(ctx, &pb.CreateClaimRequest{})
 		if assert.Nil(t, err) {
 			if assert.NotNil(t, resp) {
 				assert.NotNil(t, resp.Exception)
@@ -100,72 +90,18 @@ func TestCreateAccount(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	server, stop := makeTestServer(t)
 	defer stop()
-	if !createAccount(t, server, "abc", 100) {
+	if !createClaim(t, server) {
 		return
 	}
-	var acct *pb.Account
-	if getAccount(t, server, "abc", &acct) {
-		assert.Equal(t, int64(100), acct.GetBalance())
-
-		resp, err := server.GetAccount(context.Background(), &pb.GetAccountRequest{
-			AccountId: "xyz",
+	var claim *pb.Claim
+	if getClaim(t, server, "abc", &claim) {
+		resp, err := server.GetClaim(context.Background(), &pb.GetClaimRequest{
+			ClaimId: "xyz",
 		})
 		if assert.NoError(t, err) {
 			if assert.NotNil(t, resp) {
 				assert.NotNil(t, resp.Exception)
 			}
-		}
-	}
-}
-
-func TestTransfer(t *testing.T) {
-	server, stop := makeTestServer(t)
-	defer stop()
-	if !createAccount(t, server, "abc", 100) {
-		return
-	}
-	if !createAccount(t, server, "xyz", 50) {
-		return
-	}
-	ctx := context.Background()
-	resp, err := server.Transfer(ctx, &pb.TransferRequest{
-		PayerId:        "abc",
-		PayeeId:        "xyz",
-		TransferAmount: 30,
-	})
-	if assert.NoError(t, err) {
-		if assert.NotNil(t, resp) {
-			if assert.Nil(t, resp.Exception) {
-				var acct *pb.Account
-				if getAccount(t, server, "abc", &acct) {
-					assert.Equal(t, int64(70), acct.Balance)
-				}
-				if getAccount(t, server, "xyz", &acct) {
-					assert.Equal(t, int64(80), acct.Balance)
-				}
-			}
-		}
-	}
-
-	resp, err = server.Transfer(ctx, &pb.TransferRequest{
-		PayerId:        "abc",
-		PayeeId:        "www",
-		TransferAmount: 30,
-	})
-	if assert.NoError(t, err) {
-		if assert.NotNil(t, resp) {
-			assert.NotNil(t, resp.Exception)
-		}
-	}
-
-	resp, err = server.Transfer(ctx, &pb.TransferRequest{
-		PayerId:        "www",
-		PayeeId:        "xyz",
-		TransferAmount: 30,
-	})
-	if assert.NoError(t, err) {
-		if assert.NotNil(t, resp) {
-			assert.NotNil(t, resp.Exception)
 		}
 	}
 }

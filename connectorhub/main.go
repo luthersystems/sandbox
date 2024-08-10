@@ -19,7 +19,7 @@ package main
 
 // TODO: persist last block height state
 // TODO: reliability (e.g., "best effort" delivery to connector and back)
-// TODO: connetor router logic (replace processRequest)
+// TODO: connector router logic (replace processRequest)
 
 import (
 	"context"
@@ -153,7 +153,7 @@ func (s *g) Run() error {
 			select {
 			case event := <-stream.Listen():
 				if event == nil {
-					logrus.WithContext(ctx).Info("nil event, exiting...")
+					logrus.WithContext(ctx).Info("nil event (stale checkpoint file?), exiting...")
 					return
 				}
 				req, err := event.RequestBody()
@@ -177,7 +177,7 @@ func (s *g) Run() error {
 	logrus.WithContext(ctx).Info("signal handler called")
 	cancel()
 	if err := stream.Done(); err != nil {
-		logrus.WithError(err).Error("steam done")
+		logrus.WithError(err).Debug("stream done")
 	}
 
 	logrus.WithContext(ctx).Info("connectorhub exited!")
