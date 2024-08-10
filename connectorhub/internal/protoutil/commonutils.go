@@ -166,13 +166,13 @@ func IsConfigBlock(block *cb.Block) bool {
 		return false
 	}
 
-	return cb.HeaderType(hdr.Type) == cb.HeaderType_CONFIG || cb.HeaderType(hdr.Type) == cb.HeaderType_ORDERER_TRANSACTION
+	return cb.HeaderType(hdr.Type) == cb.HeaderType_CONFIG
 }
 
 // ChannelHeader returns the *cb.ChannelHeader for a given *cb.Envelope.
 func ChannelHeader(env *cb.Envelope) (*cb.ChannelHeader, error) {
 	if env == nil {
-		return nil, fmt.Errorf("Invalid envelope payload. can't be nil")
+		return nil, fmt.Errorf("invalid envelope payload. can't be nil")
 	}
 
 	envPayload, err := UnmarshalPayload(env.Payload)

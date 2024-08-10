@@ -128,7 +128,7 @@ func GetBytesProposalResponsePayload(hash []byte, response *peer.Response, resul
 		ProposalHash: hash,
 	}
 	prpBytes, err := proto.Marshal(prp)
-	return prpBytes, fmt.Errorf("error marshaling ProposalResponsePayload")
+	return prpBytes, fmt.Errorf("error marshaling ProposalResponsePayload: %w", err)
 }
 
 // GetBytesChaincodeProposalPayload gets the chaincode proposal payload
