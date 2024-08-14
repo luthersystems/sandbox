@@ -89,8 +89,8 @@
             (statedb:del key)))]
 
        [get-callback-state (req-id)
-         (or (sidedb:get (mk-request-key req-id)
-                         (error 'missing-handler "no registered handler")))]
+         (or (sidedb:get (mk-request-key req-id))
+                         (error 'missing-handler "no registered handler"))]
 
        [call-handler-helper (resp-body)
          (unless resp-body (error 'missing-resp "missing response"))
