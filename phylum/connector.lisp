@@ -8,7 +8,7 @@
 ;; *Request Generation Logic*:
 ;;
 ;; Phylum logic create events, and register a callback class factory, that
-;; instiantiates a business object (using the "class" pattern) which receives
+;; instantiates a business object (using the "class" pattern) which receives
 ;; the response using a `'handle` method. Each event registration specifies
 ;; the business object class that is responsible for instantiating these
 ;; objects, along with the "Object ID" (OID) associated with the event.
@@ -52,7 +52,7 @@
 ;;
 ;; The phylum logic for `$ch_callback` uses the req ID to lookup the event
 ;; context, along with the OID and class factory. The class factory is used
-;; to instiante the object for that OID, and call the handle method on that
+;; to instantiate the object for that OID, and call the handle method on that
 ;; object with the response.
 ;;
 ;; Upon execution of the callback, the original event context is purged, along
@@ -89,7 +89,7 @@
             (statedb:del key)))]
 
        [get-callback-state (req-id)
-         (sidedb:get (or (mk-request-key req-id)
+         (or (sidedb:get (mk-request-key req-id)
                          (error 'missing-handler "no registered handler")))]
 
        [call-handler-helper (resp-body)
@@ -111,11 +111,11 @@
                     (format "missing connector handler: {}" handler-name)))
            (unregister-request req-id ctx))]
 
-          [call-handler-helper-recurse-i (i)
-            (let* ([resp-body (transient:get (format-string "$ch_rep:{}" i))])
-              (when resp-body
-                (call-handler-helper resp-body)
-                (call-handler-helper-recurse-i (+ i 1))))]
+       [call-handler-helper-recurse-i (i)
+         (let* ([resp-body (transient:get (format-string "$ch_rep:{}" i))])
+           (when resp-body
+             (call-handler-helper resp-body)
+             (call-handler-helper-recurse-i (+ i 1))))]
 
        [call-handler (resp)
          (call-handler-helper-recurse-i 0)])
@@ -181,7 +181,7 @@
             (cc:storage-put-private event-pdc
                                     event-key
                                     event-body-bytes)
-            (cc:storage-put event-header-key event-body-bytes))
+            (cc:storage-put event-key event-body-bytes))
           (assoc! state "ctr" (+ event-num 1))))))))
 
 (export 'do-transition)

@@ -39,13 +39,13 @@
     (labels
       ([add-event (event-req &optional msp)
          (let* ([req-id (mk-uuid)]
-                [event-req (sorted-map "request_id" req-id)]
                 [event (sorted-map 
                          "oid" claim-id 
                          "msp" (default msp "Org1MSP")
                          "key" req-id 
                          "pdc" "private" 
                          "req" event-req)])
+           (assoc! event-req "request_id" req-id)
            (append! events event))]
 
        [ret-save ()
