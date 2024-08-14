@@ -24,7 +24,8 @@
 (defmacro defendpoint (name args &rest exprs)
   (quasiquote
     (router:defendpoint (unquote name) (unquote args)
-                        (sandbox:wrap-endpoint (lambda () (unquote-splicing exprs))))))
+                        (sandbox:wrap-endpoint 
+                          (lambda () (unquote-splicing exprs))))))
 
 ;; defendpoint-get defines a readonly endpoint, transactions of which are not
 ;; allowed to be committed.  The shiroclient should automatically detect
@@ -34,7 +35,7 @@
 (defmacro defendpoint-get (name args &rest exprs)
   (quasiquote
     (sandbox:defendpoint (unquote name) (unquote args)
-                         (cc:force-no-commit-tx) ; get route cannot update statedb
+                         (cc:force-no-commit-tx) ; get route cannot update 
                          (unquote-splicing exprs))))
 
 (set 'chaincode-version-key (format-string "{}:version" service-name))
@@ -62,40 +63,16 @@
                           "service_name"    service-name
                           "timestamp"       (cc:timestamp (cc:now)))))))
 
-(defun create-acount-handler (create)
-  (let* ([acct (get create "account")])
-    (if (create-account! (get acct "account_id") (to-int (get acct "balance")))
-      (route-success ())
-      (set-exception-business "account_id already exists"))))
+(defendpoint "create_claim" (req)
+  (let* ([claim (create-claim)]
+         [data (claim 'data)])
+    (route-success (sorted-map "claim" data))))
 
-; initialize entities a and b to integer values
-(defendpoint "create_account" (create) (create-acount-handler create))
-
-(defun update-account-handler (update)
-  (let* ([acct (get update "account")])
-    (if (set-balance! (get acct "account_id") (to-int (get acct "balance")))
-      (route-success ())
-      (set-exception-business "invalid update request"))))
-
-; update an account
-(defendpoint "update_account" (update) (update-account-handler update))
-
-(defun get-account-handler (acct)
-  (let* ([acct (get-account (get acct "account_id"))])
-    (if (nil? acct)
-      (set-exception-business "account_id not found")
-      (route-success (sorted-map "account" acct)))))
-
-; return the value of entity a
-(defendpoint-get "get_account" (acct) (get-account-handler acct))
-
-(defun transfer-handler (xfer)
-  (let* ([payer-id (get xfer "payer_id")]
-         [payee-id (get xfer "payee_id")]
-         [xfer-amount (to-int (get xfer "transfer_amount"))])
-    (if (account-transfer! payer-id payee-id xfer-amount)
-      (route-success ())
-      (set-exception-business "account does not exist"))))
-
-; make a payment of x units from entity a to entity b
-(defendpoint "transfer" (xfer) (transfer-handler xfer))
+(defendpoint "get_claim" (req) 
+  (let* ([claim-id (or (get req "claim_id")
+                       (set-exception-business "missing claim_id"))]
+         [claim (or (claims 'get claim-id)
+                    (set-exception-business 
+                      (format-string "missing claim {}" claim-id)))]
+         [data (claim 'data)])
+    (route-success (sorted-map "claim" data))))

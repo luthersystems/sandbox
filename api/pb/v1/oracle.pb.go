@@ -1,4 +1,4 @@
-// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+// Copyright © 2024 Luther Systems, Ltd. All right reserved.
 
 // API Models and Documentation.
 
@@ -25,17 +25,86 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Request structure for the create_request endponit
-type CreateAccountRequest struct {
+type ClaimState int32
+
+const (
+	ClaimState_CLAIM_STATE_UNSPECIFIED                ClaimState = 0
+	ClaimState_CLAIM_STATE_NEW                        ClaimState = 1
+	ClaimState_CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS ClaimState = 2
+	ClaimState_CLAIM_STATE_LOECLAIM_ID_VERIFIED       ClaimState = 3
+	ClaimState_CLAIM_STATE_OOECLAIM_REVIEWED          ClaimState = 4
+	ClaimState_CLAIM_STATE_OOECLAIM_VALIDATED         ClaimState = 5
+	ClaimState_CLAIM_STATE_LOEFIN_INVOICE_ISSUED      ClaimState = 6
+	ClaimState_CLAIM_STATE_OOEFIN_INVOICE_REVIEWED    ClaimState = 7
+	ClaimState_CLAIM_STATE_OOEFIN_INVOICE_APPROVED    ClaimState = 8
+	ClaimState_CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED   ClaimState = 9
+)
+
+// Enum value maps for ClaimState.
+var (
+	ClaimState_name = map[int32]string{
+		0: "CLAIM_STATE_UNSPECIFIED",
+		1: "CLAIM_STATE_NEW",
+		2: "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS",
+		3: "CLAIM_STATE_LOECLAIM_ID_VERIFIED",
+		4: "CLAIM_STATE_OOECLAIM_REVIEWED",
+		5: "CLAIM_STATE_OOECLAIM_VALIDATED",
+		6: "CLAIM_STATE_LOEFIN_INVOICE_ISSUED",
+		7: "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED",
+		8: "CLAIM_STATE_OOEFIN_INVOICE_APPROVED",
+		9: "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED",
+	}
+	ClaimState_value = map[string]int32{
+		"CLAIM_STATE_UNSPECIFIED":                0,
+		"CLAIM_STATE_NEW":                        1,
+		"CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS": 2,
+		"CLAIM_STATE_LOECLAIM_ID_VERIFIED":       3,
+		"CLAIM_STATE_OOECLAIM_REVIEWED":          4,
+		"CLAIM_STATE_OOECLAIM_VALIDATED":         5,
+		"CLAIM_STATE_LOEFIN_INVOICE_ISSUED":      6,
+		"CLAIM_STATE_OOEFIN_INVOICE_REVIEWED":    7,
+		"CLAIM_STATE_OOEFIN_INVOICE_APPROVED":    8,
+		"CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED":   9,
+	}
+)
+
+func (x ClaimState) Enum() *ClaimState {
+	p := new(ClaimState)
+	*p = x
+	return p
+}
+
+func (x ClaimState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ClaimState) Descriptor() protoreflect.EnumDescriptor {
+	return file_pb_v1_oracle_proto_enumTypes[0].Descriptor()
+}
+
+func (ClaimState) Type() protoreflect.EnumType {
+	return &file_pb_v1_oracle_proto_enumTypes[0]
+}
+
+func (x ClaimState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ClaimState.Descriptor instead.
+func (ClaimState) EnumDescriptor() ([]byte, []int) {
+	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{0}
+}
+
+type CreateClaimRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Account *Account `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Claim *Claim `protobuf:"bytes,1,opt,name=claim,proto3" json:"claim,omitempty"`
 }
 
-func (x *CreateAccountRequest) Reset() {
-	*x = CreateAccountRequest{}
+func (x *CreateClaimRequest) Reset() {
+	*x = CreateClaimRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pb_v1_oracle_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -43,13 +112,13 @@ func (x *CreateAccountRequest) Reset() {
 	}
 }
 
-func (x *CreateAccountRequest) String() string {
+func (x *CreateClaimRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateAccountRequest) ProtoMessage() {}
+func (*CreateClaimRequest) ProtoMessage() {}
 
-func (x *CreateAccountRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateClaimRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pb_v1_oracle_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -61,28 +130,29 @@ func (x *CreateAccountRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateAccountRequest.ProtoReflect.Descriptor instead.
-func (*CreateAccountRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateClaimRequest.ProtoReflect.Descriptor instead.
+func (*CreateClaimRequest) Descriptor() ([]byte, []int) {
 	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CreateAccountRequest) GetAccount() *Account {
+func (x *CreateClaimRequest) GetClaim() *Claim {
 	if x != nil {
-		return x.Account
+		return x.Claim
 	}
 	return nil
 }
 
-type CreateAccountResponse struct {
+type CreateClaimResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	Exception *v1.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
+	Claim     *Claim        `protobuf:"bytes,2,opt,name=claim,proto3" json:"claim,omitempty"`
 }
 
-func (x *CreateAccountResponse) Reset() {
-	*x = CreateAccountResponse{}
+func (x *CreateClaimResponse) Reset() {
+	*x = CreateClaimResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pb_v1_oracle_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -90,13 +160,13 @@ func (x *CreateAccountResponse) Reset() {
 	}
 }
 
-func (x *CreateAccountResponse) String() string {
+func (x *CreateClaimResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateAccountResponse) ProtoMessage() {}
+func (*CreateClaimResponse) ProtoMessage() {}
 
-func (x *CreateAccountResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateClaimResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pb_v1_oracle_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -108,28 +178,35 @@ func (x *CreateAccountResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateAccountResponse.ProtoReflect.Descriptor instead.
-func (*CreateAccountResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateClaimResponse.ProtoReflect.Descriptor instead.
+func (*CreateClaimResponse) Descriptor() ([]byte, []int) {
 	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateAccountResponse) GetException() *v1.Exception {
+func (x *CreateClaimResponse) GetException() *v1.Exception {
 	if x != nil {
 		return x.Exception
 	}
 	return nil
 }
 
-type DeleteAccountRequest struct {
+func (x *CreateClaimResponse) GetClaim() *Claim {
+	if x != nil {
+		return x.Claim
+	}
+	return nil
+}
+
+type GetClaimRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	ClaimId string `protobuf:"bytes,1,opt,name=claim_id,json=claimId,proto3" json:"claim_id,omitempty"`
 }
 
-func (x *DeleteAccountRequest) Reset() {
-	*x = DeleteAccountRequest{}
+func (x *GetClaimRequest) Reset() {
+	*x = GetClaimRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pb_v1_oracle_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -137,13 +214,13 @@ func (x *DeleteAccountRequest) Reset() {
 	}
 }
 
-func (x *DeleteAccountRequest) String() string {
+func (x *GetClaimRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteAccountRequest) ProtoMessage() {}
+func (*GetClaimRequest) ProtoMessage() {}
 
-func (x *DeleteAccountRequest) ProtoReflect() protoreflect.Message {
+func (x *GetClaimRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pb_v1_oracle_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -155,28 +232,29 @@ func (x *DeleteAccountRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteAccountRequest.ProtoReflect.Descriptor instead.
-func (*DeleteAccountRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetClaimRequest.ProtoReflect.Descriptor instead.
+func (*GetClaimRequest) Descriptor() ([]byte, []int) {
 	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *DeleteAccountRequest) GetAccountId() string {
+func (x *GetClaimRequest) GetClaimId() string {
 	if x != nil {
-		return x.AccountId
+		return x.ClaimId
 	}
 	return ""
 }
 
-type DeleteAccountResponse struct {
+type GetClaimResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	Exception *v1.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
+	Claim     *Claim        `protobuf:"bytes,2,opt,name=claim,proto3" json:"claim,omitempty"`
 }
 
-func (x *DeleteAccountResponse) Reset() {
-	*x = DeleteAccountResponse{}
+func (x *GetClaimResponse) Reset() {
+	*x = GetClaimResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pb_v1_oracle_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -184,13 +262,13 @@ func (x *DeleteAccountResponse) Reset() {
 	}
 }
 
-func (x *DeleteAccountResponse) String() string {
+func (x *GetClaimResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteAccountResponse) ProtoMessage() {}
+func (*GetClaimResponse) ProtoMessage() {}
 
-func (x *DeleteAccountResponse) ProtoReflect() protoreflect.Message {
+func (x *GetClaimResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pb_v1_oracle_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -202,28 +280,39 @@ func (x *DeleteAccountResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteAccountResponse.ProtoReflect.Descriptor instead.
-func (*DeleteAccountResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetClaimResponse.ProtoReflect.Descriptor instead.
+func (*GetClaimResponse) Descriptor() ([]byte, []int) {
 	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *DeleteAccountResponse) GetException() *v1.Exception {
+func (x *GetClaimResponse) GetException() *v1.Exception {
 	if x != nil {
 		return x.Exception
 	}
 	return nil
 }
 
-type UpdateAccountRequest struct {
+func (x *GetClaimResponse) GetClaim() *Claim {
+	if x != nil {
+		return x.Claim
+	}
+	return nil
+}
+
+// Claim represents an insurance claim.
+type Claim struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Account *Account `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	// Unique ID for the claim. Immutable. Set by backend.
+	ClaimId string `protobuf:"bytes,1,opt,name=claim_id,json=claimId,proto3" json:"claim_id,omitempty"`
+	// State of the claim.
+	State ClaimState `protobuf:"varint,2,opt,name=state,proto3,enum=pb.v1.ClaimState" json:"state,omitempty"`
 }
 
-func (x *UpdateAccountRequest) Reset() {
-	*x = UpdateAccountRequest{}
+func (x *Claim) Reset() {
+	*x = Claim{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pb_v1_oracle_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -231,13 +320,13 @@ func (x *UpdateAccountRequest) Reset() {
 	}
 }
 
-func (x *UpdateAccountRequest) String() string {
+func (x *Claim) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateAccountRequest) ProtoMessage() {}
+func (*Claim) ProtoMessage() {}
 
-func (x *UpdateAccountRequest) ProtoReflect() protoreflect.Message {
+func (x *Claim) ProtoReflect() protoreflect.Message {
 	mi := &file_pb_v1_oracle_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -249,457 +338,23 @@ func (x *UpdateAccountRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateAccountRequest.ProtoReflect.Descriptor instead.
-func (*UpdateAccountRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use Claim.ProtoReflect.Descriptor instead.
+func (*Claim) Descriptor() ([]byte, []int) {
 	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateAccountRequest) GetAccount() *Account {
+func (x *Claim) GetClaimId() string {
 	if x != nil {
-		return x.Account
-	}
-	return nil
-}
-
-type UpdateAccountResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Exception *v1.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
-}
-
-func (x *UpdateAccountResponse) Reset() {
-	*x = UpdateAccountResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *UpdateAccountResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateAccountResponse) ProtoMessage() {}
-
-func (x *UpdateAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateAccountResponse.ProtoReflect.Descriptor instead.
-func (*UpdateAccountResponse) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *UpdateAccountResponse) GetException() *v1.Exception {
-	if x != nil {
-		return x.Exception
-	}
-	return nil
-}
-
-type GetAccountRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
-}
-
-func (x *GetAccountRequest) Reset() {
-	*x = GetAccountRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetAccountRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAccountRequest) ProtoMessage() {}
-
-func (x *GetAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAccountRequest.ProtoReflect.Descriptor instead.
-func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetAccountRequest) GetAccountId() string {
-	if x != nil {
-		return x.AccountId
+		return x.ClaimId
 	}
 	return ""
 }
 
-type GetAccountResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Exception *v1.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
-	Account   *Account      `protobuf:"bytes,2,opt,name=account,proto3" json:"account,omitempty"`
-}
-
-func (x *GetAccountResponse) Reset() {
-	*x = GetAccountResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetAccountResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAccountResponse) ProtoMessage() {}
-
-func (x *GetAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAccountResponse.ProtoReflect.Descriptor instead.
-func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetAccountResponse) GetException() *v1.Exception {
+func (x *Claim) GetState() ClaimState {
 	if x != nil {
-		return x.Exception
+		return x.State
 	}
-	return nil
-}
-
-func (x *GetAccountResponse) GetAccount() *Account {
-	if x != nil {
-		return x.Account
-	}
-	return nil
-}
-
-type GetUserAccountsRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-}
-
-func (x *GetUserAccountsRequest) Reset() {
-	*x = GetUserAccountsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUserAccountsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserAccountsRequest) ProtoMessage() {}
-
-func (x *GetUserAccountsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserAccountsRequest.ProtoReflect.Descriptor instead.
-func (*GetUserAccountsRequest) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *GetUserAccountsRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-type GetUserAccountsResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Exception *v1.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
-	Accounts  []*Account    `protobuf:"bytes,2,rep,name=accounts,proto3" json:"accounts,omitempty"`
-}
-
-func (x *GetUserAccountsResponse) Reset() {
-	*x = GetUserAccountsResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUserAccountsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserAccountsResponse) ProtoMessage() {}
-
-func (x *GetUserAccountsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserAccountsResponse.ProtoReflect.Descriptor instead.
-func (*GetUserAccountsResponse) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *GetUserAccountsResponse) GetException() *v1.Exception {
-	if x != nil {
-		return x.Exception
-	}
-	return nil
-}
-
-func (x *GetUserAccountsResponse) GetAccounts() []*Account {
-	if x != nil {
-		return x.Accounts
-	}
-	return nil
-}
-
-// Transfer funds from payer account to payee account. Accounts must have same denomination (asset ID). Transfer amount cannot be negative.
-type TransferRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	// Account debited. Required.
-	PayerId string `protobuf:"bytes,1,opt,name=payer_id,json=payerId,proto3" json:"payer_id,omitempty"`
-	// Account credited. Required.
-	PayeeId string `protobuf:"bytes,2,opt,name=payee_id,json=payeeId,proto3" json:"payee_id,omitempty"`
-	// Amount transfered from payer account to payee account. Required.
-	TransferAmount int64 `protobuf:"varint,3,opt,name=transfer_amount,json=transferAmount,proto3" json:"transfer_amount,omitempty"`
-}
-
-func (x *TransferRequest) Reset() {
-	*x = TransferRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[10]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *TransferRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TransferRequest) ProtoMessage() {}
-
-func (x *TransferRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[10]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TransferRequest.ProtoReflect.Descriptor instead.
-func (*TransferRequest) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *TransferRequest) GetPayerId() string {
-	if x != nil {
-		return x.PayerId
-	}
-	return ""
-}
-
-func (x *TransferRequest) GetPayeeId() string {
-	if x != nil {
-		return x.PayeeId
-	}
-	return ""
-}
-
-func (x *TransferRequest) GetTransferAmount() int64 {
-	if x != nil {
-		return x.TransferAmount
-	}
-	return 0
-}
-
-type TransferResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Exception *v1.Exception `protobuf:"bytes,1,opt,name=exception,proto3" json:"exception,omitempty"`
-}
-
-func (x *TransferResponse) Reset() {
-	*x = TransferResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[11]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *TransferResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TransferResponse) ProtoMessage() {}
-
-func (x *TransferResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[11]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TransferResponse.ProtoReflect.Descriptor instead.
-func (*TransferResponse) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *TransferResponse) GetException() *v1.Exception {
-	if x != nil {
-		return x.Exception
-	}
-	return nil
-}
-
-// Account represents a balance for an indiviudal denominated in a unit asset. An account holder may have multiple accounts.
-type Account struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	// Unique ID for the account. Immutable.
-	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
-	// Current balance in the account denominated in the underlying asset. Cannot be negative.
-	Balance int64 `protobuf:"varint,2,opt,name=balance,proto3" json:"balance,omitempty"`
-	// ID for the underlying asset that current balance is denominated in. Immutable.
-	AssetId string `protobuf:"bytes,3,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
-	// ID of the primary account owner.
-	UserId string `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-}
-
-func (x *Account) Reset() {
-	*x = Account{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pb_v1_oracle_proto_msgTypes[12]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Account) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Account) ProtoMessage() {}
-
-func (x *Account) ProtoReflect() protoreflect.Message {
-	mi := &file_pb_v1_oracle_proto_msgTypes[12]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Account.ProtoReflect.Descriptor instead.
-func (*Account) Descriptor() ([]byte, []int) {
-	return file_pb_v1_oracle_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *Account) GetAccountId() string {
-	if x != nil {
-		return x.AccountId
-	}
-	return ""
-}
-
-func (x *Account) GetBalance() int64 {
-	if x != nil {
-		return x.Balance
-	}
-	return 0
-}
-
-func (x *Account) GetAssetId() string {
-	if x != nil {
-		return x.AssetId
-	}
-	return ""
-}
-
-func (x *Account) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
+	return ClaimState_CLAIM_STATE_UNSPECIFIED
 }
 
 var File_pb_v1_oracle_proto protoreflect.FileDescriptor
@@ -708,82 +363,64 @@ var file_pb_v1_oracle_proto_rawDesc = []byte{
 	0x0a, 0x12, 0x70, 0x62, 0x2f, 0x76, 0x31, 0x2f, 0x6f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x2e, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x1a, 0x19, 0x63, 0x6f, 0x6d,
 	0x6d, 0x6f, 0x6e, 0x2f, 0x76, 0x31, 0x2f, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x40, 0x0a, 0x14, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x28,
-	0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x0e, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52,
-	0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x4b, 0x0a, 0x15, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x38, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x43, 0x6c, 0x61, 0x69, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x22, 0x0a, 0x05,
+	0x63, 0x6c, 0x61, 0x69, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62,
+	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x52, 0x05, 0x63, 0x6c, 0x61, 0x69, 0x6d,
+	0x22, 0x6d, 0x0a, 0x13, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70,
+	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d,
+	0x6d, 0x6f, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e,
+	0x52, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x05, 0x63,
+	0x6c, 0x61, 0x69, 0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e,
+	0x76, 0x31, 0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x52, 0x05, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x22,
+	0x2c, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x49, 0x64, 0x22, 0x6a, 0x0a,
+	0x10, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
 	0x65, 0x12, 0x32, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x76, 0x31,
 	0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x65, 0x78, 0x63, 0x65,
-	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x35, 0x0a, 0x14, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41,
-	0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a,
-	0x0a, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x09, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x4b, 0x0a, 0x15,
-	0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69,
-	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f,
-	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09,
-	0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x40, 0x0a, 0x14, 0x55, 0x70, 0x64,
-	0x61, 0x74, 0x65, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x28, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x63, 0x63, 0x6f, 0x75,
-	0x6e, 0x74, 0x52, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x4b, 0x0a, 0x15, 0x55,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e,
-	0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x65,
-	0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x32, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x41,
-	0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a,
-	0x0a, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x09, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x72, 0x0a, 0x12,
-	0x47, 0x65, 0x74, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x32, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x76,
-	0x31, 0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x65, 0x78, 0x63,
-	0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x28, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e,
-	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x2e,
-	0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74,
-	0x22, 0x31, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x63, 0x63, 0x6f, 0x75,
-	0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x22, 0x79, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x63,
-	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x32,
-	0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78,
-	0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69,
-	0x6f, 0x6e, 0x12, 0x2a, 0x0a, 0x08, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x18, 0x02,
-	0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x63, 0x63,
-	0x6f, 0x75, 0x6e, 0x74, 0x52, 0x08, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x22, 0x70,
-	0x0a, 0x0f, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x19, 0x0a, 0x08, 0x70, 0x61, 0x79, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x61, 0x79, 0x65, 0x72, 0x49, 0x64, 0x12, 0x19, 0x0a, 0x08,
-	0x70, 0x61, 0x79, 0x65, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
-	0x70, 0x61, 0x79, 0x65, 0x65, 0x49, 0x64, 0x12, 0x27, 0x0a, 0x0f, 0x74, 0x72, 0x61, 0x6e, 0x73,
-	0x66, 0x65, 0x72, 0x5f, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
-	0x52, 0x0e, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74,
-	0x22, 0x46, 0x0a, 0x10, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x09, 0x65, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e,
-	0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x65,
-	0x78, 0x63, 0x65, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x76, 0x0a, 0x07, 0x41, 0x63, 0x63, 0x6f,
-	0x75, 0x6e, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74,
-	0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x07, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x19, 0x0a, 0x08,
-	0x61, 0x73, 0x73, 0x65, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
-	0x61, 0x73, 0x73, 0x65, 0x74, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f,
-	0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
-	0x42, 0x79, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x42, 0x0b, 0x4f,
-	0x72, 0x61, 0x63, 0x6c, 0x65, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x2a, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x74, 0x68, 0x65, 0x72, 0x73,
-	0x79, 0x73, 0x74, 0x65, 0x6d, 0x73, 0x2f, 0x73, 0x61, 0x6e, 0x64, 0x62, 0x6f, 0x78, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x70, 0x62, 0x2f, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x50, 0x58, 0x58, 0xaa, 0x02,
-	0x05, 0x50, 0x62, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x05, 0x50, 0x62, 0x5c, 0x56, 0x31, 0xe2, 0x02,
-	0x11, 0x50, 0x62, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
-	0x74, 0x61, 0xea, 0x02, 0x06, 0x50, 0x62, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x05, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x61,
+	0x69, 0x6d, 0x52, 0x05, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x22, 0x4b, 0x0a, 0x05, 0x43, 0x6c, 0x61,
+	0x69, 0x6d, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x49, 0x64, 0x12, 0x27, 0x0a,
+	0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x70,
+	0x62, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52,
+	0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x2a, 0xfa, 0x02, 0x0a, 0x0a, 0x43, 0x6c, 0x61, 0x69, 0x6d,
+	0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x1b, 0x0a, 0x17, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x53,
+	0x54, 0x41, 0x54, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44,
+	0x10, 0x00, 0x12, 0x13, 0x0a, 0x0f, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41, 0x54,
+	0x45, 0x5f, 0x4e, 0x45, 0x57, 0x10, 0x01, 0x12, 0x2a, 0x0a, 0x26, 0x43, 0x4c, 0x41, 0x49, 0x4d,
+	0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x4c, 0x4f, 0x45, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f,
+	0x43, 0x4f, 0x4c, 0x4c, 0x45, 0x43, 0x54, 0x45, 0x44, 0x5f, 0x44, 0x45, 0x54, 0x41, 0x49, 0x4c,
+	0x53, 0x10, 0x02, 0x12, 0x24, 0x0a, 0x20, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41,
+	0x54, 0x45, 0x5f, 0x4c, 0x4f, 0x45, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x49, 0x44, 0x5f, 0x56,
+	0x45, 0x52, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x03, 0x12, 0x21, 0x0a, 0x1d, 0x43, 0x4c, 0x41,
+	0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x4f, 0x4f, 0x45, 0x43, 0x4c, 0x41, 0x49,
+	0x4d, 0x5f, 0x52, 0x45, 0x56, 0x49, 0x45, 0x57, 0x45, 0x44, 0x10, 0x04, 0x12, 0x22, 0x0a, 0x1e,
+	0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x4f, 0x4f, 0x45, 0x43,
+	0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x45, 0x44, 0x10, 0x05,
+	0x12, 0x25, 0x0a, 0x21, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f,
+	0x4c, 0x4f, 0x45, 0x46, 0x49, 0x4e, 0x5f, 0x49, 0x4e, 0x56, 0x4f, 0x49, 0x43, 0x45, 0x5f, 0x49,
+	0x53, 0x53, 0x55, 0x45, 0x44, 0x10, 0x06, 0x12, 0x27, 0x0a, 0x23, 0x43, 0x4c, 0x41, 0x49, 0x4d,
+	0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x4f, 0x4f, 0x45, 0x46, 0x49, 0x4e, 0x5f, 0x49, 0x4e,
+	0x56, 0x4f, 0x49, 0x43, 0x45, 0x5f, 0x52, 0x45, 0x56, 0x49, 0x45, 0x57, 0x45, 0x44, 0x10, 0x07,
+	0x12, 0x27, 0x0a, 0x23, 0x43, 0x4c, 0x41, 0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f,
+	0x4f, 0x4f, 0x45, 0x46, 0x49, 0x4e, 0x5f, 0x49, 0x4e, 0x56, 0x4f, 0x49, 0x43, 0x45, 0x5f, 0x41,
+	0x50, 0x50, 0x52, 0x4f, 0x56, 0x45, 0x44, 0x10, 0x08, 0x12, 0x28, 0x0a, 0x24, 0x43, 0x4c, 0x41,
+	0x49, 0x4d, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x4f, 0x4f, 0x45, 0x50, 0x41, 0x59, 0x5f,
+	0x50, 0x41, 0x59, 0x4d, 0x45, 0x4e, 0x54, 0x5f, 0x54, 0x52, 0x49, 0x47, 0x47, 0x45, 0x52, 0x45,
+	0x44, 0x10, 0x09, 0x42, 0x79, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x2e, 0x70, 0x62, 0x2e, 0x76, 0x31,
+	0x42, 0x0b, 0x4f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a,
+	0x2a, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x74, 0x68,
+	0x65, 0x72, 0x73, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x73, 0x2f, 0x73, 0x61, 0x6e, 0x64, 0x62, 0x6f,
+	0x78, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x62, 0x2f, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x50, 0x58,
+	0x58, 0xaa, 0x02, 0x05, 0x50, 0x62, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x05, 0x50, 0x62, 0x5c, 0x56,
+	0x31, 0xe2, 0x02, 0x11, 0x50, 0x62, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x06, 0x50, 0x62, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -798,39 +435,29 @@ func file_pb_v1_oracle_proto_rawDescGZIP() []byte {
 	return file_pb_v1_oracle_proto_rawDescData
 }
 
-var file_pb_v1_oracle_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_pb_v1_oracle_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_pb_v1_oracle_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_pb_v1_oracle_proto_goTypes = []any{
-	(*CreateAccountRequest)(nil),    // 0: pb.v1.CreateAccountRequest
-	(*CreateAccountResponse)(nil),   // 1: pb.v1.CreateAccountResponse
-	(*DeleteAccountRequest)(nil),    // 2: pb.v1.DeleteAccountRequest
-	(*DeleteAccountResponse)(nil),   // 3: pb.v1.DeleteAccountResponse
-	(*UpdateAccountRequest)(nil),    // 4: pb.v1.UpdateAccountRequest
-	(*UpdateAccountResponse)(nil),   // 5: pb.v1.UpdateAccountResponse
-	(*GetAccountRequest)(nil),       // 6: pb.v1.GetAccountRequest
-	(*GetAccountResponse)(nil),      // 7: pb.v1.GetAccountResponse
-	(*GetUserAccountsRequest)(nil),  // 8: pb.v1.GetUserAccountsRequest
-	(*GetUserAccountsResponse)(nil), // 9: pb.v1.GetUserAccountsResponse
-	(*TransferRequest)(nil),         // 10: pb.v1.TransferRequest
-	(*TransferResponse)(nil),        // 11: pb.v1.TransferResponse
-	(*Account)(nil),                 // 12: pb.v1.Account
-	(*v1.Exception)(nil),            // 13: common.v1.Exception
+	(ClaimState)(0),             // 0: pb.v1.ClaimState
+	(*CreateClaimRequest)(nil),  // 1: pb.v1.CreateClaimRequest
+	(*CreateClaimResponse)(nil), // 2: pb.v1.CreateClaimResponse
+	(*GetClaimRequest)(nil),     // 3: pb.v1.GetClaimRequest
+	(*GetClaimResponse)(nil),    // 4: pb.v1.GetClaimResponse
+	(*Claim)(nil),               // 5: pb.v1.Claim
+	(*v1.Exception)(nil),        // 6: common.v1.Exception
 }
 var file_pb_v1_oracle_proto_depIdxs = []int32{
-	12, // 0: pb.v1.CreateAccountRequest.account:type_name -> pb.v1.Account
-	13, // 1: pb.v1.CreateAccountResponse.exception:type_name -> common.v1.Exception
-	13, // 2: pb.v1.DeleteAccountResponse.exception:type_name -> common.v1.Exception
-	12, // 3: pb.v1.UpdateAccountRequest.account:type_name -> pb.v1.Account
-	13, // 4: pb.v1.UpdateAccountResponse.exception:type_name -> common.v1.Exception
-	13, // 5: pb.v1.GetAccountResponse.exception:type_name -> common.v1.Exception
-	12, // 6: pb.v1.GetAccountResponse.account:type_name -> pb.v1.Account
-	13, // 7: pb.v1.GetUserAccountsResponse.exception:type_name -> common.v1.Exception
-	12, // 8: pb.v1.GetUserAccountsResponse.accounts:type_name -> pb.v1.Account
-	13, // 9: pb.v1.TransferResponse.exception:type_name -> common.v1.Exception
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	5, // 0: pb.v1.CreateClaimRequest.claim:type_name -> pb.v1.Claim
+	6, // 1: pb.v1.CreateClaimResponse.exception:type_name -> common.v1.Exception
+	5, // 2: pb.v1.CreateClaimResponse.claim:type_name -> pb.v1.Claim
+	6, // 3: pb.v1.GetClaimResponse.exception:type_name -> common.v1.Exception
+	5, // 4: pb.v1.GetClaimResponse.claim:type_name -> pb.v1.Claim
+	0, // 5: pb.v1.Claim.state:type_name -> pb.v1.ClaimState
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_pb_v1_oracle_proto_init() }
@@ -840,7 +467,7 @@ func file_pb_v1_oracle_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_pb_v1_oracle_proto_msgTypes[0].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateAccountRequest); i {
+			switch v := v.(*CreateClaimRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -852,7 +479,7 @@ func file_pb_v1_oracle_proto_init() {
 			}
 		}
 		file_pb_v1_oracle_proto_msgTypes[1].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateAccountResponse); i {
+			switch v := v.(*CreateClaimResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -864,7 +491,7 @@ func file_pb_v1_oracle_proto_init() {
 			}
 		}
 		file_pb_v1_oracle_proto_msgTypes[2].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteAccountRequest); i {
+			switch v := v.(*GetClaimRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -876,7 +503,7 @@ func file_pb_v1_oracle_proto_init() {
 			}
 		}
 		file_pb_v1_oracle_proto_msgTypes[3].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteAccountResponse); i {
+			switch v := v.(*GetClaimResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -888,103 +515,7 @@ func file_pb_v1_oracle_proto_init() {
 			}
 		}
 		file_pb_v1_oracle_proto_msgTypes[4].Exporter = func(v any, i int) any {
-			switch v := v.(*UpdateAccountRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[5].Exporter = func(v any, i int) any {
-			switch v := v.(*UpdateAccountResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[6].Exporter = func(v any, i int) any {
-			switch v := v.(*GetAccountRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[7].Exporter = func(v any, i int) any {
-			switch v := v.(*GetAccountResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[8].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUserAccountsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[9].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUserAccountsResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[10].Exporter = func(v any, i int) any {
-			switch v := v.(*TransferRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[11].Exporter = func(v any, i int) any {
-			switch v := v.(*TransferResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pb_v1_oracle_proto_msgTypes[12].Exporter = func(v any, i int) any {
-			switch v := v.(*Account); i {
+			switch v := v.(*Claim); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1001,13 +532,14 @@ func file_pb_v1_oracle_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pb_v1_oracle_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   13,
+			NumEnums:      1,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_pb_v1_oracle_proto_goTypes,
 		DependencyIndexes: file_pb_v1_oracle_proto_depIdxs,
+		EnumInfos:         file_pb_v1_oracle_proto_enumTypes,
 		MessageInfos:      file_pb_v1_oracle_proto_msgTypes,
 	}.Build()
 	File_pb_v1_oracle_proto = out.File

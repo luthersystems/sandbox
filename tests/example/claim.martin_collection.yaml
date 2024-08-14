@@ -1,0 +1,32 @@
+name: "Sandbox Example: Claim Management"
+headers:
+  - key: Content-Type
+    value: application/json
+tests:
+  - name: "Create claim"
+    method: POST
+    path: "v1/claims"
+    body: |
+      {}
+    test_script: |
+      pm.test("ok", () => {
+          let data = pm.response.json();
+          console.log(data);
+          pm.response.to.have.status(200);
+          pm.expect(data).to.not.have.property("exception");
+          pm.expect(data).to.have.property("claim");
+          pm.expect(data.claim).to.have.property("claim_id");
+          pm.environment.set("CLAIM_ID", data.claim.claim_id);
+      });
+  - name: "Get claim"
+    method: GET
+    path: "v1/claim/{{CLAIM_ID}}"
+    test_script: |
+      pm.test("ok", () => {
+          let data = pm.response.json();
+          console.log(data);
+          pm.response.to.have.status(200);
+          pm.expect(data).to.not.have.property("exception");
+          pm.expect(data).to.have.property("claim");
+          pm.expect(data.claim).to.have.property("state");
+      });

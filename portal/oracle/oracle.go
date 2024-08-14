@@ -19,16 +19,16 @@ type Config struct {
 }
 
 type portal struct {
-	srv.UnimplementedLedgerServiceServer
+	srv.UnimplementedSandboxServiceServer
 	orc *oracle.Oracle
 }
 
 func (p *portal) RegisterServiceServer(grpcServer *grpc.Server) {
-	srv.RegisterLedgerServiceServer(grpcServer, p)
+	srv.RegisterSandboxServiceServer(grpcServer, p)
 }
 
 func (p *portal) RegisterServiceClient(ctx context.Context, grpcConn *grpc.ClientConn, mux *runtime.ServeMux) error {
-	return srv.RegisterLedgerServiceHandlerClient(ctx, mux, srv.NewLedgerServiceClient(grpcConn))
+	return srv.RegisterSandboxServiceHandlerClient(ctx, mux, srv.NewSandboxServiceClient(grpcConn))
 }
 
 // Run starts an oracle and blocks the caller until it completes.

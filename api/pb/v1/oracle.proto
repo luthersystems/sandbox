@@ -1,4 +1,4 @@
-// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+// Copyright © 2024 Luther Systems, Ltd. All right reserved.
 
 // API Models and Documentation.
 
@@ -10,71 +10,41 @@ import "common/v1/exception.proto";
 
 option go_package = "github.com/luthersystems/sandbox/api/pb/v1";
 
-// Request structure for the create_request endponit
-message CreateAccountRequest {
-  Account account = 1;
+message CreateClaimRequest {
+  Claim claim = 1;
 }
 
-message CreateAccountResponse {
+message CreateClaimResponse {
   common.v1.Exception exception = 1;
+  Claim claim = 2;
 }
 
-message DeleteAccountRequest {
-  string account_id = 1;
+message GetClaimRequest {
+  string claim_id = 1;
 }
 
-message DeleteAccountResponse {
+message GetClaimResponse {
   common.v1.Exception exception = 1;
+  Claim claim = 2;
 }
 
-message UpdateAccountRequest {
-  Account account = 1;
+enum ClaimState {
+  CLAIM_STATE_UNSPECIFIED = 0;
+  CLAIM_STATE_NEW = 1;
+  CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS = 2;
+  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 3;
+  CLAIM_STATE_OOECLAIM_REVIEWED = 4;
+  CLAIM_STATE_OOECLAIM_VALIDATED = 5;
+  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 6;
+  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 7;
+  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 8;
+  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 9;
 }
 
-message UpdateAccountResponse {
-  common.v1.Exception exception = 1;
-}
-
-message GetAccountRequest {
-  string account_id = 1;
-}
-
-message GetAccountResponse {
-  common.v1.Exception exception = 1;
-  Account account = 2;
-}
-
-message GetUserAccountsRequest {
-  string user_id = 1;
-}
-
-message GetUserAccountsResponse {
-  common.v1.Exception exception = 1;
-  repeated Account accounts = 2;
-}
-
-// Transfer funds from payer account to payee account. Accounts must have same denomination (asset ID). Transfer amount cannot be negative.
-message TransferRequest {
-  // Account debited. Required.
-  string payer_id = 1;
-  // Account credited. Required.
-  string payee_id = 2;
-  // Amount transfered from payer account to payee account. Required.
-  int64 transfer_amount = 3;
-}
-
-message TransferResponse {
-  common.v1.Exception exception = 1;
-}
-
-// Account represents a balance for an indiviudal denominated in a unit asset. An account holder may have multiple accounts.
-message Account {
-  // Unique ID for the account. Immutable.
-  string account_id = 1;
-  // Current balance in the account denominated in the underlying asset. Cannot be negative.
-  int64 balance = 2;
-  // ID for the underlying asset that current balance is denominated in. Immutable.
-  string asset_id = 3;
-  // ID of the primary account owner.
-  string user_id = 4;
+// Claim represents an insurance claim.
+message Claim {
+  // Unique ID for the claim. Immutable. Set by backend.
+  string claim_id = 1;
+  // State of the claim.
+  ClaimState state = 2;
 }

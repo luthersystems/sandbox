@@ -1,4 +1,4 @@
-// Copyright © 2021 Luther Systems, Ltd. All right reserved.
+// Copyright © 2024 Luther Systems, Ltd. All right reserved.
 
 // API Specification and Documentation.
 
@@ -14,7 +14,7 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 option go_package = "github.com/luthersystems/sandbox/api/srv";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
-    title: "Ledger API"
+    title: "Sandbox API"
     version: "1.0"
     description: ""
   }
@@ -96,50 +96,24 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   }
 };
 
-// REST-JSON API Docs for the ledger project.
-service LedgerService {
+// REST-JSON API Docs for sandbox.
+service SandboxService {
   // Check the health of the service. This is used by load balancers to check service health.
   rpc GetHealthCheck(healthcheck.v1.GetHealthCheckRequest) returns (healthcheck.v1.GetHealthCheckResponse) {
     option (google.api.http) = {get: "/v1/health_check"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
-  // Create a new account denominated in an underlying asset.
-  rpc CreateAccount(pb.v1.CreateAccountRequest) returns (pb.v1.CreateAccountResponse) {
+  // Create claim initiates the creation of the claim.
+  rpc CreateClaim(pb.v1.CreateClaimRequest) returns (pb.v1.CreateClaimResponse) {
     option (google.api.http) = {
-      post: "/v1/accounts"
-      body: "account"
+      post: "/v1/claims"
+      body: "claim"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
-  // Update an account.
-  rpc UpdateAccount(pb.v1.UpdateAccountRequest) returns (pb.v1.UpdateAccountResponse) {
-    option (google.api.http) = {
-      patch: "/v1/account/{account.account_id}"
-      body: "account"
-    };
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
-  }
-  // Delete an account.
-  rpc DeleteAccount(pb.v1.DeleteAccountRequest) returns (pb.v1.DeleteAccountResponse) {
-    option (google.api.http) = {delete: "/v1/account/{account_id}"};
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
-  }
-  // Retrieve account details.
-  rpc GetAccount(pb.v1.GetAccountRequest) returns (pb.v1.GetAccountResponse) {
-    option (google.api.http) = {get: "/v1/account/{account_id}"};
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
-  }
-  // Get accounts for a user.
-  rpc GetUserAccounts(pb.v1.GetUserAccountsRequest) returns (pb.v1.GetUserAccountsResponse) {
-    option (google.api.http) = {get: "/v1/user/{user_id}/accounts"};
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
-  }
-  // Transfer between accounts denominated in the same underlying asset.
-  rpc Transfer(pb.v1.TransferRequest) returns (pb.v1.TransferResponse) {
-    option (google.api.http) = {
-      post: "/v1/transfer"
-      body: "*"
-    };
+  // Retrieve claim details.
+  rpc GetClaim(pb.v1.GetClaimRequest) returns (pb.v1.GetClaimResponse) {
+    option (google.api.http) = {get: "/v1/claim/{claim_id}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
 }
