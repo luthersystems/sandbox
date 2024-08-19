@@ -419,24 +419,42 @@ func (s *eventBus) close() error {
 
 // Events capture requests raised by phylum transactions.
 type Event struct {
-	unmarshalError error
-	respCallback   Callback
-	reqID          string
-	request        json.RawMessage
-	respCount      int
-	callbackMutex  sync.Mutex
+	respCallback  Callback
+	cEvent        *chaininfo.ConnectorEvent
+	respCount     int
+	callbackMutex sync.Mutex
 }
 
 // RequestBody returns the request, or an error if the request
 // could not be retrieved.
 func (e *Event) RequestBody() (json.RawMessage, error) {
-	if e == nil {
+	if e == nil || e.cEvent == nil {
 		return nil, nil
 	}
-	if e.unmarshalError != nil {
-		return nil, e.unmarshalError
+	if err := e.cEvent.UnmarshalError(); err != nil {
+		return nil, err
 	}
-	return e.request, nil
+	return e.cEvent.RequestBody(), nil
+}
+
+// RequestSystem returns the destination system name for the request.
+func (e *Event) RequestSystem() string {
+	return e.cEvent.RequestSystem()
+}
+
+// RequestEnglish returns an english description for the request.
+func (e *Event) RequestEnglish() string {
+	return e.cEvent.RequestEnglish()
+}
+
+// RequestMSP returns the MSP ID for the connector.
+func (e *Event) RequestMSPID() string {
+	return e.cEvent.RequestMSPID()
+}
+
+// ObjectID returns the object ID for the event.
+func (e *Event) ObjectID() string {
+	return e.cEvent.ObjectID()
 }
 
 func (e *Event) makeCallbackMessage(resp json.RawMessage, err error) (json.RawMessage, error) {
@@ -452,7 +470,7 @@ func (e *Event) makeCallbackMessage(resp json.RawMessage, err error) (json.RawMe
 	}
 
 	callbackMessage := CallbackMessage{
-		RequestID: e.reqID,
+		RequestID: e.cEvent.RequestID(),
 		Response:  resp,
 		Error:     errMsg,
 	}
@@ -489,7 +507,7 @@ func (e *Event) Callback(resp json.RawMessage, err error) error {
 
 	if e.respCallback != nil {
 		logrus.Debug("passing event response to registered callback")
-		err = e.respCallback(e.reqID, respRaw)
+		err = e.respCallback(e.cEvent.RequestID(), respRaw)
 		if err != nil && errors.Is(err, shirorpc.ErrTxInvalid) {
 			return fmt.Errorf("invalid tx: %w", err)
 		} else if err != nil {
@@ -525,19 +543,19 @@ func (s *EventStream) Listen() <-chan *Event {
 // Done closes the event stream and blocks the caller until resources are freed.
 // Subsequent calls to Done() are ignored.
 func (s *EventStream) Done() error {
-	logrus.Info("steam done")
+	logrus.Debug("stream done")
 	if s == nil {
 		return nil
 	}
 
 	var err error
 	s.once.Do(func() {
-		logrus.Info("exiting event stream")
-		close(s.done) // Signal the goroutine to stop
+		logrus.Debug("exiting event stream")
+		close(s.done)
 		s.cancel()
-		s.wg.Wait()              // Wait for the goroutine to finish
-		err = s.eventBus.close() // Clean up the event bus
-		logrus.Info("event bus closed")
+		s.wg.Wait()
+		err = s.eventBus.close()
+		logrus.Debug("event bus closed")
 	})
 
 	return err
@@ -707,17 +725,13 @@ func GatewayEvents(cfg *GatewayConfig, opts ...Option) (*EventStream, error) {
 					Info("processing luther events")
 				for _, cEvent := range cEvents {
 					events <- &Event{
-						reqID:          cEvent.RequestID(),
-						request:        cEvent.RequestBody(),
-						unmarshalError: cEvent.UnmarshalError(),
-						respCallback:   bus.respCallback,
+						cEvent:       cEvent,
+						respCallback: bus.respCallback,
 					}
 				}
 				if err := checkpointer.CheckpointBlock(blockNum); err != nil {
 					logrus.WithContext(ctx).WithError(err).Error("failed to checkpoint block")
 				}
-				logrus.WithContext(ctx).
-					Info("done processing luther events")
 			case <-ctx.Done():
 				return
 			case <-stream.done:

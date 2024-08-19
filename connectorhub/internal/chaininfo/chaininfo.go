@@ -887,12 +887,14 @@ type CallbackState struct {
 	Context ConnectorEventContext `json:"ctx"`
 }
 
-// ConnetorEventContext stores the context of the request.c:w
+// ConnetorEventContext stores the context of the request.
 type ConnectorEventContext struct {
-	ObjectID     string `json:"oid"`
-	RequestMSPID string `json:"msp"`
-	RequestKey   string `json:"key"`
-	RequestPDC   string `json:"pdc"`
+	ObjectID       string `json:"oid"`
+	RequestMSPID   string `json:"msp"`
+	RequestKey     string `json:"key"`
+	RequestPDC     string `json:"pdc"`
+	RequestSystem  string `json:"sys"`
+	RequestEnglish string `json:"eng"`
 }
 
 func (s *ConnectorEventContext) String() string {
@@ -948,6 +950,38 @@ func (s *ConnectorEvent) RequestID() string {
 		return ""
 	}
 	return s.header.RequestID
+}
+
+// RequestMSPID the ID of the MSP meant to process this event.
+func (s *ConnectorEvent) RequestMSPID() string {
+	if s == nil {
+		return ""
+	}
+	return s.context.RequestMSPID
+}
+
+// RequestSystem is the system name for the request.
+func (s *ConnectorEvent) RequestSystem() string {
+	if s == nil {
+		return ""
+	}
+	return s.context.RequestSystem
+}
+
+// RequestEnglish is the english description for the request.
+func (s *ConnectorEvent) RequestEnglish() string {
+	if s == nil {
+		return ""
+	}
+	return s.context.RequestEnglish
+}
+
+// ObjectID is the ID of the object that triggered the request.
+func (s *ConnectorEvent) ObjectID() string {
+	if s == nil {
+		return ""
+	}
+	return s.context.ObjectID
 }
 
 func getConnectorEventContext(ns string, reqID string, pvtData *rwset.TxPvtReadWriteSet) (*ConnectorEventContext, error) {
