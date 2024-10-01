@@ -148,7 +148,6 @@
                [event-req-id (or
                                (get event-body "request_id")
                                (mk-uuid))]
-               [event-msp (get event "msp")] ; msp ID for the connector
                [event-key (get event "key")] ; if key omitted then use req id
                [event-pdc (get event "pdc")] ; pdc storing key with req
                [event-oid (or ; ID of the object
@@ -157,9 +156,12 @@
                                           "missing object id"))]
                [event-header (sorted-map "rid" event-req-id)]
                [ctx (sorted-map "oid" event-oid
-                                "msp" event-msp
                                 "key" event-key
-                                "pdc" event-pdc)]
+                                "pdc" event-pdc
+                                "msp" (get event "msp")   ; opt. connector MSP
+                                "sys" (get event "sys")   ; opt. system name
+                                "eng" (get event "eng"))] ; opt. english
+                                                          ; description of event
                [event-ref-str
                  (thread-first
                    event-header

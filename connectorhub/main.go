@@ -36,6 +36,7 @@ package main
 // TODO: connector router logic (replace processRequest)
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -74,7 +75,8 @@ type g struct {
 type runSettings struct {
 	CheckpointFile   string `short:"c" type:"path" help:"Path to checkpoint file" default:"/tmp/checkpoint.tmp" env:"CH_CHECKPOINT_FILE"`
 	StartBlockNumber uint64 `short:"b" help:"Block to start playing events from" default:"1"`
-	Verbose          bool   `short:"v" help:"Verbose logs" default:"true"`
+	Verbose          bool   `short:"v" help:"Verbose logs" default:"false"`
+	Step             bool   `short:"s" help:"Interactive mode to pause for user input before processing event" default:"false"`
 }
 
 func init() {
@@ -133,9 +135,42 @@ func processRequest(ctx context.Context, req json.RawMessage, reqErr error) (jso
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal response: %w", err)
 	}
-	logrus.WithContext(ctx).Info("returning stub OK response")
+	logrus.WithContext(ctx).Debug("returning stub OK response")
 
 	return respJSON, nil
+}
+
+func waitForUser(ctx context.Context) error {
+	logrus.WithContext(ctx).WithField("demo_log", true).Info("Press 'Enter' to continue (or Ctrl-C to abort)...")
+
+	done := make(chan error)
+
+	go func() {
+		_, err := bufio.NewReader(os.Stdin).ReadBytes('\n')
+		done <- err
+		close(done)
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-done:
+		return err
+	}
+}
+
+func prettyPrintPlatformRequest(event *events.Event) {
+	logrus.WithFields(logrus.Fields{
+		"demo_log": true,
+		"claim_id": event.ObjectID(),
+	}).Infof("Platform sent request (%s) to the system [%s] via connector [%s]", event.RequestEnglish(), event.RequestSystem(), event.RequestMSPID())
+}
+
+func prettyPrintConnectorResponse(event *events.Event) {
+	logrus.WithFields(logrus.Fields{
+		"demo_log": true,
+		"claim_id": event.ObjectID(),
+	}).Infof("[%s] response (%s) is sent to Platform via connector [%s]", event.RequestSystem(), event.RequestEnglish(), event.RequestMSPID())
 }
 
 func (s *g) Run() error {
@@ -152,7 +187,7 @@ func (s *g) Run() error {
 	if s.CheckpointFile != "" {
 		gatewayOpts = append(gatewayOpts, events.WithCheckpointFile(s.CheckpointFile))
 	}
-	logrus.WithContext(ctx).Info("connecting to gateway")
+	logrus.WithContext(ctx).Debug("connecting to gateway")
 
 	stream, err := events.GatewayEvents(gatewayCfg, gatewayOpts...)
 	if err != nil {
@@ -174,11 +209,27 @@ func (s *g) Run() error {
 				if err != nil {
 					logrus.WithContext(ctx).WithError(err).Error("event received with error")
 				}
+
+				if s.Step {
+					prettyPrintPlatformRequest(event)
+					if err := waitForUser(ctx); err != nil {
+						return
+					}
+				}
+
 				resp, err := processRequest(ctx, req, err)
+
+				if s.Step {
+					prettyPrintConnectorResponse(event)
+					if err := waitForUser(ctx); err != nil {
+						return
+					}
+				}
+
 				if err := event.Callback(resp, err); err != nil {
 					logrus.WithContext(ctx).WithError(err).Error("event callback failed")
 				} else {
-					logrus.WithContext(ctx).Info("callback successful")
+					logrus.WithContext(ctx).Debug("callback successful")
 				}
 			case <-ctx.Done():
 				logrus.WithContext(ctx).Info("event listener shutting down...")
