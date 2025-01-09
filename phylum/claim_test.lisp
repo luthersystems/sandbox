@@ -45,6 +45,7 @@
              [rid (get event-ref "rid")]
              [ctx (get-connector-event-ctx rid)]
              [req (get-connector-event-req ctx)])
+        (assoc! req "request_id" rid)
         (assoc! output (to-string i) req)
         (get-connector-event-recurse metadata (+ i 1) output)))))
 

@@ -31,12 +31,13 @@
   ;; map from system names to responsible connector MSP IDs
   ;; TODO: for now it's all 1 connector, but in final version each connector
   ;; is run by a separate org (participant).
+  ;; IMPORTANT: these system names MUST match the connectorhub.yaml names!
   (sorted-map
     "CLAIMS_PORTAL_UI"   "Org1MSP"
     "EQUIFAX_ID_VERIFY"  "Org1MSP"
     "POSTGRES_CLAIMS_DB" "Org1MSP"
     "CAMUNDA_WORKFLOW"   "Org1MSP"
-    "OPENKODA_INVOICE"   "Org1MSP"
+    "PDF_INVOICE"        "Org1MSP"
     "CAMUNDA_TASKLIST"   "Org1MSP"
     "EMAIL"              "Org1MSP"
     "GOCARDLESS_PAYMENT" "Org1MSP"))
@@ -51,10 +52,11 @@
   (sorted-map 
     "CLAIM_STATE_UNSPECIFIED"                ()
     "CLAIM_STATE_NEW"                        (event-desc-record "CLAIMS_PORTAL_UI"   "input claim details")
-    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" (event-desc-record "EQUIFAX_ID_VERIFY"  "verify customer identity")
-    "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       (event-desc-record "POSTGRES_CLAIMS_DB" "collect policy details")
-    "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "CAMUNDA_WORKFLOW"   "verify policy")
-    "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "OPENKODA_INVOICE"   "generate invoice")
+    ; TODO: fix and replace with equifax
+    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" (event-desc-record "CAMUNDA_WORKFLOW"   "verify customer identity") 
+    "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       (event-desc-record "CAMUNDA_WORKFLOW"   "collect policy details")
+    "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "POSTGRES_CLAIMS_DB" "verify policy")
+    "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "PDF_INVOICE"        "generate invoice")
     "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"      (event-desc-record "CAMUNDA_TASKLIST"   "approve invoice")
     "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED"    (event-desc-record "EMAIL"              "email invoice")
     "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    (event-desc-record "GOCARDLESS_PAYMENT" "make payment")
@@ -114,33 +116,35 @@
            (cc:infof (assoc resp-body "state" state) "handle")
            (cond 
              ((equal? state "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS")
-              (add-event (mk-equifax-req (sorted-map
-                                           "account_number" "a1"
-                                           "forename" "Jimmy"
-                                           "surname" "McGill"))))
+; TODO:   
+;             (add-event (mk-equifax-req (sorted-map
+;                                          "account_number" "a1"
+;                                          "forename" "Jimmy"
+;                                          "surname" "McGill"))))
+              (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord")))) ; DELETE
 
              ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
               (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord"))))
 
-             ((equal? state "CLAIM_STATE_OOECLAIM_REVIEWED")
+             ((equal? state "CLAIM_STATE_OOECLAIM_REVIEWED") 
               (add-event (mk-psql-req "SELECT 1;")))
 
              ((equal? state "CLAIM_STATE_OOECLAIM_VALIDATED")
               (add-event (mk-pdfserv-req "<html><body>hello world</body></html>")))
 
              ((equal? state "CLAIM_STATE_LOEFIN_INVOICE_ISSUED")
-              (add-event (mk-camunda-inspect-req "a1" true)))
+              (add-event (mk-camunda-inspect-req "a1" "true")))
 
-             ((equal? state "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED") 
+             ((equal? state "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED")
               (add-event (mk-email-req 
-                           "sam.wood@luthersystems.com" 
-                           "Test Email" 
-                           "Hello, this is a test email")))
+                          "sam.wood@luthersystems.com"
+                          "Test Email" 
+                          "Hello, this is a test email")))
 
              ((equal? state "CLAIM_STATE_OOEFIN_INVOICE_APPROVED")
-                (add-event (mk-gocardless-req 
-                             (sorted-map "amount"   100 
-                                         "currency" "USD"))))
+               (add-event (mk-gocardless-req 
+                            (sorted-map "amount"   100 
+                                        "currency" "USD"))))
 
              ((equal? state "CLAIM_STATE_OOEFIN_INVOICE_TRIGGERED")
               ; done
