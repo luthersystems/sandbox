@@ -53,7 +53,7 @@
     "CLAIM_STATE_UNSPECIFIED"                ()
     "CLAIM_STATE_NEW"                        (event-desc-record "CLAIMS_PORTAL_UI"   "input claim details")
     ; TODO: fix and replace with equifax
-    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" (event-desc-record "CAMUNDA_WORKFLOW"   "verify customer identity") 
+    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" (event-desc-record "EQUIFAX_ID_VERIFY"  "verify customer identity") 
     "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       (event-desc-record "CAMUNDA_WORKFLOW"   "collect policy details")
     "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "POSTGRES_CLAIMS_DB" "verify policy")
     "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "PDF_INVOICE"        "generate invoice")
@@ -85,7 +85,7 @@
                          "sys" (get desc "sys")
                          "eng" (get desc "eng")
                          "req" event-req)])
-           (append! events event))]
+           (when event-req (append! events event)))]
 
        ;; next-state upates `claim` to the next state.
        [next-state ()
@@ -115,13 +115,19 @@
                (format-string "unhandled response error: {}" resp-err)))
            (cc:infof (assoc resp-body "state" state) "handle")
            (cond 
-             ((equal? state "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS")
-; TODO:   
-;             (add-event (mk-equifax-req (sorted-map
-;                                          "account_number" "a1"
-;                                          "forename" "Jimmy"
-;                                          "surname" "McGill"))))
-              (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord")))) ; DELETE
+             ((equal? state "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS") 
+              (add-event (mk-equifax-req (sorted-map
+                                           "account_number"    "03299391"
+                                           "account_sort_code" "090127"
+                                           "dob"               "1970-07-04"
+                                           "surname"           "Harrison"
+                                           "forename"          "Emanuel"
+                                           "full_address"      "78 Cromwell Road"
+                                           "address_number"    "78"
+                                           "address_street1"   "Cromwell Road"
+                                           "address_postcode"  "CB6 2AG"
+                                           "address_post_town" "Ely"
+                                           "nationality"       "GB"))))
 
              ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
               (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord"))))
