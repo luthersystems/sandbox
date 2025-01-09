@@ -233,14 +233,17 @@ connectorhub-up: ${START_CONNECTORHUBS}
 start-ch-%: parts=$(subst ., ,$*)
 start-ch-%: idx=$(word 1,${parts})
 start-ch-%: name=$(word 2,${parts})
-start-ch-%: ccname=$(word 3,${parts})
-start-ch-%: filter=$(word 4,${parts})
-start-ch-%: filter_args=$(if ${filter},-f ${filter})
+start-ch-%: ccname=$(word 3,${parts}) # TODO
+start-ch-%: port=$$(( 9091 + ${idx} ))
+ifdef EXPOSE_CONNECTORHUB
+start-gw-%: port_fw=-p "${port}:8080"
+endif
 start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
 	${DOCKER_RUN} -d --name ${name} \
 		-v "${CURDIR}:/tmp/fabric:ro" \
 		-v "$(abspath build/volume/checkpoint):/tmp/checkpoint:rw" \
 		-w "/tmp/fabric" \
+		${port_fw} \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${CONNECTORHUB_IMAGE}:${CONNECTORHUB_VERSION} \
 			start -v \
@@ -277,7 +280,7 @@ couchdb-down: gateway-down fnb-down
 .PHONY: oracle-down
 
 .PHONY: down
-down: oracle-down connectorhub-down gateway-down fnb-down clean-chaincodes
+down: oracle-down connectorhub-down gateway-down fnb-down clean
 
 .PHONY: fnb-down
 fnb-down: ${NETWORK_BUILDER_TARGET}

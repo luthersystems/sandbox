@@ -30,3 +30,21 @@ tests:
           pm.expect(data).to.have.property("claim");
           pm.expect(data.claim).to.have.property("state");
       });
+  - name: "Update claim"
+    method: PATCH
+    path: "v1/claim/{{CLAIM_ID}}"
+    body: |
+      {
+        "claim": {
+          "claim_id": "{{CLAIM_ID}}"
+        }
+      }
+    test_script: |
+      pm.test("ok", () => {
+          let data = pm.response.json();
+          console.log(data);
+          pm.response.to.have.status(200);
+          pm.expect(data).to.not.have.property("exception");
+          pm.expect(data).to.have.property("claim");
+          pm.expect(data.claim).to.have.property("state");
+      });

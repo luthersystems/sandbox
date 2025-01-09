@@ -10,11 +10,18 @@ import "common/v1/exception.proto";
 
 option go_package = "github.com/luthersystems/sandbox/api/pb/v1";
 
-message CreateClaimRequest {
+message CreateClaimRequest {}
+
+message CreateClaimResponse {
+  common.v1.Exception exception = 1;
+  Claim claim = 2;
+}
+
+message UpdateClaimRequest {
   Claim claim = 1;
 }
 
-message CreateClaimResponse {
+message UpdateClaimResponse {
   common.v1.Exception exception = 1;
   Claim claim = 2;
 }

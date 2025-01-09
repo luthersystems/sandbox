@@ -105,9 +105,14 @@ service SandboxService {
   }
   // Create claim initiates the creation of the claim.
   rpc CreateClaim(pb.v1.CreateClaimRequest) returns (pb.v1.CreateClaimResponse) {
+    option (google.api.http) = {post: "/v1/claims"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
+  }
+  // Update claim sets claim details.
+  rpc UpdateClaim(pb.v1.UpdateClaimRequest) returns (pb.v1.UpdateClaimResponse) {
     option (google.api.http) = {
-      post: "/v1/claims"
-      body: "claim"
+      patch: "/v1/claim/{claim.claim_id}"
+      body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }

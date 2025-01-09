@@ -18,9 +18,10 @@ BUILDENV_TAG=v0.0.85
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.205.6
+#SUBSTRATE_VERSION=v2.205.6
+SUBSTRATE_VERSION=v3.0.1-SNAPSHOT.15-1b4f632c
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
-CONNECTORHUB_VERSION=v3.0.1-SNAPSHOT.6-47015079
+CONNECTORHUB_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 NETWORK_BUILDER_VERSION=v0.0.2
 MARTIN_VERSION=v0.1.0

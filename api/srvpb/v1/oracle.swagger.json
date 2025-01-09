@@ -19,6 +19,89 @@
     "application/json"
   ],
   "paths": {
+    "/v1/claim/{claim.claimId}": {
+      "patch": {
+        "summary": "Update claim sets claim details.",
+        "operationId": "SandboxService_UpdateClaim",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateClaimResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "claim.claimId",
+            "description": "Unique ID for the claim. Immutable. Set by backend.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SandboxServiceUpdateClaimBody"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/v1/claim/{claimId}": {
       "get": {
         "summary": "Retrieve claim details.",
@@ -154,16 +237,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "claim",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1Claim"
-            }
-          }
-        ],
         "tags": [
           "Service"
         ]
@@ -246,6 +319,21 @@
     }
   },
   "definitions": {
+    "SandboxServiceUpdateClaimBody": {
+      "type": "object",
+      "properties": {
+        "claim": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "$ref": "#/definitions/v1ClaimState",
+              "description": "State of the claim."
+            }
+          },
+          "description": "Claim represents an insurance claim."
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -417,6 +505,17 @@
         }
       },
       "description": "Health check status of an individual service."
+    },
+    "v1UpdateClaimResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/v1Exception"
+        },
+        "claim": {
+          "$ref": "#/definitions/v1Claim"
+        }
+      }
     }
   },
   "securityDefinitions": {

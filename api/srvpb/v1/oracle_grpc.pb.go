@@ -27,6 +27,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	SandboxService_GetHealthCheck_FullMethodName = "/srvpb.v1.SandboxService/GetHealthCheck"
 	SandboxService_CreateClaim_FullMethodName    = "/srvpb.v1.SandboxService/CreateClaim"
+	SandboxService_UpdateClaim_FullMethodName    = "/srvpb.v1.SandboxService/UpdateClaim"
 	SandboxService_GetClaim_FullMethodName       = "/srvpb.v1.SandboxService/GetClaim"
 )
 
@@ -40,6 +41,8 @@ type SandboxServiceClient interface {
 	GetHealthCheck(ctx context.Context, in *v1.GetHealthCheckRequest, opts ...grpc.CallOption) (*v1.GetHealthCheckResponse, error)
 	// Create claim initiates the creation of the claim.
 	CreateClaim(ctx context.Context, in *v11.CreateClaimRequest, opts ...grpc.CallOption) (*v11.CreateClaimResponse, error)
+	// Update claim sets claim details.
+	UpdateClaim(ctx context.Context, in *v11.UpdateClaimRequest, opts ...grpc.CallOption) (*v11.UpdateClaimResponse, error)
 	// Retrieve claim details.
 	GetClaim(ctx context.Context, in *v11.GetClaimRequest, opts ...grpc.CallOption) (*v11.GetClaimResponse, error)
 }
@@ -72,6 +75,16 @@ func (c *sandboxServiceClient) CreateClaim(ctx context.Context, in *v11.CreateCl
 	return out, nil
 }
 
+func (c *sandboxServiceClient) UpdateClaim(ctx context.Context, in *v11.UpdateClaimRequest, opts ...grpc.CallOption) (*v11.UpdateClaimResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.UpdateClaimResponse)
+	err := c.cc.Invoke(ctx, SandboxService_UpdateClaim_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sandboxServiceClient) GetClaim(ctx context.Context, in *v11.GetClaimRequest, opts ...grpc.CallOption) (*v11.GetClaimResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v11.GetClaimResponse)
@@ -92,6 +105,8 @@ type SandboxServiceServer interface {
 	GetHealthCheck(context.Context, *v1.GetHealthCheckRequest) (*v1.GetHealthCheckResponse, error)
 	// Create claim initiates the creation of the claim.
 	CreateClaim(context.Context, *v11.CreateClaimRequest) (*v11.CreateClaimResponse, error)
+	// Update claim sets claim details.
+	UpdateClaim(context.Context, *v11.UpdateClaimRequest) (*v11.UpdateClaimResponse, error)
 	// Retrieve claim details.
 	GetClaim(context.Context, *v11.GetClaimRequest) (*v11.GetClaimResponse, error)
 	mustEmbedUnimplementedSandboxServiceServer()
@@ -109,6 +124,9 @@ func (UnimplementedSandboxServiceServer) GetHealthCheck(context.Context, *v1.Get
 }
 func (UnimplementedSandboxServiceServer) CreateClaim(context.Context, *v11.CreateClaimRequest) (*v11.CreateClaimResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateClaim not implemented")
+}
+func (UnimplementedSandboxServiceServer) UpdateClaim(context.Context, *v11.UpdateClaimRequest) (*v11.UpdateClaimResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateClaim not implemented")
 }
 func (UnimplementedSandboxServiceServer) GetClaim(context.Context, *v11.GetClaimRequest) (*v11.GetClaimResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetClaim not implemented")
@@ -170,6 +188,24 @@ func _SandboxService_CreateClaim_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SandboxService_UpdateClaim_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.UpdateClaimRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).UpdateClaim(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SandboxService_UpdateClaim_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).UpdateClaim(ctx, req.(*v11.UpdateClaimRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SandboxService_GetClaim_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v11.GetClaimRequest)
 	if err := dec(in); err != nil {
@@ -202,6 +238,10 @@ var SandboxService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateClaim",
 			Handler:    _SandboxService_CreateClaim_Handler,
+		},
+		{
+			MethodName: "UpdateClaim",
+			Handler:    _SandboxService_UpdateClaim_Handler,
 		},
 		{
 			MethodName: "GetClaim",
