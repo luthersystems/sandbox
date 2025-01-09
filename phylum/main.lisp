@@ -18,7 +18,5 @@
 (set 'build-id "LUTHER_PROJECT_BUILD_ID")  ; overridden during build
 (set 'service-version (format-string "{} ({})" version build-id))
 
-(load-file "utils.lisp")
 (load-file "routes.lisp")
-(load-file "connector.lisp")
 (load-file "claim.lisp")

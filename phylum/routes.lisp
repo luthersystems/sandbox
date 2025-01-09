@@ -64,11 +64,15 @@
                           "timestamp"       (cc:timestamp (cc:now)))))))
 
 (defendpoint "create_claim" (req)
-  (let* ([claim (create-claim)]
-         [data (claim 'data)])
-    (route-success (sorted-map "claim" data))))
+  (route-success (sorted-map "claim" (create-claim))))
 
-(defendpoint "get_claim" (req) 
+(defendpoint "update_claim" (req)
+  (let* ([claim-body (get req "claim")]
+         [claim-id (or (get claim-body "claim_id")
+                       (set-exception-business "missing claim_id"))])
+    (route-success (sorted-map "claim" (trigger-claim claim-id req)))))
+
+(defendpoint-get "get_claim" (req)
   (let* ([claim-id (or (get req "claim_id")
                        (set-exception-business "missing claim_id"))]
          [claim (or (claims 'get claim-id)
