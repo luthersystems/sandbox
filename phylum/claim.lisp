@@ -37,10 +37,10 @@
     "EQUIFAX_ID_VERIFY"  "Org1MSP"
     "POSTGRES_CLAIMS_DB" "Org1MSP"
     "CAMUNDA_WORKFLOW"   "Org1MSP"
-    "PDF_INVOICE"        "Org1MSP"
+    "INVOICE_NINJA"      "Org1MSP"
     "CAMUNDA_TASKLIST"   "Org1MSP"
     "EMAIL"              "Org1MSP"
-    "GOCARDLESS_PAYMENT" "Org1MSP"))
+    "STRIPE_PAYMENT"     "Org1MSP"))
 
 (defun event-desc-record (sys eng)
   (denil-map (sorted-map "msp" (default (get sys-msp-map sys) "Org1MSP")
@@ -52,14 +52,13 @@
   (sorted-map 
     "CLAIM_STATE_UNSPECIFIED"                ()
     "CLAIM_STATE_NEW"                        (event-desc-record "CLAIMS_PORTAL_UI"   "input claim details")
-    ; TODO: fix and replace with equifax
     "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" (event-desc-record "EQUIFAX_ID_VERIFY"  "verify customer identity") 
     "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       (event-desc-record "CAMUNDA_WORKFLOW"   "collect policy details")
     "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "POSTGRES_CLAIMS_DB" "verify policy")
-    "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "PDF_INVOICE"        "generate invoice")
+    "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "INVOICE_NINJA"      "generate invoice")
     "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"      (event-desc-record "CAMUNDA_TASKLIST"   "approve invoice")
     "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED"    (event-desc-record "EMAIL"              "email invoice")
-    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    (event-desc-record "GOCARDLESS_PAYMENT" "make payment")
+    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    (event-desc-record "STRIPE_PAYMENT"     "make payment")
     "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"   ()
     "CLAIM_STATE_DONE"                       ()))
 
@@ -136,7 +135,8 @@
               (add-event (mk-psql-req "SELECT 1;")))
 
              ((equal? state "CLAIM_STATE_OOECLAIM_VALIDATED")
-              (add-event (mk-pdfserv-req "<html><body>hello world</body></html>")))
+              (add-event (mk-invoice-ninja-email-req
+                           (sorted-map "invoice_id" "mock_invoice_id"))))
 
              ((equal? state "CLAIM_STATE_LOEFIN_INVOICE_ISSUED")
               (add-event (mk-camunda-inspect-req "a1" "true")))
@@ -148,9 +148,13 @@
                           "Hello, this is a test email")))
 
              ((equal? state "CLAIM_STATE_OOEFIN_INVOICE_APPROVED")
-               (add-event (mk-gocardless-req 
-                            (sorted-map "amount"   100 
-                                        "currency" "USD"))))
+              (add-event (mk-stripe-charge-req
+                           (sorted-map
+                             "customer_id" "mock_customer_id"
+                             "amount"      2000
+                             "currency"    "usd"
+                             "source_id"   "mock_source_id"
+                             "description" "Test Stripe charge"))))
 
              ((equal? state "CLAIM_STATE_OOEFIN_INVOICE_TRIGGERED")
               ; done

@@ -19,7 +19,7 @@ BUILDENV_TAG=v0.0.85
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
 #SUBSTRATE_VERSION=v2.205.6
-SUBSTRATE_VERSION=v3.0.1-SNAPSHOT.15-1b4f632c
+SUBSTRATE_VERSION=v3.0.1-SNAPSHOT.16-3df834e3
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 CONNECTORHUB_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
