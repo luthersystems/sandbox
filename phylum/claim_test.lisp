@@ -6,6 +6,26 @@
  ;; overwrite return from cc:creator such that tests can complete
 (set 'cc:creator (lambda () "Org1MSP"))
 
+(defun mk-test-claimant ()
+  (sorted-map "account_number"    "03299391"
+              "account_sort_code" "090127"
+              "dob"               "1970-07-04"
+              "surname"           "Harrison"
+              "forename"          "Emanuel"
+              "full_address"      "78 Cromwell Road"
+              "address_number"    "78"
+              "address_street1"   "Cromwell Road"
+              "address_postcode"  "CB6 2AG"
+              "address_post_town" "Ely"
+              "nationality"       "GB"))
+
+(defun populate-test-claim! (claim)
+  (let* ([claimant (mk-test-claimant)])
+    (assoc! claim "claimant" claimant)
+    (assoc! claim "date_of_accident" "2023-09-28")
+    (assoc! claim "damage_amount" 4750)
+    (assoc! claim "claim_reason" "Vehicle collision damage to rear bumper and trunk")))
+
 (test "claims"
   (let* ([claim (create-claim)]
          [_ (assert (not (nil? claim)))])
@@ -64,8 +84,9 @@
   (let* ([claim (create-claim)]) 
     (cc:debugf (sorted-map "claim" claim) "start-new-event-loop")
     (assert (not (nil? claim)))
-    (assert (not (nil? (get claim "claim_id")))) 
-    (trigger-claim (get claim "claim_id") (sorted-map))))
+    (assert (not (nil? (get claim "claim_id"))))
+    (populate-test-claim! claim)
+    (trigger-claim (get claim "claim_id") claim)))
 
 (defun assert-no-more-events ()
   (let* ([event-reqs (get-connector-event-reqs)])

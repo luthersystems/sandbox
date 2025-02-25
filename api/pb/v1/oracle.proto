@@ -1,5 +1,4 @@
-// Copyright © 2024 Luther Systems, Ltd. All right reserved.
-
+// Copyright © 2024 Luther Systems, Ltd. All rights reserved.
 // API Models and Documentation.
 
 syntax = "proto3";
@@ -10,48 +9,102 @@ import "common/v1/exception.proto";
 
 option go_package = "github.com/luthersystems/sandbox/api/pb/v1";
 
-message CreateClaimRequest {}
-
-message CreateClaimResponse {
-  common.v1.Exception exception = 1;
-  Claim claim = 2;
+// Represents a nationality using an enum for structured validation.
+enum Nationality {
+    NATIONALITY_UNSPECIFIED = 0; // Default value (should not be used)
+    GB = 1;  // United Kingdom
+    US = 2;  // United States
+    FR = 3;  // France
+    DE = 4;  // Germany
+    // Additional nationalities can be added as needed.
 }
 
-message UpdateClaimRequest {
-  Claim claim = 1;
+// Stores details of the claimant (person making the claim).
+message Claimant {
+  string account_number = 1;      // Bank account number (string to support leading zeros)
+  string account_sort_code = 2;   // Bank sort code (string to avoid leading-zero loss)
+  string dob = 3;                 // Date of birth (YYYY-MM-DD)
+  string surname = 4;             // Surname (last name)
+  string forename = 5;            // Forename (first name)
+  string full_address = 6;        // Full address in a single field
+  string address_number = 7;      // House/building number
+  string address_street1 = 8;     // Street address
+  string address_postcode = 9;    // Postal code (ZIP code)
+  string address_post_town = 10;  // Post town or city
+  Nationality nationality = 11;   // Nationality, stored as an enum
 }
 
-message UpdateClaimResponse {
-  common.v1.Exception exception = 1;
-  Claim claim = 2;
+// Represents the final outcome of a claim.
+enum Status {
+  STATUS_UNSPECIFIED = 0;   // Default value (should not be used)
+  STATUS_APPROVED = 1;      // Claim was approved
+  STATUS_DECLINED = 2;      // Claim was declined
+  STATUS_PAID = 3;          // Claim has been paid out
 }
 
-message GetClaimRequest {
-  string claim_id = 1;
-}
-
-message GetClaimResponse {
-  common.v1.Exception exception = 1;
-  Claim claim = 2;
-}
-
+// Represents the processing state of the claim (process progress).
 enum ClaimState {
-  CLAIM_STATE_UNSPECIFIED = 0;
-  CLAIM_STATE_NEW = 1;
-  CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS = 2;
-  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 3;
-  CLAIM_STATE_OOECLAIM_REVIEWED = 4;
-  CLAIM_STATE_OOECLAIM_VALIDATED = 5;
-  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 6;
-  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 7;
-  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 8;
-  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 9;
+  CLAIM_STATE_UNSPECIFIED = 0;               // Default value (should not be used)
+  CLAIM_STATE_NEW = 1;                       // Claim was created
+  CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED = 2;// Claimant details submitted
+  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 3;      // Identity verified
+  CLAIM_STATE_OOECLAIM_REVIEWED = 4;         // Claim reviewed
+  CLAIM_STATE_OOECLAIM_VALIDATED = 5;        // Claim validated
+  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 6;     // Invoice issued
+  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 7;   // Invoice reviewed
+  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 8;   // Invoice approved
+  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 9;  // Payment triggered
 }
 
-// Claim represents an insurance claim.
+// Request to create a claim.
+message CreateClaimRequest {
+  Claimant claimant = 1;      // Details of the claimant
+  string date_of_accident = 2;// Date when the accident occurred (YYYY-MM-DD)
+  int64 damage_amount = 3;    // Damage amount (stored in cents to avoid floating point issues)
+  string claim_reason = 4;    // Brief description of the reason for the claim
+}
+
+// Represents an insurance claim, storing its lifecycle, status, and related claimant details.
 message Claim {
-  // Unique ID for the claim. Immutable. Set by backend.
-  string claim_id = 1;
-  // State of the claim.
-  ClaimState state = 2;
+  string claim_id = 1;        // Unique ID assigned by the backend (immutable)
+  ClaimState state = 2;       // The current internal processing state of the claim
+  Claimant claimant = 3;      // Claimant details
+  string date_of_accident = 4;// Date when the accident occurred (YYYY-MM-DD)
+  int64 damage_amount = 5;    // Damage amount (stored in cents to prevent floating point issues)
+  string claim_reason = 6;    // Description of why the claim was filed
+  Status status = 7;          // The final outcome of the claim
+}
+
+// Response for creating a claim.
+message CreateClaimResponse {
+  oneof result {
+    common.v1.Exception exception = 1; // Exception details if an error occurred
+    Claim claim = 2;                   // The created claim if successful
+  }
+}
+
+// Request to update an existing claim.
+message UpdateClaimRequest {
+  Claim claim = 1; // The claim details with updates
+}
+
+// Response for updating a claim.
+message UpdateClaimResponse {
+  oneof result {
+    common.v1.Exception exception = 1; // Exception details if an error occurred
+    Claim claim = 2;                   // The updated claim if successful
+  }
+}
+
+// Request to retrieve a claim by its unique ID.
+message GetClaimRequest {
+  string claim_id = 1; // Unique identifier of the claim to fetch
+}
+
+// Response containing the requested claim.
+message GetClaimResponse {
+  oneof result {
+    common.v1.Exception exception = 1; // Exception details if an error occurred
+    Claim claim = 2;                   // The retrieved claim if successful
+  }
 }

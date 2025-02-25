@@ -104,7 +104,7 @@
        
        [data () claim]
 
-       [handle (resp) 
+       [handle (resp)
          (let* ([state (get-state)]
                 [resp-body (get resp "response")]
                 [resp-err (get resp "error")]
@@ -113,20 +113,10 @@
              (set-exception-unexpected
                (format-string "unhandled response error: {}" resp-err)))
            (cc:infof (assoc resp-body "state" state) "handle")
-           (cond 
-             ((equal? state "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS") 
-              (add-event (mk-equifax-req (sorted-map
-                                           "account_number"    "03299391"
-                                           "account_sort_code" "090127"
-                                           "dob"               "1970-07-04"
-                                           "surname"           "Harrison"
-                                           "forename"          "Emanuel"
-                                           "full_address"      "78 Cromwell Road"
-                                           "address_number"    "78"
-                                           "address_street1"   "Cromwell Road"
-                                           "address_postcode"  "CB6 2AG"
-                                           "address_post_town" "Ely"
-                                           "nationality"       "GB"))))
+           (cond
+             ((equal? state "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS")
+              (let* ([claimant (get resp "claimant")]) 
+                (add-event (mk-equifax-req claimant))))
 
              ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
               (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord"))))
