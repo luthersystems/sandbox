@@ -88,7 +88,7 @@ func TestGetAccount(t *testing.T) {
 		})
 		if assert.NoError(t, err) {
 			if assert.NotNil(t, resp) {
-				assert.NotNil(t, resp.Exception)
+				assert.NotNil(t, resp.GetException())
 			}
 		}
 	}

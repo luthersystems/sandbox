@@ -16,7 +16,7 @@
 
 (set 'state-transitions
      (make-state-chain (vector
-                         "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS"
+                         "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED"
                          "CLAIM_STATE_LOECLAIM_ID_VERIFIED"
                          "CLAIM_STATE_OOECLAIM_REVIEWED"
                          "CLAIM_STATE_OOECLAIM_VALIDATED"
