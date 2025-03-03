@@ -2,8 +2,6 @@ module github.com/luthersystems/sandbox
 
 go 1.23.0
 
-toolchain go1.24.0
-
 require (
 	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.5-20250224214741-b97f9dda9589.1
 	github.com/alecthomas/kong v0.9.0
