@@ -52,7 +52,7 @@
   (sorted-map 
     "CLAIM_STATE_UNSPECIFIED"                ()
     "CLAIM_STATE_NEW"                        (event-desc-record "CLAIMS_PORTAL_UI"   "input claim details")
-    "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS" (event-desc-record "EQUIFAX_ID_VERIFY"  "verify customer identity") 
+    "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED" (event-desc-record "EQUIFAX_ID_VERIFY"  "verify customer identity") 
     "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       (event-desc-record "CAMUNDA_WORKFLOW"   "collect policy details")
     "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "POSTGRES_CLAIMS_DB" "verify policy")
     "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "INVOICE_NINJA"      "generate invoice")
@@ -114,7 +114,7 @@
                (format-string "unhandled response error: {}" resp-err)))
            (cc:infof (assoc resp-body "state" state) "handle")
            (cond
-             ((equal? state "CLAIM_STATE_LOECLAIM_COLLECTED_DETAILS")
+             ((equal? state "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED")
               (let* ([claimant (get resp "claimant")]) 
                 (add-event (mk-equifax-req claimant))))
 
