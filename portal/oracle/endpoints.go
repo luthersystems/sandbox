@@ -28,9 +28,9 @@ func (p *portal) CreateClaim(ctx context.Context, req *pb.CreateClaimRequest) (*
 	return oracle.Call(p.orc, ctx, "create_claim", req, &pb.CreateClaimResponse{}, p.defaultConfigs(ctx)...)
 }
 
-// UpdateClaim is an example resource update endpoint.
-func (p *portal) UpdateClaim(ctx context.Context, req *pb.UpdateClaimRequest) (*pb.UpdateClaimResponse, error) {
-	return oracle.Call(p.orc, ctx, "update_claim", req, &pb.UpdateClaimResponse{}, p.defaultConfigs(ctx)...)
+// AddClaimant is an example resource update endpoint.
+func (p *portal) AddClaimant(ctx context.Context, req *pb.AddClaimantRequest) (*pb.AddClaimantResponse, error) {
+	return oracle.Call(p.orc, ctx, "add_claimant", req, &pb.AddClaimantResponse{}, p.defaultConfigs(ctx)...)
 }
 
 // GetClaim is an example query endpoint.

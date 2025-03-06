@@ -105,8 +105,7 @@
        [data () claim]
 
        [handle (resp)
-         (let* ([state (get-state)]
-                [resp-body (get resp "response")]
+         (let* ([resp-body (get resp "response")]
                 [resp-err (get resp "error")]
                 [state (get-state)])
            (when resp-err 
@@ -115,8 +114,7 @@
            (cc:infof (assoc resp-body "state" state) "handle")
            (cond
              ((equal? state "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED")
-              (let* ([claimant (get resp "claimant")]) 
-                (add-event (mk-equifax-req claimant))))
+              (add-event (mk-equifax-req resp)))
 
              ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
               (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord"))))

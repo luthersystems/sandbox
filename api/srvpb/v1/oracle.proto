@@ -108,10 +108,10 @@ service SandboxService {
     option (google.api.http) = {post: "/v1/claims"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
-  // Update claim sets claim details.
-  rpc UpdateClaim(pb.v1.UpdateClaimRequest) returns (pb.v1.UpdateClaimResponse) {
+  // Add claimant updates claim details.
+  rpc AddClaimant(pb.v1.AddClaimantRequest) returns (pb.v1.AddClaimantResponse) {
     option (google.api.http) = {
-      patch: "/v1/claim/{claim.claim_id}"
+      post: "/v1/claim/{claim_id}/claimant"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};

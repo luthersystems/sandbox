@@ -19,12 +19,9 @@
               "address_post_town" "Ely"
               "nationality"       "GB"))
 
-(defun populate-test-claim! (claim)
+(defun populate-test-claimant! (claim)
   (let* ([claimant (mk-test-claimant)])
-    (assoc! claim "claimant" claimant)
-    (assoc! claim "date_of_accident" "2023-09-28")
-    (assoc! claim "damage_amount" 4750)
-    (assoc! claim "claim_reason" "Vehicle collision damage to rear bumper and trunk")))
+    (assoc! claim "claimant" claimant)))
 
 (test "claims"
   (let* ([claim (create-claim)]
@@ -85,8 +82,8 @@
     (cc:debugf (sorted-map "claim" claim) "start-new-event-loop")
     (assert (not (nil? claim)))
     (assert (not (nil? (get claim "claim_id"))))
-    (populate-test-claim! claim)
-    (trigger-claim (get claim "claim_id") claim)))
+    (populate-test-claimant! claim)
+    (trigger-claim (get claim "claim_id") (get claim "claimant"))))
 
 (defun assert-no-more-events ()
   (let* ([event-reqs (get-connector-event-reqs)])

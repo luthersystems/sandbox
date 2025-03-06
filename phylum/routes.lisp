@@ -66,11 +66,11 @@
 (defendpoint "create_claim" (req)
   (route-success (sorted-map "claim" (create-claim))))
 
-(defendpoint "update_claim" (req)
-  (let* ([claim-body (get req "claim")]
-         [claim-id (or (get claim-body "claim_id")
-                       (set-exception-business "missing claim_id"))])
-    (route-success (sorted-map "claim" (trigger-claim claim-id req)))))
+(defendpoint "add_claimant" (req)
+  (let* ([claim-id (or (get req "claim_id")
+                       (set-exception-business "missing claim_id"))]
+         [claimant (get req "claimant")])
+    (route-success (sorted-map "claim" (trigger-claim claim-id claimant)))))
 
 (defendpoint-get "get_claim" (req)
   (let* ([claim-id (or (get req "claim_id")

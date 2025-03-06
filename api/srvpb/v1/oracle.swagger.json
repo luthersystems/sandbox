@@ -19,89 +19,6 @@
     "application/json"
   ],
   "paths": {
-    "/v1/claim/{claim.claimId}": {
-      "patch": {
-        "summary": "Update claim sets claim details.",
-        "operationId": "SandboxService_UpdateClaim",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateClaimResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request determined by business logic",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "401": {
-            "description": "Authorization failed",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "404": {
-            "description": "Missing resource",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "405": {
-            "description": "Method not allowed",
-            "schema": {
-              "type": "string",
-              "format": "string"
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "503": {
-            "description": "Service not available",
-            "schema": {
-              "$ref": "#/definitions/v1ExceptionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "claim.claimId",
-            "description": "Unique ID assigned by the backend (immutable)",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/SandboxServiceUpdateClaimBody"
-            }
-          }
-        ],
-        "tags": [
-          "Service"
-        ]
-      }
-    },
     "/v1/claim/{claimId}": {
       "get": {
         "summary": "Retrieve claim details.",
@@ -177,6 +94,88 @@
         ]
       }
     },
+    "/v1/claim/{claimId}/claimant": {
+      "post": {
+        "summary": "Add claimant updates claim details.",
+        "operationId": "SandboxService_AddClaimant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AddClaimantResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SandboxServiceAddClaimantBody"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/v1/claims": {
       "post": {
         "summary": "Create claim initiates the creation of the claim.",
@@ -239,91 +238,6 @@
           }
         },
         "parameters": [
-          {
-            "name": "claimant.accountNumber",
-            "description": "Bank account number (string to support leading zeros)",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.accountSortCode",
-            "description": "Bank sort code (string to avoid leading-zero loss)",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.dob",
-            "description": "Date of birth (YYYY-MM-DD)",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.surname",
-            "description": "Surname (last name)",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.forename",
-            "description": "Forename (first name)",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.fullAddress",
-            "description": "Full address in a single field",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.addressNumber",
-            "description": "House/building number",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.addressStreet1",
-            "description": "Street address",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.addressPostcode",
-            "description": "Postal code (ZIP code)",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.addressPostTown",
-            "description": "Post town or city",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "claimant.nationality",
-            "description": "Nationality, stored as an enum\n\n - NATIONALITY_UNSPECIFIED: Default value (should not be used)\n - GB: United Kingdom\n - US: United States\n - FR: France\n - DE: Germany",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "NATIONALITY_UNSPECIFIED",
-              "GB",
-              "US",
-              "FR",
-              "DE"
-            ],
-            "default": "NATIONALITY_UNSPECIFIED"
-          },
           {
             "name": "dateOfAccident",
             "description": "Date when the accident occurred (YYYY-MM-DD)",
@@ -429,38 +343,11 @@
     }
   },
   "definitions": {
-    "SandboxServiceUpdateClaimBody": {
+    "SandboxServiceAddClaimantBody": {
       "type": "object",
       "properties": {
-        "claim": {
-          "type": "object",
-          "properties": {
-            "state": {
-              "$ref": "#/definitions/v1ClaimState",
-              "title": "The current internal processing state of the claim"
-            },
-            "claimant": {
-              "$ref": "#/definitions/v1Claimant",
-              "title": "Claimant details"
-            },
-            "dateOfAccident": {
-              "type": "string",
-              "title": "Date when the accident occurred (YYYY-MM-DD)"
-            },
-            "damageAmount": {
-              "type": "string",
-              "format": "int64",
-              "title": "Damage amount (stored in cents to prevent floating point issues)"
-            },
-            "claimReason": {
-              "type": "string",
-              "title": "Description of why the claim was filed"
-            },
-            "status": {
-              "$ref": "#/definitions/pbv1Status",
-              "title": "The final outcome of the claim"
-            }
-          },
+        "claimant": {
+          "$ref": "#/definitions/v1Claimant",
           "title": "The claim details with updates"
         }
       },
@@ -504,6 +391,20 @@
         }
       },
       "additionalProperties": {}
+    },
+    "v1AddClaimantResponse": {
+      "type": "object",
+      "properties": {
+        "exception": {
+          "$ref": "#/definitions/v1Exception",
+          "title": "Exception details if an error occurred"
+        },
+        "claim": {
+          "$ref": "#/definitions/v1Claim",
+          "title": "The updated claim if successful"
+        }
+      },
+      "description": "Response for updating a claim."
     },
     "v1Claim": {
       "type": "object",
@@ -731,27 +632,13 @@
       "type": "string",
       "enum": [
         "NATIONALITY_UNSPECIFIED",
-        "GB",
-        "US",
-        "FR",
-        "DE"
+        "NATIONALITY_GB",
+        "NATIONALITY_US",
+        "NATIONALITY_FR",
+        "NATIONALITY_DE"
       ],
       "default": "NATIONALITY_UNSPECIFIED",
-      "description": "Represents a nationality using an enum for structured validation.\n\n - NATIONALITY_UNSPECIFIED: Default value (should not be used)\n - GB: United Kingdom\n - US: United States\n - FR: France\n - DE: Germany"
-    },
-    "v1UpdateClaimResponse": {
-      "type": "object",
-      "properties": {
-        "exception": {
-          "$ref": "#/definitions/v1Exception",
-          "title": "Exception details if an error occurred"
-        },
-        "claim": {
-          "$ref": "#/definitions/v1Claim",
-          "title": "The updated claim if successful"
-        }
-      },
-      "description": "Response for updating a claim."
+      "description": "Represents a nationality using an enum for structured validation.\n\n - NATIONALITY_UNSPECIFIED: Default value (should not be used)\n - NATIONALITY_GB: United Kingdom\n - NATIONALITY_US: United States\n - NATIONALITY_FR: France\n - NATIONALITY_DE: Germany"
     }
   },
   "securityDefinitions": {
