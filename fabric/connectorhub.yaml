@@ -1,0 +1,51 @@
+msp-id: Org1MSP
+user-id: User1
+org-domain: org1.luther.systems
+crypto-config-root-path: ./crypto-config
+peer-name: peer0
+peer-endpoint: "peer0.org1.luther.systems:7051"
+channel-name: luther
+chaincode-id: sandbox
+connectors:
+  - kind: EMAIL
+    name: EMAIL
+    mock: true
+    config:
+      smtp-server: localhost
+      from-address: martin@luther.systems
+  - kind: CAMUNDA_START
+    name: CAMUNDA_WORKFLOW
+    mock: true
+    config:
+      gateway-url: localhost
+  - kind: CAMUNDA_INSPECT
+    name: CAMUNDA_TASKLIST
+    mock: true
+    config:
+      operate-url: localhost
+  - kind: EQUIFAX
+    name: EQUIFAX_ID_VERIFY
+    mock: true
+    config:
+      aml-url: localhost
+      full-report-url: localhost
+      sm-key: todo-anr
+      region: eu-west-2
+      logon-url: localhost
+      eidv-url: localhost
+  - kind: PDFSERV
+    name: PDF_INVOICE
+    mock: true
+    config:
+      connection: localhost
+  - kind: POSTGRES
+    name: POSTGRES_CLAIMS_DB
+    mock: true
+    config:
+      connection: psql://localhost:1337
+  - kind: GOCARDLESS
+    name: GOCARDLESS_PAYMENT
+    mock: true
+    config:
+      base-url: localhost
+      access-token: fnord

@@ -13,13 +13,15 @@ SERVICE_DIR=portal
 
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
-BUILDENV_TAG=v0.0.85
+BUILDENV_TAG=v0.0.90
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.205.0
+#SUBSTRATE_VERSION=v2.205.6
+SUBSTRATE_VERSION=v3.0.1-SNAPSHOT.16-3df834e3
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
+CONNECTORHUB_VERSION=${SUBSTRATE_VERSION}
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 NETWORK_BUILDER_VERSION=v0.0.2
 MARTIN_VERSION=v0.1.0

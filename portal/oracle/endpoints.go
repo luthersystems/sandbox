@@ -23,9 +23,14 @@ func (p *portal) GetHealthCheck(ctx context.Context, req *healthcheck.GetHealthC
 	return p.orc.GetHealthCheck(ctx, req)
 }
 
-// CreateAccount is an example resource creation endpoint.
+// CreateClaim is an example resource creation endpoint.
 func (p *portal) CreateClaim(ctx context.Context, req *pb.CreateClaimRequest) (*pb.CreateClaimResponse, error) {
 	return oracle.Call(p.orc, ctx, "create_claim", req, &pb.CreateClaimResponse{}, p.defaultConfigs(ctx)...)
+}
+
+// AddClaimant is an example resource update endpoint.
+func (p *portal) AddClaimant(ctx context.Context, req *pb.AddClaimantRequest) (*pb.AddClaimantResponse, error) {
+	return oracle.Call(p.orc, ctx, "add_claimant", req, &pb.AddClaimantResponse{}, p.defaultConfigs(ctx)...)
 }
 
 // GetClaim is an example query endpoint.
