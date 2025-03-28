@@ -7,7 +7,7 @@ require (
 	github.com/alecthomas/kong v0.9.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
 	github.com/luthersystems/shiroclient-sdk-go v0.13.0
-	github.com/luthersystems/svc v0.14.4
+	github.com/luthersystems/svc v0.14.7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240723171418-e6d459c13d2a

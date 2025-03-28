@@ -40,7 +40,7 @@ func TestSnapshot(t *testing.T) {
 	// Start a new oracle, restoring state from the snapshot (twice)
 	for i := 0; i < 2; i++ {
 		server, stop = makeTestServerFrom(t, snap)
-		defer stop()
+		t.Cleanup(stop)
 		req := &healthcheck.GetHealthCheckRequest{}
 		ctx := context.Background()
 		resp, err := server.GetHealthCheck(ctx, req)
@@ -67,7 +67,7 @@ func getClaim(t *testing.T, server *portal, id string, dst **pb.Claim) bool {
 
 func TestHealthCheck(t *testing.T) {
 	server, stop := makeTestServer(t)
-	defer stop()
+	t.Cleanup(stop)
 	ctx := context.Background()
 	resp, err := server.GetHealthCheck(ctx, &healthcheck.GetHealthCheckRequest{})
 	require.NoError(t, err)
@@ -76,7 +76,7 @@ func TestHealthCheck(t *testing.T) {
 
 func TestGetAccount(t *testing.T) {
 	server, stop := makeTestServer(t)
-	defer stop()
+	t.Cleanup(stop)
 	var id string
 	if !createClaim(t, server, &id) {
 		return
