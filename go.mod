@@ -6,8 +6,8 @@ require (
 	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.5-20250224214741-b97f9dda9589.1
 	github.com/alecthomas/kong v0.9.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
-	github.com/luthersystems/shiroclient-sdk-go v0.13.0
-	github.com/luthersystems/svc v0.14.7
+	github.com/luthersystems/shiroclient-sdk-go v0.13.1
+	github.com/luthersystems/svc v0.14.9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240723171418-e6d459c13d2a
