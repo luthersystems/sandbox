@@ -96,10 +96,10 @@
          [req (first event-reqs)]
          [req-id (get req "request_id")]
          [resp (sorted-map "request_id" req-id)])
-      ;; simulate a new tx by resetting existing events
-      (connector-events 'reset)
-      ;; simulate the connectorhub callback
-      (connector-handlers 'call-handler-with-body resp)))
+    ;; simulate a new tx by resetting existing events
+    (connector-events 'reset)
+    ;; simulate the connectorhub callback
+    (connector-handlers 'invoke-handler-with-body resp)))
 
 (defun process-event-loop (iters &optional start)
   (when start (start-new-event-loop))

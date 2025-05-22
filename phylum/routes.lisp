@@ -70,6 +70,8 @@
   (let* ([claim-id (or (get req "claim_id")
                        (set-exception-business "missing claim_id"))]
          [claimant (get req "claimant")])
+    (when (or (nil? claimant) (empty? (get claimant "forename")))
+      (set-exception-business "missing claimant forename"))
     (route-success (sorted-map "claim" (trigger-claim claim-id claimant)))))
 
 (defendpoint-get "get_claim" (req)
