@@ -7,45 +7,49 @@ peer-endpoint: "peer0.org1.luther.systems:7051"
 channel-name: luther
 chaincode-id: sandbox
 connectors:
-  - kind: EMAIL
-    name: EMAIL
+  - name: EMAIL
     mock: true
-    config:
-      smtp-server: localhost
-      from-address: martin@luther.systems
-  - kind: CAMUNDA_START
-    name: CAMUNDA_WORKFLOW
+    email:
+      smtp_server: localhost
+      from_address: martin@luther.systems
+
+  - name: CAMUNDA_WORKFLOW
     mock: true
-    config:
+    camunda-start:
       gateway-url: localhost
-  - kind: CAMUNDA_INSPECT
-    name: CAMUNDA_TASKLIST
+
+  - name: CAMUNDA_TASKLIST
     mock: true
-    config:
+    camunda-inspect:
       operate-url: localhost
-  - kind: EQUIFAX
-    name: EQUIFAX_ID_VERIFY
+
+  - name: EQUIFAX_ID_VERIFY
     mock: true
-    config:
-      aml-url: localhost
-      full-report-url: localhost
-      sm-key: todo-anr
-      region: eu-west-2
-      logon-url: localhost
-      eidv-url: localhost
-  - kind: PDFSERV
-    name: PDF_INVOICE
+    equifax:
+      aml_url: localhost
+      full_report_url: localhost
+      secrets_manager_key: todo-anr
+      region: EU_WEST_2
+      logon_url: localhost
+      eidv_url: localhost
+
+  - name: PDF_INVOICE
     mock: true
-    config:
+    pdfserv:
       connection: localhost
-  - kind: POSTGRES
-    name: POSTGRES_CLAIMS_DB
+
+  - name: POSTGRES_CLAIMS_DB
     mock: true
-    config:
-      connection: psql://localhost:1337
-  - kind: GOCARDLESS
-    name: GOCARDLESS_PAYMENT
+    postgres:
+      host: localhost
+      port: 5432
+      database: claims_db
+      username: testuser
+      password: testpass
+      ssl_settings: POSTGRES_SSL_MODE_DISABLE
+
+  - name: GOCARDLESS_PAYMENT
     mock: true
-    config:
-      base-url: localhost
-      access-token: fnord
+    gocardless:
+      base_url: localhost
+      access_token: fnord

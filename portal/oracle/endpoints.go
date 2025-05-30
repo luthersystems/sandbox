@@ -2,7 +2,6 @@ package oracle
 
 import (
 	"context"
-	"fmt"
 
 	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
@@ -32,7 +31,7 @@ func (p *portal) CreateClaim(ctx context.Context, req *pb.CreateClaimRequest) (*
 	defer span()
 	ctx, err := opttrace.TraceContextWithoutELPSFilter(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("trace context: %w", err)
+		p.orc.Log(ctx).WithError(err).Warn("tracing disabled")
 	}
 	return oracle.Call(p.orc, ctx, "create_claim", req, &pb.CreateClaimResponse{}, p.defaultConfigs(ctx)...)
 }

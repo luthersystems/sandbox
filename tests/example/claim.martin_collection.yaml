@@ -50,8 +50,7 @@ tests:
           "address_number": "123",
           "address_street1": "Main Street",
           "address_postcode": "SW1A 1AA",
-          "address_post_town": "London",
-          "nationality": "NATIONALITY_GB"
+          "address_post_town": "London"
         }
       }
     test_script: |
