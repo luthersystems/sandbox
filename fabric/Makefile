@@ -5,7 +5,7 @@ PHYLA_CCAAS=sandbox
 GATEWAYS=1.shiroclient_gw_sandbox.sandbox
 CONNECTORHUBS=1.connectorhub_sandbox.sandbox
 
-GENERATE_OPTS=--org-count 1 --peer-count 1
+GENERATE_OPTS=--org-count 1 --peer-count 2
 
 DOCKER_CHOWN_USER=65534:65534
 

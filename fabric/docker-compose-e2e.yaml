@@ -8,6 +8,7 @@ version: '2'
 volumes:
   orderer0.luther.systems:
   peer0.org1.luther.systems:
+  peer1.org1.luther.systems:
   ca.org1.luther.systems:
 
 networks:
@@ -46,6 +47,16 @@ services:
     extends:
       file:  base/docker-compose-base.yaml
       service: peer0.org1.luther.systems
+    environment:
+      - FABRIC_LOGGING_SPEC
+    networks:
+      - byfn
+
+  peer1.org1.luther.systems:
+    container_name: peer1.org1.luther.systems
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.org1.luther.systems
     environment:
       - FABRIC_LOGGING_SPEC
     networks:

@@ -8,6 +8,7 @@ version: '2'
 volumes:
   orderer0.luther.systems:
   peer0.org1.luther.systems:
+  peer1.org1.luther.systems:
 
 networks:
   byfn:
@@ -34,6 +35,14 @@ services:
     extends:
       file:   docker-compose-e2e.yaml
       service: peer0.org1.luther.systems
+    networks:
+      - byfn
+
+  peer1.org1.luther.systems:
+    container_name: peer1.org1.luther.systems
+    extends:
+      file:   docker-compose-e2e.yaml
+      service: peer1.org1.luther.systems
     networks:
       - byfn
 
@@ -67,5 +76,6 @@ services:
     depends_on:
       - orderer0.luther.systems
       - peer0.org1.luther.systems
+      - peer1.org1.luther.systems
     networks:
       - byfn

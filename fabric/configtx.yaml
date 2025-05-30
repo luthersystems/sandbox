@@ -72,6 +72,8 @@ Organizations:
             # encoded in the genesis block in the Application section context
             - Host: peer0.org1.luther.systems
               Port: 7051
+            - Host: peer1.org1.luther.systems
+              Port: 7051
 
 ################################################################################
 #

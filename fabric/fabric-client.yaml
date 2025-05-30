@@ -42,6 +42,11 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+      peer1.org1.luther.systems:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
       policies:
       queryChannelConfig:
         minResponses: 1
@@ -58,6 +63,7 @@ organizations:
     cryptoPath:  peerOrganizations/org1.luther.systems/users/{username}@org1.luther.systems/msp
     peers:
       - peer0.org1.luther.systems
+      - peer1.org1.luther.systems
     certificateAuthorities:
       - ca.org1.luther.systems
   ordererorg:
@@ -92,6 +98,13 @@ peers:
     eventUrl: peer0.org1.luther.systems:7053
     grpcOptions:
       ssl-target-name-override: peer0.org1.luther.systems
+    tlsCACerts:
+      path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/tlsca/tlsca.org1.luther.systems-cert.pem"
+  peer1.org1.luther.systems:
+    url: peer1.org1.luther.systems:7051
+    eventUrl: peer1.org1.luther.systems:7053
+    grpcOptions:
+      ssl-target-name-override: peer1.org1.luther.systems
     tlsCACerts:
       path: "/tmp/fabric/crypto-config/peerOrganizations/org1.luther.systems/tlsca/tlsca.org1.luther.systems-cert.pem"
 
