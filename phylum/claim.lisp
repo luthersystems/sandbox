@@ -62,6 +62,14 @@
     "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"   ()
     "CLAIM_STATE_DONE"                       ()))
 
+;;
+;; TODO: receive, validate, store, send
+;;
+(defun mk-verify-policy-req (policy-id)
+  ;; mk-verify-policy-req creates a request to verify a policy
+  ;; For now, just returns a simple health check query
+  (mk-psql-req "SELECT 1"))
+
 (defun mk-claim (claim)
   ;; mk-claim implements claims handler logic
   (unless claim (error 'missing-claim "missing claim"))
@@ -114,15 +122,19 @@
            (cc:infof (assoc resp-body "state" state) "handle")
            (cond
              ((equal? state "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED")
-              (add-event (mk-equifax-req resp)))
+              ;; equifax event does not have NATIONALITY prefix
+              (let* ([nationality (string:trim-left (get resp "nationality") "NATIONALITY_")]
+                     [person (assoc resp "nationality" nationality)]) 
+                (add-event (mk-equifax-req (trace person "equifax")))))
 
              ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
               (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord"))))
 
              ((equal? state "CLAIM_STATE_OOECLAIM_REVIEWED") 
-              (add-event (mk-psql-req "SELECT 1;")))
+              (add-event (mk-verify-policy-req (get resp "policy_id"))))
 
              ((equal? state "CLAIM_STATE_OOECLAIM_VALIDATED")
+              (trace resp "ooe claim validated")
               (add-event (mk-invoice-ninja-email-req
                            (sorted-map "invoice_id" "mock_invoice_id"))))
 
@@ -154,7 +166,7 @@
               ((equal? op 'data) (apply data args))
               (:else (error 'unknown-operation op)))))))
 
-;; mk-claims implements factory
+;; mk-claims implements connector factory
 (defun mk-claims ()
   (labels
     ([name () "claim"]

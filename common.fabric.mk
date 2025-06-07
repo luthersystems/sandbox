@@ -10,7 +10,6 @@ CC_FILE=${CC_PKG_NAME}-${CC_VERSION}.tar.gz
 CC_PATH=chaincodes/${CC_FILE}
 # path within cli docker container of chaincode
 CC_MOUNT_PATH=/chaincodes/${CC_FILE}
-SUBSTRATE_VERSION ?= latest
 
 PHYLUM_VERSION_FILE=./build/phylum_version
 
@@ -171,7 +170,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 		-e CHAINCODE_OTLP_TRACER_ENDPOINT \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up \
 			--log-spec debug \
-			--cc-version "${SUBSTRATE_VERSION}"
+			--cc-version "${CC_VERSION}"
 
 .PHONY: fnb-extend
 fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}

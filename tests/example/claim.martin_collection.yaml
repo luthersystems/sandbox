@@ -41,16 +41,17 @@ tests:
       {
         "claim_id": "{{CLAIM_ID}}",
         "claimant": {
-          "account_number": "12345678",
-          "account_sort_code": "12-34-56",
-          "dob": "1985-06-15",
-          "surname": "Doe",
-          "forename": "John",
-          "full_address": "123 Main Street, London, SW1A 1AA, UK",
-          "address_number": "123",
-          "address_street1": "Main Street",
-          "address_postcode": "SW1A 1AA",
-          "address_post_town": "London"
+          "account_number": "",
+          "account_sort_code": "",
+          "dob": "1945-11-01",
+          "surname": "Smith",
+          "forename": "Raymond",
+          "full_address": "3 High Street",
+          "address_number": "3",
+          "address_street1": "High Street",
+          "address_postcode": "BA13 3BN",
+          "address_post_town": "Westbury",
+          "nationality": "NATIONALITY_GB"
         }
       }
     test_script: |

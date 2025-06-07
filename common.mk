@@ -20,7 +20,6 @@ PROJECT_PATH=$(shell awk '$$1 == "module" {print $$2};' ${PROJECT_REL_DIR}/go.mo
 
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
-CC_VERSION=${SUBSTRATE_VERSION}
 
 BUILD_IMAGE_GO_ALPINE=luthersystems/build-go-alpine
 SERVICE_BASE_IMAGE_ALPINE=luthersystems/service-base-alpine

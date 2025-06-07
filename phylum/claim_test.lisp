@@ -7,17 +7,17 @@
 (set 'cc:creator (lambda () "Org1MSP"))
 
 (defun mk-test-claimant ()
-  (sorted-map "account_number"    "03299391"
-              "account_sort_code" "090127"
-              "dob"               "1970-07-04"
-              "surname"           "Harrison"
-              "forename"          "Emanuel"
-              "full_address"      "78 Cromwell Road"
-              "address_number"    "78"
-              "address_street1"   "Cromwell Road"
-              "address_postcode"  "CB6 2AG"
-              "address_post_town" "Ely"
-              "nationality"       "GB"))
+  (sorted-map "account_number"    ""
+              "account_sort_code" ""
+              "dob"               "1945-11-01"
+              "surname"           "Smith"
+              "forename"          "Raymond"
+              "full_address"      "3 High Street"
+              "address_number"    "3"
+              "address_street1"   "High Street"
+              "address_postcode"  "BA13 3BN"
+              "address_post_town" "Westbury"
+              "nationality"       "NATIONALITY_GB"))
 
 (defun populate-test-claimant! (claim)
   (let* ([claimant (mk-test-claimant)])

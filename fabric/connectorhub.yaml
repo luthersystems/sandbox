@@ -33,10 +33,9 @@ connectors:
       logon_url: localhost
       eidv_url: localhost
 
-  - name: PDF_INVOICE
+  - name: INVOICE_NINJA
     mock: true
-    pdfserv:
-      connection: localhost
+    invoice-ninja: {}
 
   - name: POSTGRES_CLAIMS_DB
     mock: true
@@ -48,8 +47,6 @@ connectors:
       password: testpass
       ssl_settings: POSTGRES_SSL_MODE_DISABLE
 
-  - name: GOCARDLESS_PAYMENT
+  - name: STRIPE_PAYMENT
     mock: true
-    gocardless:
-      base_url: localhost
-      access_token: fnord
+    stripe: {}
