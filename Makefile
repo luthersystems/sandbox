@@ -198,3 +198,17 @@ explorer-clean:
 .PHONY: explorer-watch
 explorer-watch:
 	cd ${PROJECT_REL_DIR}/explorer && make watch
+
+.PHONY: observability-up observability-down
+
+
+.PHONY: observability-network observability-up observability-down
+
+observability-network:
+	docker network inspect byfn >/dev/null 2>&1 || docker network create byfn
+
+observability-up: observability-network
+	docker compose -f compose/tempo.yaml -f compose/grafana.yaml up -d --build
+
+observability-down:
+	docker compose -f compose/tempo.yaml -f compose/grafana.yaml down --volumes --remove-orphans

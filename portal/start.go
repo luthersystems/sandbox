@@ -12,7 +12,7 @@ type startCmd struct {
 	baseCmd
 	ListenAddress   string `short:"l" help:"Address to listen on" default:":8080" env:"SANDBOX_ORACLE_LISTEN_ADDRESS"`
 	GatewayEndpoint string `short:"g" help:"URL for shiroclient gateway" env:"SANDBOX_ORACLE_GATEWAY_ENDPOINT"`
-	OLTPEndpoint    string `short:"o" help:"URL for OLTP provider" env:"SANDBOX_ORACLE_OLTP_ENDPOINT"`
+	OTLPEndpoint    string `short:"o" help:"URL for OTLP provider" env:"SANDBOX_ORACLE_OTLP_ENDPOINT"`
 	PhylumPath      string `short:"p" help:"Phylum path for in-memory mode" default:"./phylum" env:"SANDBOX_ORACLE_PHYLUM_PATH"`
 	Verbose         bool   `short:"v" help:"Verbose logging" default:"false" env:"SANDBOX_ORACLE_VERBOSE"`
 	EmulateCC       bool   `short:"e" help:"Enable in-memory-mode" default:"false" env:"SANDBOX_ORACLE_EMULATE_CC"`
@@ -24,7 +24,7 @@ func (r *startCmd) Run() error {
 	cfg.ServiceName = "sandbox-oracle"
 	cfg.Version = version.Version
 	cfg.PhylumPath = r.PhylumPath
-	cfg.SetOTLPEndpoint(r.OLTPEndpoint)
+	cfg.SetOTLPEndpoint(r.OTLPEndpoint)
 	cfg.SetSwaggerHandler(api.SwaggerHandlerOrPanic("v1/oracle"))
 	cfg.ListenAddress = r.ListenAddress
 	cfg.GatewayEndpoint = r.GatewayEndpoint

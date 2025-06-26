@@ -1,0 +1,52 @@
+msp-id: Org1MSP
+user-id: User1
+org-domain: org1.luther.systems
+crypto-config-root-path: ./crypto-config
+peer-name: peer0
+peer-endpoint: "peer0.org1.luther.systems:7051"
+channel-name: luther
+chaincode-id: sandbox
+connectors:
+  - name: EMAIL
+    mock: true
+    email:
+      smtp_server: localhost
+      from_address: martin@luther.systems
+
+  - name: CAMUNDA_WORKFLOW
+    mock: true
+    camunda-start:
+      gateway-url: localhost
+
+  - name: CAMUNDA_TASKLIST
+    mock: true
+    camunda-inspect:
+      operate-url: localhost
+
+  - name: EQUIFAX_ID_VERIFY
+    mock: true
+    equifax:
+      aml_url: localhost
+      full_report_url: localhost
+      secrets_manager_key: todo-anr
+      region: EU_WEST_2
+      logon_url: localhost
+      eidv_url: localhost
+
+  - name: INVOICE_NINJA
+    mock: true
+    invoice-ninja: {}
+
+  - name: POSTGRES_CLAIMS_DB
+    mock: true
+    postgres:
+      host: localhost
+      port: 5432
+      database: claims_db
+      username: testuser
+      password: testpass
+      ssl_settings: POSTGRES_SSL_MODE_DISABLE
+
+  - name: STRIPE_PAYMENT
+    mock: true
+    stripe: {}

@@ -160,16 +160,30 @@ environment variable to point at an OTLP endpoint (e.g. a Grafana agent). When
 configured, trace spans will be created at key layers of the stack and delivered
 to the configured endpoint.
 
+You can test tracing locally by setting the following env variables:
+
 ```bash
-SANDBOX_ORACLE_OTLP_ENDPOINT=http://otlp-hostname:4317
-SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
-CHAINCODE_OTLP_TRACER_ENDPOINT=http://otlp-hostname:4317
+export SANDBOX_ORACLE_OTLP_ENDPOINT=http://tempo:4317
+export SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://tempo:4317
+export CHAINCODE_OTLP_TRACER_ENDPOINT=http://tempo:4317
 ```
+
+And bringing up observability:
+
+```
+make observability-up
+```
+
+Login to the local [grafana](http://localhost:3000/) with username: admin,
+password: admin.
+
+Click "Explore" and select "Tempo" as the data source. Query `{}` to list
+all traces.
 
 #### ELPS trace spans
 
 Phylum endpoints defined with `defendpoint` will automatically receive a span
-named after the endpoint.  Other functions in the phylum can be traced by adding
+named after the endpoint. Other functions in the phylum can be traced by adding
 a special ELPS doc keyword:
 
 ```lisp

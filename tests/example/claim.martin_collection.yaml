@@ -7,7 +7,11 @@ tests:
     method: POST
     path: "v1/claims"
     body: |
-      {}
+      {
+        "date_of_accident": "2024-01-15",
+        "damage_amount": 500000,
+        "claim_reason": "Car accident due to adverse weather conditions."
+      }
     test_script: |
       pm.test("ok", () => {
           let data = pm.response.json();
@@ -21,6 +25,35 @@ tests:
   - name: "Get claim"
     method: GET
     path: "v1/claim/{{CLAIM_ID}}"
+    test_script: |
+      pm.test("ok", () => {
+          let data = pm.response.json();
+          console.log(data);
+          pm.response.to.have.status(200);
+          pm.expect(data).to.not.have.property("exception");
+          pm.expect(data).to.have.property("claim");
+          pm.expect(data.claim).to.have.property("state");
+      });
+  - name: "Add claimant"
+    method: POST
+    path: "v1/claim/{{CLAIM_ID}}/claimant"
+    body: |
+      {
+        "claim_id": "{{CLAIM_ID}}",
+        "claimant": {
+          "account_number": "",
+          "account_sort_code": "",
+          "dob": "1945-11-01",
+          "surname": "Smith",
+          "forename": "Raymond",
+          "full_address": "3 High Street",
+          "address_number": "3",
+          "address_street1": "High Street",
+          "address_postcode": "BA13 3BN",
+          "address_post_town": "Westbury",
+          "nationality": "NATIONALITY_GB"
+        }
+      }
     test_script: |
       pm.test("ok", () => {
           let data = pm.response.json();

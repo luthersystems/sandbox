@@ -10,7 +10,6 @@ CC_FILE=${CC_PKG_NAME}-${CC_VERSION}.tar.gz
 CC_PATH=chaincodes/${CC_FILE}
 # path within cli docker container of chaincode
 CC_MOUNT_PATH=/chaincodes/${CC_FILE}
-SUBSTRATE_VERSION ?= latest
 
 PHYLUM_VERSION_FILE=./build/phylum_version
 
@@ -26,7 +25,11 @@ NETWORK_BUILDER_TARGET ?= docker-pull/${NETWORK_BUILDER_IMAGE}\:${NETWORK_BUILDE
 NETWORK_BUILDER=${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION} --chown "${DOCKER_CHOWN_USER}"
 
 SHIROCLIENT_IMAGE ?= luthersystems/shiroclient
+CONNECTORHUB_IMAGE ?= luthersystems/connectorhub
+
 SHIROCLIENT_TARGET ?= docker-pull/${SHIROCLIENT_IMAGE}\:${SHIROCLIENT_VERSION}
+CONNECTORHUB_TARGET ?= docker-pull/${CONNECTORHUB_IMAGE}\:${CONNECTORHUB_VERSION}
+
 SHIROCLIENT_FABRIC_CONFIG_BASENAME=shiroclient
 SHIROCLIENT_FABRIC_CONFIG_FAST_BASENAME=shiroclient_fast
 # index.gateway_name[.msp_filter]...
@@ -35,7 +38,9 @@ CHAINCODE_GO ?= ${PHYLA_GO}
 PHYLA_CCAAS ?=
 PHYLA ?= ${PHYLA_GO} ${PHYLA_CCAAS}
 GATEWAYS ?= 1.shiroclient_gw_a.a
+CONNECTORHUBS ?= 1.connectorhub_a.a
 START_GATEWAYS=$(addprefix start-gw-,${GATEWAYS})
+START_CONNECTORHUBS=$(addprefix start-ch-,${CONNECTORHUBS})
 NOTIFY_GATEWAYS=$(addprefix notify-gw-,${GATEWAYS})
 FUNCTIONAL_TEST_PHYLA=$(addprefix functional-test-phylum-,${PHYLA})
 SHIRO_INIT_PHYLA=$(addprefix shiro-init-phylum-,${PHYLA})
@@ -152,8 +157,7 @@ couchdb-up: DBMODE = couchdb
 couchdb-up: fnb-up gateway-up
 
 .PHONY: up
-up: generate-chaincodes .env fnb-up gateway-up
-	@
+up: generate-chaincodes .env fnb-up gateway-up connectorhub-up
 
 .PHONY: fnb-up
 fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
@@ -166,7 +170,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 		-e CHAINCODE_OTLP_TRACER_ENDPOINT \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up \
 			--log-spec debug \
-			--cc-version "${SUBSTRATE_VERSION}"
+			--cc-version "${CC_VERSION}"
 
 .PHONY: fnb-extend
 fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
@@ -222,6 +226,29 @@ start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
 			--chaincode.version ${CC_VERSION}_${ccname} \
 			gateway ${filter_args}
 
+.PHONY: connectorhub-up
+connectorhub-up: ${START_CONNECTORHUBS}
+
+start-ch-%: parts=$(subst ., ,$*)
+start-ch-%: idx=$(word 1,${parts})
+start-ch-%: name=$(word 2,${parts})
+start-ch-%: ccname=$(word 3,${parts}) # TODO
+start-ch-%: port=$$(( 9091 + ${idx} ))
+ifdef EXPOSE_CONNECTORHUB
+start-gw-%: port_fw=-p "${port}:8080"
+endif
+start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
+	${DOCKER_RUN} -d --name ${name} \
+		-v "${CURDIR}:/tmp/fabric:ro" \
+		-v "$(abspath build/volume/checkpoint):/tmp/checkpoint:rw" \
+		-w "/tmp/fabric" \
+		${port_fw} \
+		--network ${FABRIC_DOCKER_NETWORK} \
+		${CONNECTORHUB_IMAGE}:${CONNECTORHUB_VERSION} \
+			start -v \
+			--config-file /tmp/fabric/connectorhub.yaml \
+			--checkpoint-file /tmp/checkpoint/checkpoint.txt
+
 .SECONDEXPANSION:
 notify-gw-%: parts=$(subst ., ,$*)
 notify-gw-%: name=$(word 2,${parts})
@@ -252,7 +279,7 @@ couchdb-down: gateway-down fnb-down
 .PHONY: oracle-down
 
 .PHONY: down
-down: oracle-down gateway-down fnb-down clean-chaincodes
+down: oracle-down connectorhub-down gateway-down fnb-down clean
 
 .PHONY: fnb-down
 fnb-down: ${NETWORK_BUILDER_TARGET}
@@ -268,6 +295,11 @@ fnb-down: ${NETWORK_BUILDER_TARGET}
 gateway-down: gw_names=$(foreach g,${GATEWAYS},$(word 2,$(subst ., ,${g})))
 gateway-down:
 	-docker stop ${gw_names}
+
+.PHONY: connectorhub-down
+connectorhub-down: ch_names=$(foreach g,${CONNECTORHUBS},$(word 2,$(subst ., ,${g})))
+connectorhub-down:
+	-docker stop ${ch_names}
 
 .PHONY: sleep-%
 sleep-%:
@@ -432,6 +464,10 @@ build/volume/msp:
 	chmod a+w $@
 
 build/volume/enroll_user:
+	mkdir -p $@
+	chmod a+w $@
+
+build/volume/checkpoint:
 	mkdir -p $@
 	chmod a+w $@
 
