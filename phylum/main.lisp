@@ -2,7 +2,7 @@
 
 ;; main.lisp
 
-;; This file is the entrypoint for your chaincode application.  It should
+;; This file is the entrypoint for your operations script.  It should
 ;; initialize global variables and load files containing utilities and endpoint
 ;; definitions.  Be careful not to use methods in the cc: package namespace
 ;; while main.lisp is loading because there is no transaction context until the

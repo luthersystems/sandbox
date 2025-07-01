@@ -38,10 +38,10 @@
                          (cc:force-no-commit-tx) ; get route cannot update 
                          (unquote-splicing exprs))))
 
-(set 'chaincode-version-key (format-string "{}:version" service-name))
+(set 'app-version-key (format-string "{}:version" service-name))
 
 (defendpoint "init" ()
-  (let* ([prev-version (statedb:get chaincode-version-key)]
+  (let* ([prev-version (statedb:get app-version-key)]
          [init? (nil? prev-version)])
     (if init?
       (cc:infof (sorted-map "phylum_version" version
@@ -51,7 +51,7 @@
                             "phylum_version_old" prev-version
                             "build_id" build-id)
                 "Phylum upgraded"))
-    (statedb:put chaincode-version-key version)
+    (statedb:put app-version-key version)
     (route-success ())))
 
 (defendpoint-get "healthcheck" ()

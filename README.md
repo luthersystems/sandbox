@@ -1,6 +1,6 @@
-# Luther Application Starter Kit
+# Luther Application Starter Kit (sandbox)
 
-This repository contains a working starter kit for developers to modifiy and
+This repository contains a working starter kit for developers to modify and
 specialize to their specific use case.
 
 ## High-level File System Structure
@@ -26,7 +26,7 @@ that should not be modified.
          |                              +<----+ Swagger Specification:
          |        Middleware API        |       api/swagger/oracle.swagger.json
          +--------------+---------------+
-         |  Middleware Oracle Service   |
+         |  Middleware Portal Service   |
          |             portal/          |
          +------------------+-----------+
                             |
@@ -38,12 +38,12 @@ that should not be modified.
                              |
                              | JSON-RPC
  +---------------------------v--------------------------+
- |                   Phylum Business Logic              |
+ |              Common Operations Script                |
  |                    phylum/                           |
  +------------------------------------------------------+
- |       Substrate Chaincode (Smart Contract Runtime)   |
+ |       Substrate (Common Operations Script Runtime)   |
  +------------------------------------------------------+
- |            Hyperledger Fabric Services               |
+ |          Distributed Systems Services (fabric)       |
  +------------------------------------------------------+
 ```
 
@@ -127,8 +127,9 @@ make
 ### Running the Application
 
 First we'll run the sample application with a local instance of the Luther
-platform (gateway, chaincode, and a fabric network). Run `make up` to bring up
-a local docker network running the application and platform containers.
+platform (gateway, common operations script, and a fabric network).
+Run `make up` to bring up a local docker network running the application and
+platform containers.
 
 ```bash
 make up
@@ -199,10 +200,10 @@ Custom span names are also supported as follows:
 "@trace{ custom span name }"
 ```
 
-### Run Blockchain Explorer
+### Run Distributed Systems Explorer
 
-To examine a graphical UI for the chaincodee transactions and blocks and look at
-the details of the work the sandbox network has done, build the Blockchain
+To examine a graphical UI for the transactions and blocks and look at
+the details of the work the sandbox network has done, build the
 Explorer. With the full network running, run:
 
 ```bash
@@ -253,7 +254,7 @@ api/:
 compose/:
  Configuration for docker compose networks that are brought up during
  testing. These configurations are used by the existing Make targets
- and `blockchain_compose.py`.
+ and the compose python.
 fabric/:
  Configuration and scripts to launch a fabric network locally. Not used in
     codespaces.

@@ -88,11 +88,11 @@ storage-down:
 
 .PHONY: service-up
 service-up: api portal
-	./blockchain_compose.py local up -d
+	./network_compose.py local up -d
 
 .PHONY: service-down
 service-down:
-	-./blockchain_compose.py local down
+	-./network_compose.py local down
 
 .PHONY: up
 up: all service-down storage-down storage-up service-up
@@ -112,11 +112,11 @@ upgrade: all service-down init service-up
 
 .PHONY: mem-up
 mem-up: all mem-down
-	./blockchain_compose.py mem up -d
+	./network_compose.py mem up -d
 
 .PHONY: mem-down
 mem-down: explorer-down
-	-./blockchain_compose.py mem down
+	-./network_compose.py mem down
 
 # citest runs all tests within containers, as in CI.
 .PHONY: citest
