@@ -3,7 +3,7 @@
 The sandbox _oracle_ serves the application's JSON API, abstracting the details
 of interacting with smart contracts from API consumers.
 
-> A blockchain oracle is a service that provides smart contracts with
+> An oracle is a service that provides the common operations script with
 > information from the outside world.
 
 ## Directory Structure
@@ -47,4 +47,3 @@ CreateAccount API endpoint:
 ```sh
 go test -run=CreateAccount ./...
 ```
-

@@ -1,9 +1,10 @@
-# Phylum: Chaincode Business Logic
+# Phylum: Common Operations Script Business Logic
 
-The phylum stores chaincode business logic.  This phylum defines a route for
-each of the 3 application API endpoints (see `routes.lisp`).  This code securely
-runs on all of the participant nodes in the network, and the platform ensures
-that these participants reach agreement on the execution of this code.
+The phylum stores process operations business logic. This phylum defines a
+route for each of the 3 application API endpoints (see `routes.lisp`).
+This code securely runs on all of the participant nodes in the network, and the
+platform ensures that these participants reach agreement on the execution of
+this code.
 
 See [Phylum Best Practices](https://docs.luthersystems.com/luther/application/development-guidelines/phylum-best-practices).
 
@@ -11,17 +12,15 @@ See [Phylum Best Practices](https://docs.luthersystems.com/luther/application/de
 
 ```
 build:
-	Temporary build artifacts (do not check into git).
+ Temporary build artifacts (do not check into git).
 main.lisp:
-	Entrypoint into the chainocode.
-phylum.go:
-	Go library for off-chain service to interact with phylum.
+ Entrypoint into the common operations script.
 routes.lisp:
-	Routes callable by off-chain services.
+ Routes callable by external services.
 utils.lisp:
-	Common utility functions for the app.
+ Common utility functions for the app.
 utils_test.lisp:
-	ELPS tests for the utility functions.
+ ELPS tests for the utility functions.
 ```
 
 ## Making changes
@@ -31,7 +30,7 @@ utils_test.lisp:
 The phylum can define unit tests in files with names ending it `_test.lisp`.
 These tests can be run using the following command:
 
-```
+```sh
 make test
 ```
 
@@ -48,6 +47,8 @@ pip install --upgrade yasi
 ```
 
 And to format:
-```
+
+```sh
 make format
 ```
+
