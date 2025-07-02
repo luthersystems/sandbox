@@ -262,7 +262,7 @@ portal/:
  The portal service responsible for serving the REST/JSON APIs and
  communicating with other microservices.
 phylum/:
- Business logic that is executed "on-chain" using the platform (substrate).
+ Business logic that is executed in common script using the platform (substrate).
 scripts/:
  Helper scripts for the build process.
 tests/:
