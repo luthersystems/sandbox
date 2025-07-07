@@ -162,7 +162,7 @@ pre-push:
 	cd api && $(MAKE)
 
 .PHONY:
-download: ${SUBSTRATE_PLUGIN}
+download: plugin
 
 .PHONY: print-export-path
 print-export-path:
@@ -212,3 +212,12 @@ observability-up: observability-network
 
 observability-down:
 	docker compose -f compose/tempo.yaml -f compose/grafana.yaml down --volumes --remove-orphans
+
+.PHONY: init-docs
+init-docs:
+	git submodule update --init --recursive --remote docs
+
+.PHONY: setup
+
+setup: init-docs download
+	@echo "Running project setup..."

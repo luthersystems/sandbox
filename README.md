@@ -3,12 +3,22 @@
 This repository contains a working starter kit for developers to modify and
 specialize to their specific use case.
 
+## Setup
+
+Once you've cloned the repo, run:
+
+```sh
+make setup
+```
+
+To download the docs and complete the repo setup.
+
 ## High-level File System Structure
 
 _Application Specific Code_: Add your specific process operations code to
 the `phylum/` directory.
 
-_Application Templates_: Edit the template code in `oracle/` and `api/` to
+_Application Templates_: Edit the template code in `portal/` and `api/` to
 specialize for your use case.
 
 _Platform_: The remaining files and directories are platform related code
@@ -51,7 +61,9 @@ This repo includes an end-to-end "hello world" application described below.
 
 ## Luther Documentation
 
-Check out the [docs](https://docs.luthersystems.com).
+Check out the [docs](https://docs.luthersystems.com) on our website.
+
+Run `make init-docs` and the docs are available [here](./docs/README.md).
 
 ## Getting Started
 
@@ -124,6 +136,20 @@ Run `make` to build all the services:
 make
 ```
 
+## "Hello World" Application
+
+This repo includes a small application for managing an insurance claim. It
+serves a [JSON API](api/srvpb/v1/oracle.swagger.json) that provides endpoints to:
+
+1. create a new insurance claim
+2. add a claimant to the claim
+3. retrieve claim details
+
+> To simplify the sandbox, we have omitted authentication which we handle
+> using [lutherauth](https://docs.luthersystems.com/luther/application/modules/lutherauth).
+> Authorization is implemented at the application layer over tokens issued by
+> lutherauth.
+
 ### Running the Application
 
 First we'll run the sample application with a local instance of the Luther
@@ -152,93 +178,6 @@ make down
 ```
 
 Running `docker ps` again will show all the containers have been removed.
-
-### Application tracing (OpenTelemetry)
-
-There is support for tracing of the application and the Luther platform using
-the OpenTelemetry protocol. Each can optionally be configured by setting an
-environment variable to point at an OTLP endpoint (e.g. a Grafana agent). When
-configured, trace spans will be created at key layers of the stack and delivered
-to the configured endpoint.
-
-You can test tracing locally by setting the following env variables:
-
-```bash
-export SANDBOX_ORACLE_OTLP_ENDPOINT=http://tempo:4317
-export SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://tempo:4317
-export CHAINCODE_OTLP_TRACER_ENDPOINT=http://tempo:4317
-```
-
-And bringing up observability:
-
-```
-make observability-up
-```
-
-Login to the local [grafana](http://localhost:3000/) with username: admin,
-password: admin.
-
-Click "Explore" and select "Tempo" as the data source. Query `{}` to list
-all traces.
-
-#### ELPS trace spans
-
-Phylum endpoints defined with `defendpoint` will automatically receive a span
-named after the endpoint. Other functions in the phylum can be traced by adding
-a special ELPS doc keyword:
-
-```lisp
-(defun trace-this ()
-  "@trace"
-  (slow-function1)
-  (slow-function2))
-```
-
-Custom span names are also supported as follows:
-
-```
-"@trace{ custom span name }"
-```
-
-### Run Distributed Systems Explorer
-
-To examine a graphical UI for the transactions and blocks and look at
-the details of the work the sandbox network has done, build the
-Explorer. With the full network running, run:
-
-```bash
-make explorer
-```
-
-This creates a web app which will be visible on `localhost:8090`. The default
-login credentials are username: `admin`, password `adminpw`. Bringing up the
-network should produce some transactions and blocks, and `make integration` will
-generate more activity, which can be viewed in the web app.
-
-If the `make` command fails, or if the Explorer runs but no new activity is
-detected, it has most likely failed to authenticate; run
-
-```bash
-make explorer-clean
-make explorer-up
-```
-
-To wipe out the pre-existing database and recreate it empty, then re-build the
-Explorer. This will reconnect it to the current network.
-
-## "Hello World" Application
-
-This repo includes a small application for managing account balances. It serves
-a JSON API that provides endpoints to:
-
-1. create an account with a balance
-2. look up the balance for an account
-3. transfer between two accounts
-
-> To simplify the sandbox, we have omitted authentication which we handle
-> using [lutherauth](https://docs.luthersystems.com/luther/application/modules/lutherauth).
-> Authorization is implemented at the application layer over tokens issued by
-> lutherauth.
 
 ### Directory Structure
 
@@ -383,6 +322,84 @@ platform are cleaned up by running the command:
 ```bash
 make down
 ```
+
+## Advanced Usage
+
+Once you're comfortable with the basic development workflow, checkout the
+more advanced features.
+
+### Application tracing (OpenTelemetry)
+
+There is support for tracing of the application and the Luther platform using
+the OpenTelemetry protocol. Each can optionally be configured by setting an
+environment variable to point at an OTLP endpoint (e.g. a Grafana agent). When
+configured, trace spans will be created at key layers of the stack and delivered
+to the configured endpoint.
+
+You can test tracing locally by setting the following env variables:
+
+```bash
+export SANDBOX_ORACLE_OTLP_ENDPOINT=http://tempo:4317
+export SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://tempo:4317
+export CHAINCODE_OTLP_TRACER_ENDPOINT=http://tempo:4317
+```
+
+And bringing up observability:
+
+```
+make observability-up
+```
+
+Login to the local [grafana](http://localhost:3000/) with username: admin,
+password: admin.
+
+Click "Explore" and select "Tempo" as the data source. Query `{}` to list
+all traces.
+
+#### ELPS trace spans
+
+Phylum endpoints defined with `defendpoint` will automatically receive a span
+named after the endpoint. Other functions in the phylum can be traced by adding
+a special ELPS doc keyword:
+
+```lisp
+(defun trace-this ()
+  "@trace"
+  (slow-function1)
+  (slow-function2))
+```
+
+Custom span names are also supported as follows:
+
+```
+"@trace{ custom span name }"
+```
+
+### Run Distributed Systems Explorer
+
+To examine a graphical UI for the transactions and blocks and look at
+the details of the work the sandbox network has done, build the
+Explorer. With the full network running, run:
+
+```bash
+make explorer
+```
+
+This creates a web app which will be visible on `localhost:8090`. The default
+login credentials are username: `admin`, password `adminpw`. Bringing up the
+network should produce some transactions and blocks, and `make integration` will
+generate more activity, which can be viewed in the web app.
+
+If the `make` command fails, or if the Explorer runs but no new activity is
+detected, it has most likely failed to authenticate; run
+
+```bash
+make explorer-clean
+make explorer-up
+```
+
+To wipe out the pre-existing database and recreate it empty, then re-build the
+Explorer. This will reconnect it to the current network.
 
 ## Platform Releases
 
