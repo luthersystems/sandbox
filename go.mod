@@ -1,6 +1,6 @@
 module github.com/luthersystems/sandbox
 
-go 1.23.0
+go 1.24
 
 require (
 	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.5-20250224214741-b97f9dda9589.1
