@@ -74,7 +74,7 @@ func TestHealthCheck(t *testing.T) {
 	require.Equal(t, 2, len(resp.GetReports()))
 }
 
-func TestGetAccount(t *testing.T) {
+func TestGetClaim(t *testing.T) {
 	server, stop := makeTestServer(t)
 	t.Cleanup(stop)
 	var id string

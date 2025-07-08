@@ -21,6 +21,7 @@
 
 ;; defendpoint shadows router:endpoint so that all endpoints can be wrapped
 ;; with logic contained in wrap-endpoint.
+;; This exposes an endpoint that is the equivalent of an HTTP POST.
 (defmacro defendpoint (name args &rest exprs)
   (quasiquote
     (router:defendpoint (unquote name) (unquote args)
@@ -32,6 +33,7 @@
 ;; readonly transactions and avoid committing them.  But defendpoint-get will
 ;; provide additional protection if a utility function accidentally writes to
 ;; statedb during these endpoints.
+;; This exposes an endpoint that is the equivalent of an HTTP GET.
 (defmacro defendpoint-get (name args &rest exprs)
   (quasiquote
     (sandbox:defendpoint (unquote name) (unquote args)

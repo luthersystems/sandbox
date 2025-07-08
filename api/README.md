@@ -1,62 +1,72 @@
 # API
 
 This directory contains the API specification and all files necessary to build
-API artifacts.   API definitions use gRPC tools for consistent and quality
-tooling.  Within the oracles (middleware), we use grpc-gateway to expose a
-REST/JSON API (documented in the swagger file) that is
-[transcoded](https://cloud.google.com/endpoints/docs/grpc/transcoding) to a gRPC
-service that is consumed internally.
+API artifacts. API definitions use gRPC tools for consistent and high-quality
+tooling. We use grpc-gateway to expose a REST/JSON API (documented in Swagger)
+that is [transcoded](https://cloud.google.com/endpoints/docs/grpc/transcoding)
+to a gRPC service consumed internally.
 
-Entity types and endpoints are defined in protobuf and gRPC. This has several
-advantages over editing the swagger file directly, including:
-  * Clean diffs.
-  * Better backwards compatibilty through field numbers.
-  * Clear semantics for objects and repeated fields.
+Entity types and endpoints are defined in protobuf. This approach offers:
+
+- Clean diffs
+- Backwards compatibility via field numbers
+- Clear semantics for structured data
+
+The `buf` tool is used to manage protobuf definitions and the build toolchain.
 
 ## Directory Structure
 
 ```
-pb:
-	Protobuf speciations for entities, models, and messages used and referenced
-	in various API endpoints.
-srvpb:
-	Endpoint specifications (in gRPC format with HTTP/swagger annotations).
-swagger:
-	Generated swagger JSON and a Go package that serves the json to frontend
-	clients.
+api/
+├── Makefile                  # Build artifacts from protobuf definitions
+├── README.md                 # This file
+├── buf.gen.yaml              # Code generation configuration
+├── buf.yaml                  # Linting and dependency config
+├── embed.go                  # Serves swagger JSON via embed.FS
+├── pb/                       # Shared protobuf messages and types
+│   └── v1/
+│       └── oracle.proto      # Shared claim models
+├── srvpb/                    # gRPC services with REST annotations
+│   └── v1/
+│       └── oracle.proto      # Endpoint and routing definitions
 ```
 
-## Generating gRPC service code and Swagger/OpenAPI documentation
+❌ Excluded files (generated or irrelevant):
 
-The generated gRPC service code, gateway code, and the swagger file are checked
-into git. After every change you should regenerate these files and check them
-in.  Run `make` in the api directory to regenerate these files.
+- `*.pb.go`, `*.pb.gw.go`, `*_grpc.pb.go` — generated Go bindings
+- `*.swagger.json` — generated Swagger specs
 
-```
+## Generating Artifacts
+
+Run `make` to regenerate gRPC service code and Swagger/OpenAPI documentation:
+
+```sh
 make
 ```
 
-Among the generated output is a swagger file, `swagger/oracle.swagger.json`.  Do
-not edit this file directly or it will be replaced the next time any .proto
-files are modifieed.
+Artifacts are written to the same directory as the `.proto` files and committed
+to the repo.
 
-## Viewing REST API documentation
+> ⚠️ Do not edit generated files directly — they will be overwritten.
 
-Use your favorite OpenAPI/Swagger tool to view the swagger file generated above
-at `swagger/oracle.swagger.json`. One such tool is `redoc`.  To view the swagger
-file using redoc, you need to install the CLI first:
+## Viewing API Documentation
 
-```
-brew install npm
+The Swagger file for the REST API can be previewed using any OpenAPI tool.
+To use [Redoc](https://github.com/Redocly/redoc):
+
+Install Redoc CLI:
+
+```sh
 npm i -g redoc-cli
 ```
 
-Run `make redoc` at the root of the project to view the User API spec. The port
-has been set to not conflict with Oracle. You can also run redoc directly:
+Then view the Swagger file with:
 
-```
-npx redoc-cli serve -p 57505 ./api/swagger/oracle.swagger.json
+```sh
+make redoc
 ```
 
-Use the [swagger editor](https://editor.swagger.io/) to view the swagger
-specification online.
+This serves the file at `http://localhost:57505`.
+
+You can also drag `srvpb/v1/oracle.swagger.json` into
+[https://editor.swagger.io](https://editor.swagger.io).

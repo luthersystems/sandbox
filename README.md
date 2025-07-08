@@ -3,7 +3,9 @@
 This repository contains a working starter kit for developers to modify and
 specialize to their specific use case.
 
-## Setup
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/luthersystems/sandbox?quickstart=1)
+
+## Local Setup
 
 Once you've cloned the repo, run:
 
@@ -11,7 +13,7 @@ Once you've cloned the repo, run:
 make setup
 ```
 
-To download the docs and complete the repo setup.
+To download the docs and complete the local setup.
 
 ## High-level File System Structure
 
@@ -24,8 +26,6 @@ specialize for your use case.
 _Platform_: The remaining files and directories are platform related code
 that should not be modified.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/luthersystems/sandbox?quickstart=1)
-
 ## Component Diagram
 
 ```asciiart
@@ -37,7 +37,7 @@ that should not be modified.
          |        Middleware API        |       api/swagger/oracle.swagger.json
          +--------------+---------------+
          |  Middleware Portal Service   |
-         |             portal/          |
+         |     ./portal/README.md       |
          +------------------+-----------+
                             |
                    JSON-RPC |
@@ -49,11 +49,12 @@ that should not be modified.
                              | JSON-RPC
  +---------------------------v--------------------------+
  |              Common Operations Script                |
- |                    phylum/                           |
+ |               ./phylum/README.md                     |
  +------------------------------------------------------+
  |       Substrate (Common Operations Script Runtime)   |
  +------------------------------------------------------+
  |          Distributed Systems Services (fabric)       |
+ |                ./fabric/README.md                    |
  +------------------------------------------------------+
 ```
 
@@ -195,17 +196,18 @@ compose/:
  testing. These configurations are used by the existing Make targets
  and the compose python.
 fabric/:
- Configuration and scripts to launch a fabric network locally. Not used in
-    codespaces.
+ Configuration and scripts to launch a distributed systems network locally.
+ Not used in codespaces.
 portal/:
  The portal service responsible for serving the REST/JSON APIs and
  communicating with other microservices.
 phylum/:
- Business logic that is executed in common script using the platform (substrate).
+ Business logic that is executed in common operations script using the
+ platform (substrate).
 scripts/:
  Helper scripts for the build process.
 tests/:
- End-to-end API tests that use martin.
+ End-to-end API tests that use 'martin', Luther's e2e testing tool.
 ```
 
 ### Developing the application
@@ -236,13 +238,13 @@ There are 3 main types of tests in this project:
 2. Oracle _functional_ tests. These tests exercise API endpoints and their
    connectivity to the phylum application layer. More information about writing
    and running functional tests can be found in the oracle
-   [documentation](portal/).
+   [documentation](portal/README.md).
 
 3. End-To-End _integration_ tests. These tests use the `martin` tool. These
    tests exercise realistic end-user functionality of the oracle REST/JSON APIs
    using [Postman](https://www.postman.com/product/api-client/) under the hood.
    More information about writing and running integration tests can be found in
-   the test [documentation](tests/)
+   the test [documentation](tests/README.md)
 
 After making some changes to the phylum's business logic, the oracle middleware,
 or the API it is a good idea to test those changes. The quickest integrity
@@ -323,6 +325,11 @@ platform are cleaned up by running the command:
 make down
 ```
 
+## Distributed Systems
+
+See [fabric/README.md](./fabric/README.md) for an overview of the distributed systems
+architecture that powers the platform.
+
 ## Advanced Usage
 
 Once you're comfortable with the basic development workflow, checkout the
@@ -360,7 +367,7 @@ all traces.
 
 Phylum endpoints defined with `defendpoint` will automatically receive a span
 named after the endpoint. Other functions in the phylum can be traced by adding
-a special ELPS doc keyword:
+a special [ELPS](https://github.com/luthersystems/elps) doc keyword:
 
 ```lisp
 (defun trace-this ()

@@ -1,54 +1,89 @@
-# Phylum: Common Operations Script Business Logic
+# Common Operations Script Business Logic (phylum)
 
-The phylum stores process operations business logic. This phylum defines a
-route for each of the 3 application API endpoints (see `routes.lisp`).
-This code securely runs on all of the participant nodes in the network, and the
-platform ensures that these participants reach agreement on the execution of
-this code.
+This directory contains the business logic ("phylum") for process automation
+on the Luther Platform. It defines logic that runs on participant nodes in a
+distributed system, with consistent execution enforced by the platform.
 
-See [Phylum Best Practices](https://docs.luthersystems.com/luther/application/development-guidelines/phylum-best-practices).
+Each phylum exposes named endpoints via `routes.lisp` and defines application
+behavior through [ELPS](https://github.com/luthersystems/elps) code.
+
+See the [Business Logic Development Guide](https://docs.luthersystems.com/develop-business-logic/business-logic/dev-language) for more details.
+
+See the [ConnectorHub Guide](https://docs.luthersystems.com/luther-connectors-setup/connector-hub)
+for details on raising connector events from within your business logic.
+
+---
 
 ## Directory Structure
 
 ```
-build:
- Temporary build artifacts (do not check into git).
-main.lisp:
- Entrypoint into the common operations script.
-routes.lisp:
- Routes callable by external services.
-utils.lisp:
- Common utility functions for the app.
-utils_test.lisp:
- ELPS tests for the utility functions.
+phylum/
+├── .yasirc.json        # Editor config for YASI (code formatter)
+├── Makefile            # Build and test commands for this phylum
+├── claim.lisp          # Core claim handling logic
+├── claim_test.lisp     # Unit tests for claims
+├── main.lisp           # Entrypoint for phylum execution
+├── routes.lisp         # RPC endpoint definitions
 ```
 
-## Making changes
+---
+
+## Developing This Phylum
 
 ### Testing Changes
 
-The phylum can define unit tests in files with names ending it `_test.lisp`.
-These tests can be run using the following command:
+Tests live in `*_test.lisp` files. To run all unit tests:
 
 ```sh
 make test
 ```
 
-From the project's top level `make phylumtest` will run the same tests.
-
-### Formatting Changes
-
-You need to install the `yasi` command line tool to use the `make format`
-target. This tool is installed using `pip` which requires python:
-
-```
-brew install pip
-pip install --upgrade yasi
-```
-
-And to format:
+You can also run from the project root:
 
 ```sh
-make format
+make phylumtest
 ```
 
+### Running Individual Tests
+
+To run specific test files:
+
+```sh
+$(make echo:SHIRO_TEST) claim_test.lisp
+```
+
+To filter tests using regex (like Go's `-run`):
+
+```sh
+$(make echo:SHIRO_TEST) --run "/my_test_name"
+```
+
+Test helpers are provided for introspecting event state, response metadata,
+and mocking connector behavior. See `claim_test.lisp` for usage examples.
+
+### Interactive REPL
+
+You can open a REPL for live evaluation of ELPS expressions:
+
+```sh
+make repl
+```
+
+This launches the `shirotester` container in REPL mode inside the phylum:
+
+```sh
+shiro> (+ 1 1)
+2
+shiro>
+```
+
+---
+
+## Notes
+
+- The phylum runs distributed on participant nodes.
+- `main.lisp` loads all routes and logic.
+- The platform enforces consistency on state transitions.
+- Repl/debug and formatting support available via `make repl` and `.yasirc.json`.
+
+> ⚠️ Do not commit `build/` artifacts or generated content.

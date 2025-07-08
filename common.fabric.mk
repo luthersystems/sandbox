@@ -1,5 +1,5 @@
-# This makefile provides targets for local fabric networks. It's meant to
-# be re-usable across projects.
+# This makefile provides targets for local fabric (distributed systems) 
+# networks. It's meant to be re-usable across projects.
 include ${PROJECT_REL_DIR}/common.mk
 
 # name of the chaincode
