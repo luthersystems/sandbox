@@ -20,8 +20,8 @@ To download the docs and complete the local setup.
 _Application Specific Code_: Add your specific process operations code to
 the `phylum/` directory.
 
-_Application Templates_: Edit the template code in `portal/` and `api/` to
-specialize for your use case.
+\_Application Starter Code: Edit the example template code in `portal/` and
+`api/` to specialize for your use case.
 
 _Platform_: The remaining files and directories are platform related code
 that should not be modified.
@@ -29,33 +29,43 @@ that should not be modified.
 ## Component Diagram
 
 ```asciiart
-                     FE Portal
-                        +
-                        |
-         +--------------v---------------+
-         |                              +<----+ Swagger Specification:
-         |        Middleware API        |       api/swagger/oracle.swagger.json
-         +--------------+---------------+
-         |  Middleware Portal Service   |
-         |     ./portal/README.md       |
-         +------------------+-----------+
-                            |
-                   JSON-RPC |
-               +------------v-----------+
-               |  shiroclient gateway   |
-               |  substrate/shiroclient |
-               +-------------+----------+
-                             |
-                             | JSON-RPC
- +---------------------------v--------------------------+
- |              Common Operations Script                |
- |               ./phylum/README.md                     |
- +------------------------------------------------------+
- |       Substrate (Common Operations Script Runtime)   |
- +------------------------------------------------------+
- |          Distributed Systems Services (fabric)       |
- |                ./fabric/README.md                    |
- +------------------------------------------------------+
+
+                      +------------------+
+                      |    FE Portal     |
+                      +--------+---------+
+                               |
+                               v
+                      +--------+---------+
+                      |  Middleware API  | <---- Swagger:
+                      +--------+---------+       api/swagger/oracle.swagger.json
+                               |
+                      +--------v---------+
+                      |   Portal Service |
+                      |  (./portal/)     |
+                      +--------+---------+
+                               |
+                            JSON-RPC
+                               |
+                      +--------v---------+
+                      |   Shiroclient    |
+                      |   (gateway)      |
+                      +--------+---------+
+                               |
+                            JSON-RPC
+                               |
+       +-----------------------v-----------------------+
+       |       Common Operations Script (Phylum)       |
+       |               ./phylum/README.md              |
+       +-----------------------+-----------------------+
+                               |
+       +-----------------------v-----------------------+
+       |  Substrate Runtime (ELPS interpreter, state)  |
+       +-----------------------+-----------------------+
+                               |
+       +-----------------------v-----------------------+
+       |     Distributed Systems Layer (Fabric)        |
+       |               ./fabric/README.md              |
+       +-----------------------------------------------+
 ```
 
 This repo includes an end-to-end "hello world" application described below.
@@ -182,33 +192,19 @@ Running `docker ps` again will show all the containers have been removed.
 
 ### Directory Structure
 
-Overview of the directory structure
+Overview of the directory structure:
 
-```asciiart
-build/:
- Temporary build artifacts (do not check into git).
-common.config.mk:
- User-defined settings & overrides across the project.
-api/:
- API specification and artifacts. See README.
-compose/:
- Configuration for docker compose networks that are brought up during
- testing. These configurations are used by the existing Make targets
- and the compose python.
-fabric/:
- Configuration and scripts to launch a distributed systems network locally.
- Not used in codespaces.
-portal/:
- The portal service responsible for serving the REST/JSON APIs and
- communicating with other microservices.
-phylum/:
- Business logic that is executed in common operations script using the
- platform (substrate).
-scripts/:
- Helper scripts for the build process.
-tests/:
- End-to-end API tests that use 'martin', Luther's e2e testing tool.
-```
+| Directory          | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `build/`           | Temporary build artifacts (do not check into Git)                        |
+| `common.config.mk` | User-defined settings and overrides across the project                   |
+| `api/`             | API specification and artifacts (see `api/README.md`)                    |
+| `compose/`         | Docker Compose configurations used during testing and `make` targets     |
+| `fabric/`          | Local distributed systems network configuration (not used in Codespaces) |
+| `portal/`          | REST/JSON middleware service and app logic                               |
+| `phylum/`          | Business logic written in Common Operations Script (ELPS)                |
+| `scripts/`         | Helper scripts for the build process                                     |
+| `tests/`           | End-to-end tests using `martin`, Luther’s e2e testing tool               |
 
 ### Developing the application
 
@@ -230,10 +226,11 @@ sandbox phylum's [documentation](phylum/).
 
 There are 3 main types of tests in this project:
 
-1. Phylum _unit_ tests. These tests excercise busines rules and logic around
+1. Phylum _unit_ tests. These tests exercise business rules and logic around
    storage of smart contract data model entities. More information about
    writing and running unit tests can be found in the phylum
-   [documentation](phylum/).
+   [documentation](phylum/README.md).
+   See the example [claims test](./phylum/claim_test.lisp).
 
 2. Oracle _functional_ tests. These tests exercise API endpoints and their
    connectivity to the phylum application layer. More information about writing
@@ -269,6 +266,8 @@ against a real network of docker containers. As done in the Getting Started
 section, this will require running `make up` to create a network and `make
 integration` to actually run the tests.
 
+> `make mem-up` is a faster alternative suitable for development.
+
 ```bash
 make up
 make integration
@@ -284,6 +283,9 @@ running fabric network with the following shell command:
 ```bash
 (cd fabric && make init)
 ```
+
+> This command rebuilds and re-installs the business logic on the running
+> Fabric network without restarting the containers.
 
 This uses the OTA Update module to immediately install the new business logic on
 to the fabric network. The upgrade here is done the same way devops engineers
