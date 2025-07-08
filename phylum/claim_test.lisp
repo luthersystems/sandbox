@@ -1,11 +1,23 @@
-;; Copyright © 2024 Luther Systems, Ltd. All right reserved.
-
+;; Copyright © 2025 Luther Systems, Ltd. All right reserved.
+;; ----------------------------------------------------------------------------
+;;
+;; This file contains unit tests for the claim connector object.
+;; It exercises core functionality including:
+;; - Claim creation and persistence
+;; - State transitions and event triggering
+;; - Connector event simulation and response handling
+;;
+;; Run with:
+;;   make test
+;; ----------------------------------------------------------------------------
 (in-package 'sandbox)
 (use-package 'testing)
 
  ;; overwrite return from cc:creator such that tests can complete
 (set 'cc:creator (lambda () "Org1MSP"))
 
+;; mk-test-claimant returns a map with mock claimant details.
+;; Used to simulate an inbound claim submission.
 (defun mk-test-claimant ()
   (sorted-map "account_number"    ""
               "account_sort_code" ""
@@ -19,10 +31,16 @@
               "address_post_town" "Westbury"
               "nationality"       "NATIONALITY_GB"))
 
+;; populate-test-claimant! mutates the given claim to add a test claimant.
+;; Used to simulate user input collected from the portal.
 (defun populate-test-claimant! (claim)
   (let* ([claimant (mk-test-claimant)])
     (assoc! claim "claimant" claimant)))
 
+;; Basic storage test for claim lifecycle:
+;; - Ensures claim can be created
+;; - Ensures it has valid state and ID
+;; - Verifies it can be fetched from storage
 (test "claims"
   (let* ([claim (create-claim)]
          [_ (assert (not (nil? claim)))])
@@ -39,7 +57,8 @@
 ;; helper functions to interrogate the state after running the tests.
 ;;
 
-;; get the request corresponding to the event ctx.
+;;;; get-connector-event-req retrieves the connector request from state using
+;; the given connector event context.
 (defun get-connector-event-req (ctx)
   (let* ([key (get ctx "key")]
          [pdc (get ctx "pdc")]
@@ -49,11 +68,14 @@
          [event (json:load-bytes event-bytes)])
     event))
 
-;; lookup the event ctx for a request ID.
+;;;; get-connector-event-ctx looks up the event context given a request ID.
+;; Used to inspect connector request metadata.
 (defun get-connector-event-ctx (rid)
   (get (connector-handlers 'get-callback-state rid) "ctx"))
 
-;; get all the events within a tx, recursively.
+;; get-connector-event-recurse recursively walks all events in the current
+;; transaction metadata and builds a map of connector requests by index.
+;; Used to extract all raised events for test assertions.
 (defun get-connector-event-recurse (metadata i output)
   (let* ([event-ref-key (format-string "$connector_events:{}" i)])
     (when (key? metadata event-ref-key)
@@ -66,7 +88,8 @@
         (assoc! output (to-string i) req)
         (get-connector-event-recurse metadata (+ i 1) output)))))
 
-;; get all the events raised within the tx.
+;; get-connector-event-reqs returns a vector of all connector requests raised
+;; during the current transaction.
 (defun get-connector-event-reqs ()
   (let* ([m (get-tx-metadata)]
          [output (sorted-map)])
@@ -77,6 +100,8 @@
 ;; connector tests
 ;;
 
+;; start-new-event-loop creates a new claim and triggers the first event.
+;; Used to simulate an end-to-end claim submission.
 (defun start-new-event-loop ()
   (let* ([claim (create-claim)]) 
     (cc:debugf (sorted-map "claim" claim) "start-new-event-loop")
@@ -85,11 +110,16 @@
     (populate-test-claimant! claim)
     (trigger-claim (get claim "claim_id") (get claim "claimant"))))
 
+;; assert-no-more-events verifies that no connector events remain to process.
+;; Use after all expected events have been handled.
 (defun assert-no-more-events ()
   (let* ([event-reqs (get-connector-event-reqs)])
     ;; done, no more events! 
     (assert-equal (length event-reqs) 0)))
 
+;; process-single-event-empty-response simulates a connectorhub callback with
+;; an empty response body for the first pending event.
+;; Used to advance the state machine during tests.
 (defun process-single-event-empty-response ()
   (let* ([event-reqs (get-connector-event-reqs)]
          [_ (assert-equal 1 (length event-reqs))]
@@ -101,6 +131,12 @@
     ;; simulate the connectorhub callback
     (connector-handlers 'invoke-handler-with-body resp)))
 
+;; process-event-loop advances the claim state machine by simulating connector
+;; responses across `iters` iterations.
+;;
+;; Parameters:
+;; - iters: number of iterations (connector responses) to simulate
+;; - start: if true, starts a new claim first
 (defun process-event-loop (iters &optional start)
   (when start (start-new-event-loop))
   (if (<= iters 0)
@@ -109,4 +145,6 @@
       (process-single-event-empty-response)
       (process-event-loop (- iters 1)))))
 
+;; Integration test for full claim processing loop.
+;; Runs 7 connector event cycles from new claim to DONE state.
 (test "test-claim-factory" (process-event-loop 7 true))

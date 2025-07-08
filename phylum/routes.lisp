@@ -1,11 +1,18 @@
-;; Copyright © 2021 Luther Systems, Ltd. All right reserved.
-
-;; routes.lisp
-
-;; This file defines all of the RPC endpoints exposed by the phylum.  This
-;; package uses a simple macro to define a class of readonly endpoints but this
-;; is just one approach for defining such middleware that extends all the
-;; routes in an application.
+;; Copyright © 2025 Luther Systems, Ltd. All right reserved.
+;; ----------------------------------------------------------------------------
+;;
+;; Defines all RPC endpoints exposed by this phylum.
+;; Endpoints are declared using `defendpoint` (POST) and `defendpoint-get` (GET).
+;;
+;; All routes are automatically wrapped with error-handling and side-effect
+;; protection to ensure consistent behavior and logging.
+;;
+;; Readonly GET endpoints are protected against state updates via 
+;; `cc:force-no-commit-tx`.
+;;
+;; Each endpoint maps to a handler that interacts with the connector objects
+;; defined in claim.lisp.
+;; ----------------------------------------------------------------------------
 (in-package 'sandbox)
 
 ;; wrap-endpoint is a simple wrapper for endpoints which allows them to call
@@ -37,11 +44,15 @@
 (defmacro defendpoint-get (name args &rest exprs)
   (quasiquote
     (sandbox:defendpoint (unquote name) (unquote args)
-                         (cc:force-no-commit-tx) ; get route cannot update 
+                         (cc:force-no-commit-tx) ; get route cannot update
                          (unquote-splicing exprs))))
 
+;; app-version-key stores the deployed version of this phylum in statedb.
 (set 'app-version-key (format-string "{}:version" service-name))
 
+
+;; init endpoint: called during a successful over-the-air update.
+;; Stores the current phylum version and logs upgrade/init info.
 (defendpoint "init" ()
   (let* ([prev-version (statedb:get app-version-key)]
          [init? (nil? prev-version)])
@@ -56,6 +67,7 @@
     (statedb:put app-version-key version)
     (route-success ())))
 
+;; healthcheck endpoint: returns static service metadata and timestamp.
 (defendpoint-get "healthcheck" ()
   (route-success
     (sorted-map "reports"
@@ -65,9 +77,12 @@
                           "service_name"    service-name
                           "timestamp"       (cc:timestamp (cc:now)))))))
 
+;; create_claim endpoint: creates a new claim and stores it.
 (defendpoint "create_claim" (req)
   (route-success (sorted-map "claim" (create-claim))))
 
+;; add_claimant endpoint: populates claim with claimant info and triggers
+;; claim processing state machine.
 (defendpoint "add_claimant" (req)
   (let* ([claim-id (or (get req "claim_id")
                        (set-exception-business "missing claim_id"))]
@@ -76,6 +91,7 @@
       (set-exception-business "missing claimant forename"))
     (route-success (sorted-map "claim" (trigger-claim claim-id claimant)))))
 
+;; get_claim endpoint: fetches the full data for a given claim by ID.
 (defendpoint-get "get_claim" (req)
   (let* ([claim-id (or (get req "claim_id")
                        (set-exception-business "missing claim_id"))]
