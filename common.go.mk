@@ -27,6 +27,8 @@ GO_PKG_VOLUME_DUMMY=${PROJECT_REL_DIR}/$(call DUMMY_TARGET,volume,${GO_PKG_VOLUM
 GO_BUILD_TAGS ?= osusergo,netgo,cgo,timetzdata
 GO_BUILD_FLAGS="-installsuffix ${GO_BUILD_TAGS} -tags ${GO_BUILD_TAGS} -buildvcs=false"
 
+HOST_GO_ENV=SUBSTRATEHCP_FILE=${SUBSTRATEHCP_FILE}
+
 .PHONY: default
 default: docker-build
 	@

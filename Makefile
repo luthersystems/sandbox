@@ -164,10 +164,6 @@ pre-push:
 .PHONY:
 download: plugin
 
-.PHONY: print-export-path
-print-export-path:
-	@echo "export SUBSTRATEHCP_FILE=${SUBSTRATEHCP_FILE}"
-
 ${STATIC_PLUGINS_DUMMY}:
 	${MKDIR_P} $(dir $@)
 	./scripts/obtain-plugin.sh
