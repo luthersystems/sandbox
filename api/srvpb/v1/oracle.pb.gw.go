@@ -231,7 +231,7 @@ func RegisterSandboxServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetHealthCheck", runtime.WithHTTPPathPattern("/v1/health_check"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetHealthCheck", runtime.WithHTTPPathPattern("/v1/sandbox/health_check"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -256,7 +256,7 @@ func RegisterSandboxServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/CreateClaim", runtime.WithHTTPPathPattern("/v1/claims"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/CreateClaim", runtime.WithHTTPPathPattern("/v1/sandbox/claims"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -281,7 +281,7 @@ func RegisterSandboxServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/AddClaimant", runtime.WithHTTPPathPattern("/v1/claim/{claim_id}/claimant"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/AddClaimant", runtime.WithHTTPPathPattern("/v1/sandbox/claim/{claim_id}/claimant"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -306,7 +306,7 @@ func RegisterSandboxServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetClaim", runtime.WithHTTPPathPattern("/v1/claim/{claim_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetClaim", runtime.WithHTTPPathPattern("/v1/sandbox/claim/{claim_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -370,7 +370,7 @@ func RegisterSandboxServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetHealthCheck", runtime.WithHTTPPathPattern("/v1/health_check"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetHealthCheck", runtime.WithHTTPPathPattern("/v1/sandbox/health_check"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -392,7 +392,7 @@ func RegisterSandboxServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/CreateClaim", runtime.WithHTTPPathPattern("/v1/claims"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/CreateClaim", runtime.WithHTTPPathPattern("/v1/sandbox/claims"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -414,7 +414,7 @@ func RegisterSandboxServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/AddClaimant", runtime.WithHTTPPathPattern("/v1/claim/{claim_id}/claimant"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/AddClaimant", runtime.WithHTTPPathPattern("/v1/sandbox/claim/{claim_id}/claimant"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -436,7 +436,7 @@ func RegisterSandboxServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetClaim", runtime.WithHTTPPathPattern("/v1/claim/{claim_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/srvpb.v1.SandboxService/GetClaim", runtime.WithHTTPPathPattern("/v1/sandbox/claim/{claim_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -456,13 +456,13 @@ func RegisterSandboxServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_SandboxService_GetHealthCheck_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "health_check"}, ""))
+	pattern_SandboxService_GetHealthCheck_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "sandbox", "health_check"}, ""))
 
-	pattern_SandboxService_CreateClaim_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "claims"}, ""))
+	pattern_SandboxService_CreateClaim_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "sandbox", "claims"}, ""))
 
-	pattern_SandboxService_AddClaimant_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "claim", "claim_id", "claimant"}, ""))
+	pattern_SandboxService_AddClaimant_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "sandbox", "claim", "claim_id", "claimant"}, ""))
 
-	pattern_SandboxService_GetClaim_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "claim", "claim_id"}, ""))
+	pattern_SandboxService_GetClaim_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "sandbox", "claim", "claim_id"}, ""))
 )
 
 var (

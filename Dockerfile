@@ -33,3 +33,4 @@ COPY --from=build /src/app /opt/app
 
 # Entrypoint: run the app using tini for proper signal handling
 ENTRYPOINT ["tini", "--", "/opt/app"]
+CMD ["start"]

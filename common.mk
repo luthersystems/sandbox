@@ -18,6 +18,8 @@ include ${PROJECT_REL_DIR}/common.config.mk
 
 PROJECT_PATH=$(shell awk '$$1 == "module" {print $$2};' ${PROJECT_REL_DIR}/go.mod)
 
+FQ_DOCKER_IMAGE ?= luthersystems/$(2)
+
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
 

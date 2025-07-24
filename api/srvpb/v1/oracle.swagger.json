@@ -19,7 +19,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/claim/{claimId}": {
+    "/v1/sandbox/claim/{claimId}": {
       "get": {
         "summary": "Retrieve claim details.",
         "operationId": "SandboxService_GetClaim",
@@ -94,7 +94,7 @@
         ]
       }
     },
-    "/v1/claim/{claimId}/claimant": {
+    "/v1/sandbox/claim/{claimId}/claimant": {
       "post": {
         "summary": "Add claimant updates claim details.",
         "operationId": "SandboxService_AddClaimant",
@@ -176,7 +176,7 @@
         ]
       }
     },
-    "/v1/claims": {
+    "/v1/sandbox/claims": {
       "post": {
         "summary": "Create claim initiates the creation of the claim.",
         "operationId": "SandboxService_CreateClaim",
@@ -266,7 +266,7 @@
         ]
       }
     },
-    "/v1/health_check": {
+    "/v1/sandbox/health_check": {
       "get": {
         "summary": "Check the health of the service. This is used by load balancers to check service health.",
         "operationId": "SandboxService_GetHealthCheck",

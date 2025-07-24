@@ -197,7 +197,6 @@ explorer-watch:
 
 .PHONY: observability-up observability-down
 
-
 .PHONY: observability-network observability-up observability-down
 
 observability-network:

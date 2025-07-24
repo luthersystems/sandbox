@@ -1,28 +1,28 @@
 # collection to execute before each test run
 name: "initialization"
 headers:
-    - key: Content-Type
-      value: application/json
+  - key: Content-Type
+    value: application/json
 tests:
-    - name: "INIT: Health check"
-      method: GET
-      path: "v1/health_check"
-      test_script: |
-          pm.test("ok", () => {
-              console.log(pm.response.text());
-              let data = pm.response.json();
-              console.log(data);
-              pm.response.to.have.status(200);
-              pm.expect(data).to.not.have.property("exception");
-          });
-    - name: "INIT: swagger.json"
-      method: GET
-      path: "swagger.json"
-      test_script: |
-          pm.test("ok", () => {
-              console.log(pm.response.text());
-              let data = pm.response.json();
-              console.log(data);
-              pm.response.to.have.status(200);
-              pm.expect(data).to.not.have.property("exception");
-          });
+  - name: "INIT: Health check"
+    method: GET
+    path: "v1/sandbox/health_check"
+    test_script: |
+      pm.test("ok", () => {
+          console.log(pm.response.text());
+          let data = pm.response.json();
+          console.log(data);
+          pm.response.to.have.status(200);
+          pm.expect(data).to.not.have.property("exception");
+      });
+  - name: "INIT: swagger.json"
+    method: GET
+    path: "swagger.json"
+    test_script: |
+      pm.test("ok", () => {
+          console.log(pm.response.text());
+          let data = pm.response.json();
+          console.log(data);
+          pm.response.to.have.status(200);
+          pm.expect(data).to.not.have.property("exception");
+      });
