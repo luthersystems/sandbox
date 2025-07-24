@@ -100,25 +100,25 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service SandboxService {
   // Check the health of the service. This is used by load balancers to check service health.
   rpc GetHealthCheck(healthcheck.v1.GetHealthCheckRequest) returns (healthcheck.v1.GetHealthCheckResponse) {
-    option (google.api.http) = {get: "/v1/health_check"};
+    option (google.api.http) = {get: "/v1/sandbox/health_check"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
   // Create claim initiates the creation of the claim.
   rpc CreateClaim(pb.v1.CreateClaimRequest) returns (pb.v1.CreateClaimResponse) {
-    option (google.api.http) = {post: "/v1/claims"};
+    option (google.api.http) = {post: "/v1/sandbox/claims"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
   // Add claimant updates claim details.
   rpc AddClaimant(pb.v1.AddClaimantRequest) returns (pb.v1.AddClaimantResponse) {
     option (google.api.http) = {
-      post: "/v1/claim/{claim_id}/claimant"
+      post: "/v1/sandbox/claim/{claim_id}/claimant"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
   // Retrieve claim details.
   rpc GetClaim(pb.v1.GetClaimRequest) returns (pb.v1.GetClaimResponse) {
-    option (google.api.http) = {get: "/v1/claim/{claim_id}"};
+    option (google.api.http) = {get: "/v1/sandbox/claim/{claim_id}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
 }

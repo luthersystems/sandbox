@@ -18,6 +18,8 @@ include ${PROJECT_REL_DIR}/common.config.mk
 
 PROJECT_PATH=$(shell awk '$$1 == "module" {print $$2};' ${PROJECT_REL_DIR}/go.mod)
 
+FQ_DOCKER_IMAGE ?= luthersystems/$(2)
+
 BUILD_ID=$(shell git rev-parse --short HEAD)
 BUILD_VERSION=${VERSION}$(if $(findstring SNAPSHOT,${VERSION}),-${BUILD_ID},)
 
@@ -86,6 +88,7 @@ TAR=tar
 DUMMY_TARGET=build/$(1)/$(2)/.dummy
 IMAGE_DUMMY=$(call DUMMY_TARGET,image,$(1))
 PUSH_DUMMY=$(call DUMMY_TARGET,push,$(1))
+MANIFEST_DUMMY=$(call DUMMY_TARGET,manifest,$(1))
 PLUGIN_DUMMY=$(call DUMMY_TARGET,plugin,$(1))
 STATIC_PLUGINS_DUMMY=$(call PLUGIN_DUMMY,${SUBSTRATE_VERSION})
 
@@ -117,3 +120,6 @@ echo\:%:
 docker-pull/%: id=$(shell docker image inspect -f "{{.Id}}" $* 2>/dev/null)
 docker-pull/%:
 	@[ -n "${id}" ] || { echo "retrieving $*" && docker pull $*; }
+
+make-C/%:
+	@cd $(dir $*) && $(MAKE) $(notdir $*)

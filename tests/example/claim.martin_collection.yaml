@@ -5,7 +5,7 @@ headers:
 tests:
   - name: "Create claim"
     method: POST
-    path: "v1/claims"
+    path: "v1/sandbox/claims"
     body: |
       {
         "date_of_accident": "2024-01-15",
@@ -24,7 +24,7 @@ tests:
       });
   - name: "Get claim"
     method: GET
-    path: "v1/claim/{{CLAIM_ID}}"
+    path: "v1/sandbox/claim/{{CLAIM_ID}}"
     test_script: |
       pm.test("ok", () => {
           let data = pm.response.json();
@@ -36,7 +36,7 @@ tests:
       });
   - name: "Add claimant"
     method: POST
-    path: "v1/claim/{{CLAIM_ID}}/claimant"
+    path: "v1/sandbox/claim/{{CLAIM_ID}}/claimant"
     body: |
       {
         "claim_id": "{{CLAIM_ID}}",

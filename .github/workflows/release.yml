@@ -1,0 +1,49 @@
+name: Build, Push, and Release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  build-push-docker:
+    name: ${{ matrix.arch }} - docker build
+    runs-on: ${{ fromJSON('{"arm64":"buildjet-2vcpu-ubuntu-2204-arm","amd64":"ubuntu-22.04"}')[matrix.arch] }}
+    permissions:
+      id-token: write # Required for OIDC authentication
+      contents: read # This is required for actions/checkout@v4
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0 # include tags for VERSION detection
+      - name: Configure DockerHub
+        uses: ./.github/actions/configure-dockerhub
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      - name: Set up Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Publish Docker
+        run: make publish VERSION=$GITHUB_REF_NAME TAG_SUFFIX=-${{ matrix.arch }}
+  push-docker-manifests:
+    runs-on: ubuntu-22.04
+    needs:
+      - build-push-docker
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Configure DockerHub
+        uses: ./.github/actions/configure-dockerhub
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Publish
+        run: make publish-docker-manifests VERSION=$GITHUB_REF_NAME

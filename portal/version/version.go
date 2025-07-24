@@ -2,5 +2,4 @@
 
 package version
 
-// Version is the project version. It is overridden as part of the build.
-var Version string
+var Version = "v0.0.1" // overridden at build time with -ldflags

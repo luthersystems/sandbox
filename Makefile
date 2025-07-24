@@ -36,48 +36,58 @@ plugin-darwin: ${SUBSTRATE_PLUGIN_DARWIN}
 
 all: tests-api
 .PHONY: tests-api
-tests-api:
-	cd tests && $(MAKE)
+tests-api: make-C/tests/default
+	@
 .PHONY: tests-api-clean
-tests-api-clean:
-	cd tests && $(MAKE) clean
+tests-api-clean: make-C/tests/clean
+	@
 
 all: api
 .PHONY: api
-api:
-	cd api && $(MAKE)
+api: make-C/api/default
+	@
 
 all: phylum
 .PHONY: phylum
-phylum:
-	cd phylum && $(MAKE)
+phylum: make-C/phylum/default
+	@
 test: phylumtest
 .PHONY: phylumtest
-phylumtest:
-	cd phylum && $(MAKE) test
+phylumtest: make-C/phylum/test
+	@
 clean: phylumclean
 .PHONY: phylumclean
-phylumclean:
-	cd phylum && $(MAKE) clean
+phylumclean: make-C/phylum/clean
+	@
 
 all: portal
 .PHONY: portal
-portal: plugin
-	cd ${SERVICE_DIR} && $(MAKE)
+portal: plugin make-C/portal/default
+	@
+
 clean: portalclean
 .PHONY: portalclean
-portalclean:
-	cd ${SERVICE_DIR} && $(MAKE) clean
+portalclean: make-C/portal/clean
+	@
+
+docker-push: portal-push
+.PHONY: portal-push
+portal-push: make-C/portal/push
+	@
+
+docker-push-manifests: portal-push-manifests
+.PHONY: portal-push-manifests
+portal-push-manifests: make-C/portal/push-manifests
+	@
 
 .PHONY: fabric
 all: fabric
-fabric:
-	cd fabric && $(MAKE)
+fabric: make-C/fabric/default
+	@
 .PHONY: fabricclean
 clean: fabricclean
-fabricclean:
-	cd fabric && $(MAKE) clean
-
+fabricclean: make-C/fabric/clean
+	@
 .PHONY: storage-up
 storage-up:
 	cd fabric && $(MAKE) up install init
@@ -146,12 +156,12 @@ integrationcitest:
 	$(MAKE) down
 
 .PHONY: integration
-integration:
-	cd tests && $(MAKE) test-docker
+integration: make-C/tests/test-docker
+	@
 
 .PHONY: repl
-repl:
-	cd phylum && $(MAKE) repl
+repl: make-C/phylum/repl
+	@
 
 # this target is called by git-hooks/pre-push. It's separated into its own target
 # to allow us to update the git-hooks without having to reinstall the hook
@@ -163,6 +173,7 @@ pre-push:
 
 .PHONY:
 download: plugin
+	@
 
 ${STATIC_PLUGINS_DUMMY}:
 	${MKDIR_P} $(dir $@)
@@ -174,29 +185,29 @@ ${SUBSTRATE_PLUGIN}: ${STATIC_PLUGINS_DUMMY}
 
 .PHONY: explorer
 explorer: explorer-up-clean
+	@
 
 .PHONY: explorer-up
-explorer-up:
-	cd ${PROJECT_REL_DIR}/explorer && make up
+explorer-up: make-C/explorer/up
+	@
 
 .PHONY: explorer-up-clean
-explorer-up-clean:
-	cd ${PROJECT_REL_DIR}/explorer && make up-clean
+explorer-up-clean: make-C/explorer/up-clean
+	@
 
 .PHONY: explorer-down
-explorer-down:
-	cd ${PROJECT_REL_DIR}/explorer && make down
+explorer-down: make-C/explorer/down
+	@
 
 .PHONY: explorer-clean
-explorer-clean:
-	cd ${PROJECT_REL_DIR}/explorer && make down-clean
+explorer-clean: make-C/explorer/down-clean
+	@
 
 .PHONY: explorer-watch
-explorer-watch:
-	cd ${PROJECT_REL_DIR}/explorer && make watch
+explorer-watch: make-C/explorer/watch
+	@
 
 .PHONY: observability-up observability-down
-
 
 .PHONY: observability-network observability-up observability-down
 
@@ -214,6 +225,22 @@ init-docs:
 	git submodule update --init --recursive --remote docs
 
 .PHONY: setup
-
 setup: init-docs download
 	@echo "Running project setup..."
+
+.PHONY: publish-docker
+publish-docker: docker-push
+	@
+
+.PHONY: publish-docker-manifests
+publish-docker-manifests: docker-push-manifests
+	@
+
+.PHONY: publish
+publish: publish-docker
+	@
+
+.PHONY:
+docker-push: all
+	@
+
