@@ -12,10 +12,6 @@ type versionCmd struct {
 }
 
 func (r *versionCmd) Run() error {
-	ver := version.Version
-	if ver == "" {
-		ver = "SNAPSHOT"
-	}
-	fmt.Println(ver)
+	fmt.Println(version.Version)
 	return nil
 }
