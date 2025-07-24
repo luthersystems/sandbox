@@ -1,0 +1,11 @@
+name: configure-dockerhub
+description: Login to dockerhub
+runs:
+  using: composite
+  steps:
+    - name: Configure Docker Hub
+      run: |-
+        [ -z "$DOCKERHUB_USERNAME" ] && exit 0
+        [ -z "$DOCKERHUB_TOKEN" ] && exit 0
+        echo "${DOCKERHUB_TOKEN}" | docker login --username $DOCKERHUB_USERNAME --password-stdin
+      shell: bash
