@@ -32,8 +32,8 @@
 ;; Used by `next-state` in mk-claim to determine the next processing step.
 (set 'state-transitions
      (make-state-chain (vector
-                         "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED"
-                         "CLAIM_STATE_LOECLAIM_ID_VERIFIED"
+                        ;  "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED"
+                        ;  "CLAIM_STATE_LOECLAIM_ID_VERIFIED"
                          "CLAIM_STATE_OOECLAIM_REVIEWED"
                          "CLAIM_STATE_OOECLAIM_VALIDATED"
                          "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"
@@ -50,14 +50,14 @@
   ;; TODO: for now it's all 1 connector, but in final version each connector
   ;; is run by a separate org (participant).
   (sorted-map
-    "CLAIMS_PORTAL_UI"   "Org1MSP"
-    "EQUIFAX_ID_VERIFY"  "Org1MSP"
-    "POSTGRES_CLAIMS_DB" "Org1MSP"
-    "CAMUNDA_WORKFLOW"   "Org1MSP"
-    "INVOICE_NINJA"      "Org1MSP"
-    "CAMUNDA_TASKLIST"   "Org1MSP"
+    "CLAIMS PORTAL UI"   "Org1MSP"
+    ; "EQUIFAX ID VERIFY"  "Org1MSP"
+    "POSTGRES CLAIMS DB" "Org1MSP"
+    "CAMUNDA WORKFLOW"   "Org1MSP"
+    "INVOICE NINJA"      "Org1MSP"
+    "CAMUNDA TASKLIST"   "Org1MSP"
     "EMAIL"              "Org1MSP"
-    "STRIPE_PAYMENT"     "Org1MSP"))
+    "STRIPE PAYMENT"     "Org1MSP"))
 
 ;; event-desc-record returns metadata describing the system and action to trigger.
 ;; Used when building connector events for a specific state.
@@ -71,22 +71,29 @@
 (set 'claims-state-event-desc
   (sorted-map 
     "CLAIM_STATE_UNSPECIFIED"                ()
-    "CLAIM_STATE_NEW"                        (event-desc-record "CLAIMS_PORTAL_UI"   "input claim details")
-    "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED" (event-desc-record "EQUIFAX_ID_VERIFY"  "verify customer identity") 
-    "CLAIM_STATE_LOECLAIM_ID_VERIFIED"       (event-desc-record "CAMUNDA_WORKFLOW"   "collect policy details")
-    "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "POSTGRES_CLAIMS_DB" "verify policy")
-    "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "INVOICE_NINJA"      "generate invoice")
-    "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"      (event-desc-record "CAMUNDA_TASKLIST"   "approve invoice")
+    "CLAIM_STATE_NEW"                        (event-desc-record "CLAIMS PORTAL UI"   "input claim details")
+    ; "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED" (event-desc-record "EQUIFAX ID VERIFY"  "verify customer identity") 
+    ; "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED"       (event-desc-record "CAMUNDA WORKFLOW"   "collect policy details")
+    "CLAIM_STATE_OOECLAIM_REVIEWED"          (event-desc-record "POSTGRES CLAIMS DB" "verify policy")
+    "CLAIM_STATE_OOECLAIM_VALIDATED"         (event-desc-record "INVOICE NINJA"      "generate invoice")
+    "CLAIM_STATE_LOEFIN_INVOICE_ISSUED"      (event-desc-record "CAMUNDA TASKLIST"   "approve invoice")
     "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED"    (event-desc-record "EMAIL"              "email invoice")
-    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    (event-desc-record "STRIPE_PAYMENT"     "make payment")
+    "CLAIM_STATE_OOEFIN_INVOICE_APPROVED"    (event-desc-record "STRIPE PAYMENT"     "make payment")
     "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"   ()
     "CLAIM_STATE_DONE"                       ()))
 
 ;; mk-verify-policy-req creates a request to verify a policy
 ;; For now, just returns a simple health check query
 (defun mk-verify-policy-req (policy-id)
-  (mk-psql-req "SELECT 1"))
-
+  (mk-connector-req
+    (sorted-map
+      "kind" "KIND_POSTGRES_POC"
+      "operation" "search-hotels-by-name"
+      "args" (sorted-map
+                "name" "l"))))
+  ; (let* ([req-body (mk-psql-req "SELECT 1")])
+  ;   (cc:infof (sorted-map "sql req" req-body) "here")
+  ;   req-body))
 
 ;; mk-claim returns a stateful handler for a claim.
 ;; Supports operations:
@@ -121,6 +128,8 @@
                          "sys" (get desc "sys")
                          "eng" (get desc "eng")
                          "req" event-req)])
+                         (cc:infof (sorted-map "event" event) "add-event event")
+                         
            (when event-req (append! events event)))]
 
        ;; next-state upates `claim` to the next state.
@@ -132,8 +141,13 @@
        ;; ret-save returns a map that the connector hub API can use to store 
        ;; new data for the object, and raise events for subsequent processing.
        [ret-save ()
-                 (next-state)
-                 (sorted-map "put" claim "events" events)]
+        (cc:infof (sorted-map
+                    "claim_id" (get claim "claim_id")
+                    "state"    (get claim "state")
+                    "events"   events)
+                  "ret-save")
+        (next-state)
+        (sorted-map "put" claim "events" events)]
 
        ;; init initializes a new claim with the initial state.
        ;; Should be called only once on a newly created claim object.
@@ -154,28 +168,36 @@
        ;; - Advances the state machine
        ;; Returns updated claim data and any new events to raise.
        [handle (resp)
+        (cc:infof (sorted-map "state" (get-state) "resp" resp) "in handle")
          (let* ([resp-body (get resp "response")]
                 [resp-err (get resp "error")]
                 [state (get-state)])
+                 (cc:infof (sorted-map "resp" resp-body) "here")
            (when resp-err 
              (set-exception-unexpected
                (format-string "unhandled response error: {}" resp-err)))
            (cc:infof (assoc resp-body "state" state) "handle")
            (cond
-             ((equal? state "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED")
-              ;; equifax event does not have NATIONALITY prefix
-              (let* ([nationality (string:trim-left (get resp "nationality") "NATIONALITY_")]
-                     [person (assoc resp "nationality" nationality)]) 
-                (add-event (mk-equifax-req (trace person "equifax")))))
+             ((equal? state "CLAIM_STATE_OOECLAIM_REVIEWED")
+            ;   ;; equifax event does not have NATIONALITY prefix
+            ;   (let* ([nationality (string:trim-left (get resp "nationality") "NATIONALITY_")]
+            ;          [person (assoc resp "nationality" nationality)])
+            ;     (add-event (mk-verify-policy-req (get resp "policy_id"))) 
+            ;     (add-event (mk-equifax-req (trace person "equifax")))))
 
-             ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
+            ;  ((equal? state "CLAIM_STATE_LOECLAIM_ID_VERIFIED")
               (add-event (mk-camunda-start-req "a1" (sorted-map "x" "fnord"))))
 
-             ((equal? state "CLAIM_STATE_OOECLAIM_REVIEWED") 
+            ;  ((equal? state "CLAIM_STATE_OOECLAIM_REVIEWED")
               (add-event (mk-verify-policy-req (get resp "policy_id"))))
 
              ((equal? state "CLAIM_STATE_OOECLAIM_VALIDATED")
+             
               (trace resp "ooe claim validated")
+              (let* ([generic-resp (mk-connector-resp resp)])
+              
+              (cc:infof (sorted-map "generic-resp" generic-resp) "maybe here"))
+              
               (add-event (mk-invoice-ninja-email-req
                            (sorted-map "invoice_id" "mock_invoice_id"))))
 
@@ -236,7 +258,8 @@
      ;; Returns the result of the initial state transition (usually includes events).
      [new-claim () 
        (let* ([claim-data (sorted-map "claim_id" (mk-uuid))]
-              [claim (mk-claim claim-data)]) 
+              [claim (mk-claim claim-data)])
+              (cc:infof (sorted-map "claim" claim) "new-claim")
          (claim 'init))]
 
      ;; storage-get-claim: load claim from sidedb by ID

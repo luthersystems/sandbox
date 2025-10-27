@@ -29,6 +29,8 @@ const (
 	SandboxService_CreateClaim_FullMethodName    = "/srvpb.v1.SandboxService/CreateClaim"
 	SandboxService_AddClaimant_FullMethodName    = "/srvpb.v1.SandboxService/AddClaimant"
 	SandboxService_GetClaim_FullMethodName       = "/srvpb.v1.SandboxService/GetClaim"
+	SandboxService_UploadInvoice_FullMethodName  = "/srvpb.v1.SandboxService/UploadInvoice"
+	SandboxService_ProcessInvoice_FullMethodName = "/srvpb.v1.SandboxService/ProcessInvoice"
 )
 
 // SandboxServiceClient is the client API for SandboxService service.
@@ -45,6 +47,8 @@ type SandboxServiceClient interface {
 	AddClaimant(ctx context.Context, in *v11.AddClaimantRequest, opts ...grpc.CallOption) (*v11.AddClaimantResponse, error)
 	// Retrieve claim details.
 	GetClaim(ctx context.Context, in *v11.GetClaimRequest, opts ...grpc.CallOption) (*v11.GetClaimResponse, error)
+	UploadInvoice(ctx context.Context, in *v11.UploadInvoiceRequest, opts ...grpc.CallOption) (*v11.UploadInvoiceResponse, error)
+	ProcessInvoice(ctx context.Context, in *v11.ProcessInvoiceRequest, opts ...grpc.CallOption) (*v11.ProcessInvoiceResponse, error)
 }
 
 type sandboxServiceClient struct {
@@ -95,6 +99,26 @@ func (c *sandboxServiceClient) GetClaim(ctx context.Context, in *v11.GetClaimReq
 	return out, nil
 }
 
+func (c *sandboxServiceClient) UploadInvoice(ctx context.Context, in *v11.UploadInvoiceRequest, opts ...grpc.CallOption) (*v11.UploadInvoiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.UploadInvoiceResponse)
+	err := c.cc.Invoke(ctx, SandboxService_UploadInvoice_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sandboxServiceClient) ProcessInvoice(ctx context.Context, in *v11.ProcessInvoiceRequest, opts ...grpc.CallOption) (*v11.ProcessInvoiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.ProcessInvoiceResponse)
+	err := c.cc.Invoke(ctx, SandboxService_ProcessInvoice_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SandboxServiceServer is the server API for SandboxService service.
 // All implementations must embed UnimplementedSandboxServiceServer
 // for forward compatibility.
@@ -109,6 +133,8 @@ type SandboxServiceServer interface {
 	AddClaimant(context.Context, *v11.AddClaimantRequest) (*v11.AddClaimantResponse, error)
 	// Retrieve claim details.
 	GetClaim(context.Context, *v11.GetClaimRequest) (*v11.GetClaimResponse, error)
+	UploadInvoice(context.Context, *v11.UploadInvoiceRequest) (*v11.UploadInvoiceResponse, error)
+	ProcessInvoice(context.Context, *v11.ProcessInvoiceRequest) (*v11.ProcessInvoiceResponse, error)
 	mustEmbedUnimplementedSandboxServiceServer()
 }
 
@@ -130,6 +156,12 @@ func (UnimplementedSandboxServiceServer) AddClaimant(context.Context, *v11.AddCl
 }
 func (UnimplementedSandboxServiceServer) GetClaim(context.Context, *v11.GetClaimRequest) (*v11.GetClaimResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetClaim not implemented")
+}
+func (UnimplementedSandboxServiceServer) UploadInvoice(context.Context, *v11.UploadInvoiceRequest) (*v11.UploadInvoiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadInvoice not implemented")
+}
+func (UnimplementedSandboxServiceServer) ProcessInvoice(context.Context, *v11.ProcessInvoiceRequest) (*v11.ProcessInvoiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProcessInvoice not implemented")
 }
 func (UnimplementedSandboxServiceServer) mustEmbedUnimplementedSandboxServiceServer() {}
 func (UnimplementedSandboxServiceServer) testEmbeddedByValue()                        {}
@@ -224,6 +256,42 @@ func _SandboxService_GetClaim_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SandboxService_UploadInvoice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.UploadInvoiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).UploadInvoice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SandboxService_UploadInvoice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).UploadInvoice(ctx, req.(*v11.UploadInvoiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SandboxService_ProcessInvoice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.ProcessInvoiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).ProcessInvoice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SandboxService_ProcessInvoice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).ProcessInvoice(ctx, req.(*v11.ProcessInvoiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SandboxService_ServiceDesc is the grpc.ServiceDesc for SandboxService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -246,6 +314,14 @@ var SandboxService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetClaim",
 			Handler:    _SandboxService_GetClaim_Handler,
+		},
+		{
+			MethodName: "UploadInvoice",
+			Handler:    _SandboxService_UploadInvoice_Handler,
+		},
+		{
+			MethodName: "ProcessInvoice",
+			Handler:    _SandboxService_ProcessInvoice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

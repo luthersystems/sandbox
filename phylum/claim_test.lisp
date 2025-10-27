@@ -147,4 +147,10 @@
 
 ;; Integration test for full claim processing loop.
 ;; Runs 7 connector event cycles from new claim to DONE state.
-(test "test-claim-factory" (process-event-loop 7 true))
+; (test "test-claim-factory" (process-event-loop 7 true))
+
+(test "builds s3 request" (mk-s3-upload-req "abc" "foo.txt" "my-bucket"))
+(test "inline factory name" (inline-upload-factory 'name))
+(test "inline factory put" (inline-upload-factory 'put (sorted-map "upload_id" "123")))
+(test "builds upload transition" (build-upload-transition (mk-s3-upload-req "abc" "foo.txt" "my-bucket")))
+

@@ -19,6 +19,156 @@
     "application/json"
   ],
   "paths": {
+    "/v1/sandbox/ProcessInvoice": {
+      "post": {
+        "operationId": "SandboxService_ProcessInvoice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProcessInvoiceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ProcessInvoiceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
+    "/v1/sandbox/UploadInvoice": {
+      "post": {
+        "operationId": "SandboxService_UploadInvoice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UploadInvoiceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request determined by business logic",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "401": {
+            "description": "Authorization failed",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "404": {
+            "description": "Missing resource",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "500": {
+            "description": "Unexpected internal server error",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "503": {
+            "description": "Service not available",
+            "schema": {
+              "$ref": "#/definitions/v1ExceptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UploadInvoiceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/v1/sandbox/claim/{claimId}": {
       "get": {
         "summary": "Retrieve claim details.",
@@ -639,6 +789,57 @@
       ],
       "default": "NATIONALITY_UNSPECIFIED",
       "description": "Represents a nationality using an enum for structured validation.\n\n - NATIONALITY_UNSPECIFIED: Default value (should not be used)\n - NATIONALITY_GB: United Kingdom\n - NATIONALITY_US: United States\n - NATIONALITY_FR: France\n - NATIONALITY_DE: Germany"
+    },
+    "v1ProcessInvoiceRequest": {
+      "type": "object",
+      "properties": {
+        "invoiceId": {
+          "type": "string",
+          "title": "The invoice ID created by UploadInvoice"
+        }
+      }
+    },
+    "v1ProcessInvoiceResponse": {
+      "type": "object",
+      "properties": {
+        "invoiceId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "exception": {
+          "$ref": "#/definitions/v1Exception"
+        }
+      }
+    },
+    "v1UploadInvoiceRequest": {
+      "type": "object",
+      "properties": {
+        "fileContent": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "bucketName": {
+          "type": "string"
+        }
+      }
+    },
+    "v1UploadInvoiceResponse": {
+      "type": "object",
+      "properties": {
+        "invoiceId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "exception": {
+          "$ref": "#/definitions/v1Exception"
+        }
+      }
     }
   },
   "securityDefinitions": {
