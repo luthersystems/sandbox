@@ -14,7 +14,7 @@ SERVICE_DIR=portal
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
 # https://github.com/luthersystems/buildenv
-BUILDENV_TAG=v0.0.92
+BUILDENV_TAG=v0.0.96
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
