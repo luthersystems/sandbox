@@ -6,17 +6,29 @@ on:
 jobs:
   build-push-docker:
     name: ${{ matrix.arch }} - docker build
-    runs-on: ${{ fromJSON('{"arm64":"buildjet-2vcpu-ubuntu-2204-arm","amd64":"ubuntu-22.04"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"arm64":"2vcpu-ubuntu-2204-arm","amd64":"ubuntu-22.04"}')[matrix.arch] }}
     permissions:
       id-token: write # Required for OIDC authentication
-      contents: read # This is required for actions/checkout@v4
+      contents: read # This is required for actions/checkout
     strategy:
       matrix:
         arch:
           - amd64
           - arm64
     steps:
-      - uses: actions/checkout@v4
+      - name: Install Docker (ARM runners)
+        if: runner.arch == 'ARM64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates curl gnupg make
+          sudo install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+          sudo chmod a+r /etc/apt/keyrings/docker.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+          sudo chmod 666 /var/run/docker.sock
+      - uses: actions/checkout@v5
         with:
           lfs: true
           fetch-depth: 0 # include tags for VERSION detection
@@ -37,13 +49,13 @@ jobs:
       - build-push-docker
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Configure DockerHub
         uses: ./.github/actions/configure-dockerhub
         env:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Publish
         run: make publish-docker-manifests VERSION=$GITHUB_REF_NAME
