@@ -1,3 +1,4 @@
 build
 .luther-license.yaml
 .DS_Store
+.firecrawl/
