@@ -1,5 +1,6 @@
+#!/bin/bash
 # Copyright © 2021 Luther Systems, Ltd. All right reserved.
-
+#
 # run-postman-collections-docker.sh
 #
 # This script executes martin in a docker container, running any test
@@ -11,8 +12,6 @@
 # directory.  Run `make integration` in the project's root directory to run
 # tests from another directory.
 
-#!/bin/bash
-
 set -o errexit
 set -o nounset
 
@@ -23,10 +22,10 @@ SOURCE_DIR=$(dirname "$SCRIPT")
 
 cd "$SOURCE_DIR"
 
-MARTIN_NETWORK=$(make echo:RUN_MARTIN_NETWORK)
-MARTIN=$(make echo:RUN_MARTIN)
-MARTIN_BIND_SOURCE=$(make echo:MARTIN_BIND_SOURCE)
-MARTIN_BIND_DEST=$(make echo:MARTIN_BIND_DEST)
+MARTIN_NETWORK=$(make --no-print-directory echo:RUN_MARTIN_NETWORK)
+MARTIN=$(make --no-print-directory echo:RUN_MARTIN)
+MARTIN_BIND_SOURCE=$(make --no-print-directory echo:MARTIN_BIND_SOURCE)
+MARTIN_BIND_DEST=$(make --no-print-directory echo:MARTIN_BIND_DEST)
 
 if docker network inspect byfn 1>/dev/null 2>/dev/null; then
     cmd="$MARTIN_NETWORK"

@@ -12,6 +12,13 @@ services:
     - SANDBOX_ORACLE_EMULATE_CC=true
     - TMPDIR=/tmp
     - SUBSTRATEHCP_FILE=/tmp/plugin
+    # Forward to the in-process substratehcp plugin so its tracer is non-noop
+    # (required for the per-request Debug->Info log promotion to fire).
+    - SUBSTRATE_OTLP_ENDPOINT
+    - SUBSTRATE_LOG_LEVEL
+    # OTel resource.WithProcess() calls os/user.Current() which fails inside
+    # the container (no passwd entry for DOCKER_UID); set USER to short-circuit.
+    - USER=oracle
     volumes:
     - ../${SUBSTRATE_PLUGIN_LINUX}:/tmp/plugin
     networks:
