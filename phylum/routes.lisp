@@ -78,7 +78,10 @@
                           "timestamp"       (cc:timestamp (cc:now)))))))
 
 ;; create_claim endpoint: creates a new claim and stores it.
+;; The cc:debugf probe is promoted to Info when the request carries a sampled
+;; OpenTelemetry parent span (substrate v2.223.0+ debug-log promotion).
 (defendpoint "create_claim" (req)
+  (cc:debugf () "trace-debug-probe-create-claim")
   (route-success (sorted-map "claim" (create-claim))))
 
 ;; add_claimant endpoint: populates claim with claimant info and triggers
