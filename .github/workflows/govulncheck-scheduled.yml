@@ -10,7 +10,8 @@ name: govulncheck (scheduled)
 # advisories, which track toolchain patch releases rather than any dependency.
 #
 # A finding opens (and later auto-closes) a `govulncheck-drift` issue, so it
-# is visible without anyone subscribing to cron failures.
+# is visible without anyone subscribing to cron failures. The issue logic
+# lives in scripts/govulncheck-drift.cjs, not inline here.
 
 on:
   schedule:
@@ -44,61 +45,11 @@ jobs:
         uses: actions/github-script@v7
         env:
           FOUND: ${{ steps.scan.outputs.exit != '0' }}
+          REPORT_PATH: /tmp/govulncheck.txt
         with:
           script: |
-            const fs = require('fs');
-            const found = process.env.FOUND === 'true';
-            const label = 'govulncheck-drift';
-            const title = 'govulncheck: reachable vulnerability on main';
-            const { owner, repo } = context.repo;
-            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
-
-            const existing = (await github.rest.issues.listForRepo({
-              owner, repo, state: 'open', labels: label,
-            })).data[0];
-
-            if (!found) {
-              if (existing) {
-                await github.rest.issues.createComment({
-                  owner, repo, issue_number: existing.number,
-                  body: `Scheduled govulncheck is clean as of ${runUrl} - closing.`,
-                });
-                await github.rest.issues.update({
-                  owner, repo, issue_number: existing.number,
-                  state: 'closed', state_reason: 'completed',
-                });
-              }
-              return;
-            }
-
-            let report = '';
-            try { report = fs.readFileSync('/tmp/govulncheck.txt', 'utf8').slice(-50000); } catch (e) {}
-            const body = [
-              'Scheduled `govulncheck` found a reachable vulnerability on `main`.',
-              '',
-              'This is a **reachability** finding: govulncheck only reports when this',
-              'module actually calls the vulnerable code, so it is not import-only noise.',
-              '',
-              `Run: ${runUrl}`,
-              '',
-              '<details><summary>Report</summary>',
-              '',
-              '```',
-              report,
-              '```',
-              '',
-              '</details>',
-            ].join('\n');
-
-            if (existing) {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number: existing.number, body,
-              });
-            } else {
-              await github.rest.issues.create({
-                owner, repo, title, body, labels: [label],
-              });
-            }
+            const run = require('./scripts/govulncheck-drift.cjs');
+            await run({ github, context, core });
 
       - name: Fail if vulnerabilities were found
         if: steps.scan.outputs.exit != '0'
