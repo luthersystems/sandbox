@@ -25,7 +25,7 @@ permissions:
 jobs:
   govulncheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -41,10 +41,47 @@ jobs:
           govulncheck ./... 2>&1 | tee /tmp/govulncheck.txt
           echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
+      # Second, ADDITIVE pass over the built binaries. NOT a substitute for the
+      # source scan above and must not become one: source mode reports
+      # vulnerabilities in imported packages even when the linker dropped the
+      # code, which binary mode cannot see. Run together, neither loses
+      # coverage.
+      #
+      # What binary mode adds: reflection-reached code. Per the govulncheck
+      # docs, calls made via package reflect "will not be reported in source
+      # scan mode" -- binary mode keys off symbol presence instead. It also
+      # scans the stdlib at the version the binary was BUILT with rather than
+      # the version the scanner runs under.
+      #
+      # Library modules have no main packages; there the step is a no-op.
+      - name: Run govulncheck (binary mode)
+        id: binscan
+        run: |
+          set -o pipefail
+          status=0
+          mains=$(go list -f '{{if eq .Name "main"}}{{.ImportPath}}{{end}}' ./... | grep -v '^$' || true)
+          if [ -z "$mains" ]; then
+            echo "No main packages in this module — binary mode does not apply."
+            echo "exit=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mkdir -p /tmp/gv-bins
+          for pkg in $mains; do
+            out="/tmp/gv-bins/$(echo "$pkg" | tr '/' '_')"
+            go build -o "$out" "$pkg"
+            echo "::group::govulncheck -mode=binary ${pkg}"
+            if ! govulncheck -mode=binary "$out" 2>&1 | tee -a /tmp/govulncheck.txt; then
+              status=1
+            fi
+            echo "::endgroup::"
+            rm -f "$out"
+          done
+          echo "exit=${status}" >> "$GITHUB_OUTPUT"
+
       - name: Open, refresh or close the tracking issue
         uses: actions/github-script@v7
         env:
-          FOUND: ${{ steps.scan.outputs.exit != '0' }}
+          FOUND: ${{ steps.scan.outputs.exit != '0' || steps.binscan.outputs.exit != '0' }}
           REPORT_PATH: /tmp/govulncheck.txt
         with:
           script: |
@@ -52,5 +89,5 @@ jobs:
             await run({ github, context, core });
 
       - name: Fail if vulnerabilities were found
-        if: steps.scan.outputs.exit != '0'
+        if: steps.scan.outputs.exit != '0' || steps.binscan.outputs.exit != '0'
         run: exit 1
