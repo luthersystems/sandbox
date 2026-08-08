@@ -41,6 +41,31 @@ jobs:
           govulncheck ./... 2>&1 | tee /tmp/govulncheck.txt
           echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
+      # The binary pass must build with the toolchain we RELEASE with, not the
+      # one the scanner runs under. The source scan above deliberately uses
+      # `stable` so the stdlib is checked at a current patch level -- but binary
+      # mode checks the stdlib of whatever built the binary, so building it with
+      # `stable` too would just re-check `stable` and tell us nothing about the
+      # artifact we actually ship. That was the gap in the first cut of this.
+      #
+      # Derived from .github/workflows/release.yml at run time rather than hardcoded, so the two
+      # cannot silently drift apart.
+      - name: Resolve the release Go toolchain
+        id: releasego
+        run: |
+          v=$(grep -oE 'go-version: *"[^"]+"' .github/workflows/release.yml | head -1 | sed 's/.*"\(.*\)"/\1/')
+          if [ -z "$v" ]; then
+            echo "::error::could not resolve the release Go version from .github/workflows/release.yml"
+            exit 1
+          fi
+          echo "release toolchain: $v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.releasego.outputs.version }}
+          cache: true
+
       # Second, ADDITIVE pass over the built binaries. NOT a substitute for the
       # source scan above and must not become one: source mode reports
       # vulnerabilities in imported packages even when the linker dropped the
