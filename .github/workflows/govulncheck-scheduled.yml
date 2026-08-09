@@ -33,13 +33,30 @@ jobs:
           go-version: "stable"
           cache: true
 
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
       - name: Run govulncheck
         id: scan
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          set +e
-          govulncheck ./... 2>&1 | tee /tmp/govulncheck.txt
-          echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+        run: bash scripts/govulncheck-scan.sh
+
+      # The binary pass must build with the toolchain we RELEASE with, not the
+      # one the scanner runs under. The source scan above deliberately uses
+      # `stable` so the stdlib is checked at a current patch level -- but binary
+      # mode checks the stdlib of whatever built the binary, so building it with
+      # `stable` too would just re-check `stable` and tell us nothing about the
+      # artifact we actually ship. That was the gap in the first cut of this.
+      #
+      # Derived from .github/workflows/release.yml at run time rather than hardcoded, so the two
+      # cannot silently drift apart.
+      - name: Resolve the release Go toolchain
+        id: releasego
+        run: bash scripts/resolve-release-go.sh .github/workflows/release.yml
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.releasego.outputs.version }}
+          cache: true
 
       # The binary pass must build with the toolchain we RELEASE with, not the
       # one the scanner runs under. The source scan above deliberately uses
@@ -81,27 +98,7 @@ jobs:
       # Library modules have no main packages; there the step is a no-op.
       - name: Run govulncheck (binary mode)
         id: binscan
-        run: |
-          set -o pipefail
-          status=0
-          mains=$(go list -f '{{if eq .Name "main"}}{{.ImportPath}}{{end}}' ./... | grep -v '^$' || true)
-          if [ -z "$mains" ]; then
-            echo "No main packages in this module — binary mode does not apply."
-            echo "exit=0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          mkdir -p /tmp/gv-bins
-          for pkg in $mains; do
-            out="/tmp/gv-bins/$(echo "$pkg" | tr '/' '_')"
-            go build -o "$out" "$pkg"
-            echo "::group::govulncheck -mode=binary ${pkg}"
-            if ! govulncheck -mode=binary "$out" 2>&1 | tee -a /tmp/govulncheck.txt; then
-              status=1
-            fi
-            echo "::endgroup::"
-            rm -f "$out"
-          done
-          echo "exit=${status}" >> "$GITHUB_OUTPUT"
+        run: bash scripts/govulncheck-binary-scan.sh
 
       - name: Open, refresh or close the tracking issue
         uses: actions/github-script@v7
