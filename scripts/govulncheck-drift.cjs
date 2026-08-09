@@ -11,8 +11,19 @@
 //       await run({ github, context, core });
 //
 // Inputs (env):
-//   FOUND        'true' when the scan reported a reachable vulnerability
-//   REPORT_PATH  path to the captured govulncheck output (default /tmp/govulncheck.txt)
+//   FOUND         'true' when ANY condition tripped (vulnerability or build break)
+//   VULN_FOUND    'true' when a scan actually reported a vulnerability
+//   BUILD_FAILED  'true' when the binary-mode pass could not BUILD a main package
+//   REPORT_PATH   path to the captured govulncheck output (default /tmp/govulncheck.txt)
+//
+// VULN_FOUND / BUILD_FAILED exist because the binary-mode pass has to compile
+// every main package before it can scan it, so it goes red for two unrelated
+// reasons. Filing "reachable vulnerability on main" for a compile error sends
+// whoever picks up the issue hunting a CVE that does not exist (the triggering
+// case: ui-core run 31232762542, red with zero vulnerabilities because
+// argo-workflows v4.0.8 stopped compiling against a bumped k8s.io/api). Both
+// still open an issue -- an unscanned tree is not a clean tree -- but the
+// issue says which one happened.
 //
 // Behaviour:
 //   - finding + no open issue   -> open one, labelled `govulncheck-drift`
@@ -25,12 +36,20 @@
 // rather than a version bump, so there is nothing safe to auto-apply.
 
 const LABEL = 'govulncheck-drift';
-const TITLE = 'govulncheck: reachable vulnerability on main';
+const TITLE_VULN = 'govulncheck: reachable vulnerability on main';
+const TITLE_BUILD = 'govulncheck: binary-mode build failure on main';
 const MAX_REPORT_BYTES = 50000;
 
 module.exports = async ({ github, context, core }) => {
   const fs = require('fs');
   const found = process.env.FOUND === 'true';
+  const buildFailed = process.env.BUILD_FAILED === 'true';
+  // Fall back to the old single-flag behaviour when a caller has not been
+  // updated to pass VULN_FOUND: anything that is not a known build break is
+  // reported as a vulnerability, exactly as before.
+  const vulnFound = process.env.VULN_FOUND
+    ? process.env.VULN_FOUND === 'true'
+    : found && !buildFailed;
   const reportPath = process.env.REPORT_PATH || '/tmp/govulncheck.txt';
   const { owner, repo } = context.repo;
   const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
@@ -72,12 +91,34 @@ module.exports = async ({ github, context, core }) => {
     core.warning(`Could not read ${reportPath}: ${err.message}`);
   }
 
+  const lead = [];
+  if (buildFailed) {
+    lead.push(
+      'The scheduled `govulncheck` run went red because the binary-mode pass',
+      '**could not build** one or more `main` packages.',
+      '',
+      '**This is a build break, not a vulnerability finding.** The packages that',
+      'failed to compile were not scanned at all, which is why the run still',
+      'fails -- an unscanned tree is not a clean tree. Fix the compile error',
+      'first; look for the `BUILD FAILURE` lines in the report below.',
+      '',
+    );
+  }
+  if (vulnFound) {
+    lead.push(
+      'Scheduled `govulncheck` found a reachable vulnerability on `main`.',
+      '',
+      'This is a **reachability** finding: govulncheck only reports when this',
+      'module actually calls the vulnerable code, so it is not import-only noise.',
+      '',
+    );
+  }
+  if (lead.length === 0) {
+    lead.push('Scheduled `govulncheck` reported a failure on `main`.', '');
+  }
+
   const body = [
-    'Scheduled `govulncheck` found a reachable vulnerability on `main`.',
-    '',
-    'This is a **reachability** finding: govulncheck only reports when this',
-    'module actually calls the vulnerable code, so it is not import-only noise.',
-    '',
+    ...lead,
     `Run: ${runUrl}`,
     '',
     '<details><summary>Report</summary>',
@@ -103,7 +144,7 @@ module.exports = async ({ github, context, core }) => {
   const created = await github.rest.issues.create({
     owner,
     repo,
-    title: TITLE,
+    title: buildFailed && !vulnFound ? TITLE_BUILD : TITLE_VULN,
     body,
     labels: [LABEL],
   });
