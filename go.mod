@@ -3,12 +3,12 @@ module github.com/luthersystems/sandbox
 go 1.26.0
 
 require (
-	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.5-20250224214741-b97f9dda9589.1
-	github.com/alecthomas/kong v0.9.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
-	github.com/luthersystems/shiroclient-sdk-go v0.13.3
-	github.com/luthersystems/svc v0.14.9
-	github.com/sirupsen/logrus v1.9.3
+	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.11-20250430044901-c62151e471be.1
+	github.com/alecthomas/kong v1.16.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0
+	github.com/luthersystems/shiroclient-sdk-go v0.14.0
+	github.com/luthersystems/svc v0.15.0
+	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa
 	google.golang.org/grpc v1.83.0
@@ -19,7 +19,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -38,7 +38,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
