@@ -27,8 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: "stable"
           cache: true
@@ -53,7 +53,7 @@ jobs:
         id: releasego
         run: bash scripts/resolve-release-go.sh .github/workflows/release.yml
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ steps.releasego.outputs.version }}
           cache: true
@@ -78,7 +78,7 @@ jobs:
           echo "release toolchain: $v"
           echo "version=$v" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ steps.releasego.outputs.version }}
           cache: true
@@ -121,7 +121,7 @@ jobs:
       # skipped scan must never be read as "clean" and auto-close the issue.
       - name: Open, refresh or close the tracking issue
         if: ${{ !cancelled() && steps.binscan.outcome != 'skipped' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           FOUND: ${{ steps.scan.outputs.exit != '0' || steps.binscan.outputs.exit != '0' }}
           # Split out so the issue does not describe a compile error as a
