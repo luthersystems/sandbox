@@ -100,6 +100,39 @@ message GetClaimRequest {
   string claim_id = 1; // Unique identifier of the claim to fetch
 }
 
+message UploadInvoiceRequest {
+  string file_content = 1;
+  string location = 2;
+  string bucket_name = 3;
+}
+
+message UploadInvoiceResponse {
+  string invoice_id = 1;
+  string state = 2;
+
+  oneof result {
+    common.v1.Exception exception = 3;
+  }
+}
+
+message ProcessInvoiceRequest {
+  string invoice_id = 1; // The invoice ID created by UploadInvoice
+}
+
+message ProcessInvoiceResponse {
+  string invoice_id = 1;
+  string state = 2;
+
+  oneof result {
+    common.v1.Exception exception = 3;
+  }
+}
+
+// message UploadInvoiceResult {
+//   string invoice_id = 1;
+//   string state = 2;
+// }
+
 // Response containing the requested claim.
 message GetClaimResponse {
   oneof result {

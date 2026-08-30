@@ -121,4 +121,20 @@ service SandboxService {
     option (google.api.http) = {get: "/v1/sandbox/claim/{claim_id}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
+
+  rpc UploadInvoice(pb.v1.UploadInvoiceRequest) returns (pb.v1.UploadInvoiceResponse) {
+    option (google.api.http) = {
+      post: "/v1/sandbox/UploadInvoice"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
+  }
+
+  rpc ProcessInvoice(pb.v1.ProcessInvoiceRequest) returns (pb.v1.ProcessInvoiceResponse) {
+    option (google.api.http) = {
+      post: "/v1/sandbox/ProcessInvoice"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
+  }
 }

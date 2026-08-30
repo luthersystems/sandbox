@@ -15,6 +15,8 @@
 ;; ----------------------------------------------------------------------------
 (in-package 'sandbox)
 
+(use-package 'connector)
+
 ;; wrap-endpoint is a simple wrapper for endpoints which allows them to call
 ;; set-exception and shortcircuit the endpoint handler.  wrap-endpoint may be
 ;; customised to add universal logging or book-keeping that should be present
@@ -103,3 +105,4 @@
                       (format-string "missing claim {}" claim-id)))]
          [data (claim 'data)])
     (route-success (sorted-map "claim" data))))
+
