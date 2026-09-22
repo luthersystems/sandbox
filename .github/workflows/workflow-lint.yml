@@ -1,0 +1,30 @@
+name: workflow-lint
+
+# Fails a PR that would land an invalid workflow file. GitHub itself does not:
+# it rejects the file only when the workflow is triggered, so a broken
+# scheduled workflow goes silent instead of red. See scripts/lint-workflows.sh
+# for the triggering example (govulncheck-scheduled.yml's duplicate step id).
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/**"
+      - "scripts/lint-workflows.sh"
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "stable"
+          cache: false
+      - name: Lint workflows
+        run: bash scripts/lint-workflows.sh

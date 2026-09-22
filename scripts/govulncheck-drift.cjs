@@ -14,6 +14,12 @@
 //   FOUND         'true' when ANY condition tripped (vulnerability or build break)
 //   VULN_FOUND    'true' when a scan actually reported a vulnerability
 //   BUILD_FAILED  'true' when the binary-mode pass could not BUILD a main package
+//   SCAN_FAILED   'true' when the source-mode scan did not complete: the module
+//                 did not load, or govulncheck was killed (137/143, usually OOM)
+//   INCOMPLETE    set to the scan job's result ('failure' / 'cancelled') when
+//                 the job died before it could report at all -- the runner was
+//                 lost or the job timed out. Written by the `report-incomplete`
+//                 job in govulncheck-scheduled.yml, never by the scan job.
 //   REPORT_PATH   path to the captured govulncheck output (default /tmp/govulncheck.txt)
 //
 // VULN_FOUND / BUILD_FAILED exist because the binary-mode pass has to compile
@@ -24,6 +30,12 @@
 // argo-workflows v4.0.8 stopped compiling against a bumped k8s.io/api). Both
 // still open an issue -- an unscanned tree is not a clean tree -- but the
 // issue says which one happened.
+//
+// SCAN_FAILED / INCOMPLETE exist for the same reason: a big module's
+// whole-program scan can exhaust the runner (insideout-mcp's was killed with
+// exit 143 at ~13.9 GB). A killed scan must neither read as a CVE nor go
+// quiet -- an unscanned module is not a clean one -- so it opens the same
+// tracking issue, saying what actually happened.
 //
 // Behaviour:
 //   - finding + no open issue   -> open one, labelled `govulncheck-drift`
@@ -38,18 +50,21 @@
 const LABEL = 'govulncheck-drift';
 const TITLE_VULN = 'govulncheck: reachable vulnerability on main';
 const TITLE_BUILD = 'govulncheck: binary-mode build failure on main';
+const TITLE_SCAN = 'govulncheck: scheduled scan did not complete on main';
 const MAX_REPORT_BYTES = 50000;
 
 module.exports = async ({ github, context, core }) => {
   const fs = require('fs');
   const found = process.env.FOUND === 'true';
   const buildFailed = process.env.BUILD_FAILED === 'true';
+  const scanFailed = process.env.SCAN_FAILED === 'true';
+  const incomplete = process.env.INCOMPLETE || '';
   // Fall back to the old single-flag behaviour when a caller has not been
   // updated to pass VULN_FOUND: anything that is not a known build break is
   // reported as a vulnerability, exactly as before.
   const vulnFound = process.env.VULN_FOUND
     ? process.env.VULN_FOUND === 'true'
-    : found && !buildFailed;
+    : found && !buildFailed && !scanFailed && !incomplete;
   const reportPath = process.env.REPORT_PATH || '/tmp/govulncheck.txt';
   const { owner, repo } = context.repo;
   const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
@@ -92,6 +107,30 @@ module.exports = async ({ github, context, core }) => {
   }
 
   const lead = [];
+  if (incomplete) {
+    lead.push(
+      `The scheduled \`govulncheck\` job ended as **${incomplete}** before it`,
+      'could report anything -- typically the runner was lost ("The runner has',
+      'received a shutdown signal", often the scan exhausting its memory) or the',
+      'job hit its timeout.',
+      '',
+      '**This is not a vulnerability finding, but nothing was scanned to',
+      'completion**, so `main` is not known to be clean. Check the run log.',
+      '',
+    );
+  }
+  if (scanFailed) {
+    lead.push(
+      'The scheduled `govulncheck` source-mode scan **did not complete**: the',
+      'module could not be loaded, or govulncheck was killed (exit 137/143 is',
+      'almost always the runner running out of memory -- see GOMEMLIMIT in',
+      '`scripts/govulncheck-scan.sh`).',
+      '',
+      '**This is not a vulnerability finding, but the module was not scanned.**',
+      'Look for the `SCAN FAILURE` lines in the report below.',
+      '',
+    );
+  }
   if (buildFailed) {
     lead.push(
       'The scheduled `govulncheck` run went red because the binary-mode pass',
@@ -144,7 +183,13 @@ module.exports = async ({ github, context, core }) => {
   const created = await github.rest.issues.create({
     owner,
     repo,
-    title: buildFailed && !vulnFound ? TITLE_BUILD : TITLE_VULN,
+    title: vulnFound
+      ? TITLE_VULN
+      : scanFailed || incomplete
+        ? TITLE_SCAN
+        : buildFailed
+          ? TITLE_BUILD
+          : TITLE_VULN,
     body,
     labels: [LABEL],
   });
