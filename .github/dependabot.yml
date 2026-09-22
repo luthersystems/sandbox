@@ -7,6 +7,11 @@ updates:
     groups:
       go-deps:
         patterns: ["*"]
+    ignore:
+      # GO-2026-6443: grpc v1.84.0 is vulnerable and no released fix exists
+      # (fixed only in 1.85.0-dev). Stay on v1.83.2 until v1.84.1+/v1.85.0 ships.
+      - dependency-name: "google.golang.org/grpc"
+        versions: ["1.84.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
