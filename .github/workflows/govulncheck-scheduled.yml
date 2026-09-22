@@ -12,6 +12,13 @@ name: govulncheck (scheduled)
 # A finding opens (and later auto-closes) a `govulncheck-drift` issue, so it
 # is visible without anyone subscribing to cron failures. The issue logic
 # lives in scripts/govulncheck-drift.cjs, not inline here.
+#
+# This file was INVALID from #110 until this fix: it declared the `releasego`
+# step id twice (#110's move of the inline shell into
+# scripts/resolve-release-go.sh left both copies). GitHub rejects such a file
+# outright, so the cron never fired, no drift issue was ever filed, and the
+# only trace was a 0-second "workflow file issue" failure on every push. Keep
+# one copy of each step; run `actionlint` on any edit here.
 
 on:
   schedule:
@@ -25,7 +32,11 @@ permissions:
 jobs:
   govulncheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    outputs:
+      # 'success' once the tracking-issue writer has run. report-incomplete
+      # keys off its absence to catch a job that died before reporting.
+      reported: ${{ steps.issue.outcome }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -33,9 +44,14 @@ jobs:
           go-version: "1.26.x"
           cache: true
 
+      # Pinned, with timeout+retry (ported from ui-core, where an unbounded
+      # `go install` hung for 15+ minutes until the runner was shut down).
       - name: Install govulncheck
-        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+        run: bash scripts/govulncheck-install.sh
 
+      # Sets GOMEMLIMIT from the runner's memory and reports a finding
+      # (govulncheck exit 3) separately from a scan that did not complete (any
+      # other exit, including 137/143 when the scan is killed). See the script.
       - name: Run govulncheck
         id: scan
         run: bash scripts/govulncheck-scan.sh
@@ -52,31 +68,6 @@ jobs:
       - name: Resolve the release Go toolchain
         id: releasego
         run: bash scripts/resolve-release-go.sh .github/workflows/release.yml
-
-      - uses: actions/setup-go@v7
-        with:
-          go-version: ${{ steps.releasego.outputs.version }}
-          cache: true
-
-      # The binary pass must build with the toolchain we RELEASE with, not the
-      # one the scanner runs under. The source scan above deliberately uses
-      # `stable` so the stdlib is checked at a current patch level -- but binary
-      # mode checks the stdlib of whatever built the binary, so building it with
-      # `stable` too would just re-check `stable` and tell us nothing about the
-      # artifact we actually ship. That was the gap in the first cut of this.
-      #
-      # Derived from .github/workflows/release.yml at run time rather than hardcoded, so the two
-      # cannot silently drift apart.
-      - name: Resolve the release Go toolchain
-        id: releasego
-        run: |
-          v=$(grep -oE 'go-version: *"[^"]+"' .github/workflows/release.yml | head -1 | sed 's/.*"\(.*\)"/\1/')
-          if [ -z "$v" ]; then
-            echo "::error::could not resolve the release Go version from .github/workflows/release.yml"
-            exit 1
-          fi
-          echo "release toolchain: $v"
-          echo "version=$v" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-go@v7
         with:
@@ -120,14 +111,16 @@ jobs:
       # setup failure (checkout / install) skips the writer entirely -- a
       # skipped scan must never be read as "clean" and auto-close the issue.
       - name: Open, refresh or close the tracking issue
+        id: issue
         if: ${{ !cancelled() && steps.binscan.outcome != 'skipped' }}
         uses: actions/github-script@v9
         env:
           FOUND: ${{ steps.scan.outputs.exit != '0' || steps.binscan.outputs.exit != '0' }}
-          # Split out so the issue does not describe a compile error as a
-          # "reachable vulnerability" and send its reader hunting a CVE that
-          # does not exist.
-          VULN_FOUND: ${{ steps.scan.outputs.exit != '0' || steps.binscan.outputs.vulns_found == '1' }}
+          # Split out so the issue does not describe a compile error or a
+          # killed scan as a "reachable vulnerability" and send its reader
+          # hunting a CVE that does not exist.
+          VULN_FOUND: ${{ steps.scan.outputs.vulns_found == '1' || steps.binscan.outputs.vulns_found == '1' }}
+          SCAN_FAILED: ${{ steps.scan.outputs.scan_failed == '1' }}
           BUILD_FAILED: ${{ steps.binscan.outputs.build_failed == '1' }}
           REPORT_PATH: /tmp/govulncheck.txt
         with:
@@ -141,7 +134,34 @@ jobs:
       - name: Fail if govulncheck reported a finding or a build break
         if: ${{ !cancelled() && (steps.scan.outputs.exit != '0' || steps.binscan.outputs.exit != '0') }}
         env:
+          SOURCE_SCAN_FAILED: ${{ steps.scan.outputs.scan_failed }}
+          SOURCE_VULNS_FOUND: ${{ steps.scan.outputs.vulns_found }}
           SOURCE_SCAN_EXIT: ${{ steps.scan.outputs.exit }}
           BINARY_BUILD_FAILED: ${{ steps.binscan.outputs.build_failed }}
           BINARY_VULNS_FOUND: ${{ steps.binscan.outputs.vulns_found }}
         run: bash scripts/govulncheck-fail-summary.sh
+
+  # Backstop for a scan job that died before it could report: the runner was
+  # lost (a whole-program scan exhausting the box surfaces as "The runner has
+  # received a shutdown signal", not as a step failure) or the job hit its
+  # timeout. Without this, the tracking-issue step never runs and the only
+  # signal is a red cron nobody is subscribed to -- the same silence the
+  # schedule exists to prevent. Runs on a fresh runner, so it survives the
+  # first one dying.
+  report-incomplete:
+    needs: govulncheck
+    if: ${{ always() && (needs.govulncheck.result == 'failure' || needs.govulncheck.result == 'cancelled') && needs.govulncheck.outputs.reported != 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Open or refresh the tracking issue
+        uses: actions/github-script@v9
+        env:
+          FOUND: "true"
+          INCOMPLETE: ${{ needs.govulncheck.result }}
+          REPORT_PATH: /dev/null
+        with:
+          script: |
+            const run = require('./scripts/govulncheck-drift.cjs');
+            await run({ github, context, core });

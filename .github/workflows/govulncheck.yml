@@ -23,7 +23,19 @@ jobs:
         with:
           go-version: "1.26.x"
           cache: true
+      - name: Install govulncheck
+        run: bash scripts/govulncheck-install.sh
+      # Same script as the scheduled run, so the PR gate gets the same
+      # GOMEMLIMIT sizing and the same finding-vs-scan-failure split: exit 3
+      # is a finding, any other non-zero (a load error, or a scan killed for
+      # memory) is reported as a SCAN FAILURE, and both fail the check.
       - name: Run govulncheck
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
+        id: scan
+        run: bash scripts/govulncheck-scan.sh
+      - name: Fail if govulncheck reported a finding or did not complete
+        if: ${{ !cancelled() && steps.scan.outputs.exit != '0' }}
+        env:
+          SOURCE_SCAN_FAILED: ${{ steps.scan.outputs.scan_failed }}
+          SOURCE_VULNS_FOUND: ${{ steps.scan.outputs.vulns_found }}
+          SOURCE_SCAN_EXIT: ${{ steps.scan.outputs.exit }}
+        run: bash scripts/govulncheck-fail-summary.sh
