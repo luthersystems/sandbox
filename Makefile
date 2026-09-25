@@ -156,8 +156,9 @@ integrationcitest:
 	$(MAKE) down
 
 .PHONY: integration
-integration: make-C/tests/test-docker
-	@
+integration:
+	./scripts/wait-for-oracle.sh
+	@cd tests && $(MAKE) test-docker
 
 .PHONY: repl
 repl: make-C/phylum/repl

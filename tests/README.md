@@ -29,6 +29,13 @@ directory.
 ./run-postman-collections-docker.sh Docker.postman_environment.json
 ```
 
+Before running the tests, `make integration` waits (via
+`scripts/wait-for-oracle.sh`) until the oracle's health check reports every
+service, including the phylum, as `UP`. The wait is bounded; override
+`ORACLE_HEALTH_URL` (default `http://localhost:8080/v1/sandbox/health_check`),
+`WAIT_TIMEOUT` (default 300 seconds) or `WAIT_INTERVAL` (default 5 seconds) if
+needed.
+
 The above command finds and runs all test files with names matching
 `*.martin_collection.yaml`. As a project grows it can take some time for all
 tests to complete and when trying to fix a bug affecting a single file it is
