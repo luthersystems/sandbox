@@ -18,15 +18,16 @@
 ;; Used to model the claim lifecycle as a state machine.
 (defun make-state-chain (chain first-state last-state)
   (let* ([result (sorted-map)]
-         [states (append! chain last-state)]
-         [build-chain 
-           (lambda (current remaining)
-              (when (not (empty? remaining))
-                (let ([next (first remaining)])
-                  (assoc! result current next)
-                  (build-chain next (rest remaining)))))])
-      (build-chain first-state states)
-      result))
+         [states (append! chain last-state)])
+    ;; labels, not a let* binding: a let* initializer cannot refer to its own
+    ;; binding, so local recursion needs labels.
+    (labels ([build-chain (current remaining)
+               (when (not (empty? remaining))
+                 (let ([next (first remaining)])
+                   (assoc! result current next)
+                   (build-chain next (rest remaining))))])
+      (build-chain first-state states))
+    result))
 
 ;; state-transitions defines the allowed sequence of states for a claim.
 ;; Used by `next-state` in mk-claim to determine the next processing step.
