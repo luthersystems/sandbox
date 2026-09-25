@@ -26,12 +26,7 @@ connectors:
   - name: EQUIFAX_ID_VERIFY
     mock: true
     equifax:
-      aml_url: localhost
-      full_report_url: localhost
-      secrets_manager_key: todo-anr
-      region: EU_WEST_2
-      logon_url: localhost
-      eidv_url: localhost
+      host: localhost
 
   - name: INVOICE_NINJA
     mock: true
