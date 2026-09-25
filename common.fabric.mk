@@ -237,8 +237,12 @@ start-ch-%: port=$$(( 9091 + ${idx} ))
 ifdef EXPOSE_CONNECTORHUB
 start-gw-%: port_fw=-p "${port}:8080"
 endif
+# No --rm: `docker run -d` succeeds as soon as the container starts, so a
+# connectorhub that crashes on startup would be deleted along with its logs.
+# Check that it stays up, and keep it for inspection if it does not;
+# connectorhub-down removes it.
 start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
-	${DOCKER_RUN} -d --name ${name} \
+	${DOCKER} run -d --name ${name} \
 		-v "${CURDIR}:/tmp/fabric:ro" \
 		-v "$(abspath build/volume/checkpoint):/tmp/checkpoint:rw" \
 		-w "/tmp/fabric" \
@@ -248,6 +252,7 @@ start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
 			start -v \
 			--config-file /tmp/fabric/connectorhub.yaml \
 			--checkpoint-file /tmp/checkpoint/checkpoint.txt
+	DOCKER=${DOCKER} ${PROJECT_REL_DIR}/scripts/check-container-running.sh ${name}
 
 .SECONDEXPANSION:
 notify-gw-%: parts=$(subst ., ,$*)
@@ -300,6 +305,7 @@ gateway-down:
 connectorhub-down: ch_names=$(foreach g,${CONNECTORHUBS},$(word 2,$(subst ., ,${g})))
 connectorhub-down:
 	-docker stop ${ch_names}
+	-docker rm ${ch_names}
 
 .PHONY: sleep-%
 sleep-%:
