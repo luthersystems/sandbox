@@ -19,4 +19,6 @@ PHYLUM_VERSION_FILE="$(grep '^PHYLUM_VERSION_FILE=' common.fabric.mk | awk -F= '
 mkdir -p $(dirname ./fabric/"$PHYLUM_VERSION_FILE")
 touch ./fabric/"$PHYLUM_VERSION_FILE"
 export PHYLUM_VERSION="$(cat ./fabric/"$PHYLUM_VERSION_FILE")"
-export SUBSTRATE_PLUGIN_LINUX=$(make -f ./common.go.mk echo:SUBSTRATE_PLUGIN_LINUX)
+# Forward a SUBSTRATE_VERSION override (MAKEFLAGS is unset above) so the
+# mounted plugin path matches the one `make plugin` downloaded.
+export SUBSTRATE_PLUGIN_LINUX=$(make -f ./common.go.mk ${SUBSTRATE_VERSION:+"SUBSTRATE_VERSION=${SUBSTRATE_VERSION}"} echo:SUBSTRATE_PLUGIN_LINUX)

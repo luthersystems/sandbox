@@ -98,7 +98,7 @@ storage-down:
 
 .PHONY: service-up
 service-up: api portal
-	./network_compose.py local up -d
+	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py local up -d
 
 .PHONY: service-down
 service-down:
@@ -122,7 +122,7 @@ upgrade: all service-down init service-up
 
 .PHONY: mem-up
 mem-up: all mem-down
-	./network_compose.py mem up -d
+	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py mem up -d
 
 .PHONY: mem-down
 mem-down: explorer-down
