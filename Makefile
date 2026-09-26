@@ -51,7 +51,7 @@ all: phylum
 .PHONY: phylum
 phylum: make-C/phylum/default
 	@
-test: phylumtest
+test: phylumtest unit-portal
 .PHONY: phylumtest
 phylumtest: make-C/phylum/test
 	@
@@ -98,7 +98,7 @@ storage-down:
 
 .PHONY: service-up
 service-up: api portal
-	./network_compose.py local up -d
+	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py local up -d
 
 .PHONY: service-down
 service-down:
@@ -122,7 +122,7 @@ upgrade: all service-down init service-up
 
 .PHONY: mem-up
 mem-up: all mem-down
-	./network_compose.py mem up -d
+	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py mem up -d
 
 .PHONY: mem-down
 mem-down: explorer-down
@@ -133,9 +133,19 @@ mem-down: explorer-down
 citest: plugin unit integrationcitest
 	@
 
+# unit-portal runs the Go tests (oracle functional tests and API tests) on the
+# host against the downloaded substrate plugin; it does not need Docker.
+# -count=1 disables the Go test cache: the plugin loads the phylum's .lisp
+# files itself, so go test cannot see phylum edits and would report a stale
+# cached pass.
 .PHONY: unit-portal
-unit-portal:
-	go test -v ./...
+unit-portal: plugin
+	go test -count=1 -v ./...
+
+# oraclegotest is an alias for unit-portal.
+.PHONY: oraclegotest
+oraclegotest: unit-portal
+	@
 
 .PHONY: unit
 unit: unit-portal unit-other
@@ -178,7 +188,7 @@ download: plugin
 
 ${STATIC_PLUGINS_DUMMY}:
 	${MKDIR_P} $(dir $@)
-	./scripts/obtain-plugin.sh
+	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./scripts/obtain-plugin.sh
 	touch $@
 
 ${SUBSTRATE_PLUGIN}: ${STATIC_PLUGINS_DUMMY}

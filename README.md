@@ -112,11 +112,15 @@ xcode-select --install
 
 ### Ubuntu
 
-If you are running Ubuntu 20.04+ you can use the commands to install the dependencies:
+CI builds and tests on Ubuntu 22.04 with Go 1.26 (the version required by
+`go.mod`). On Ubuntu 22.04+ you can install the other dependencies with:
 
 ```bash
-sudo apt update && sudo apt install make jq zip gcc python3-pip golang-1.16
+sudo apt update && sudo apt install make jq zip gcc python3-pip wget
 ```
+
+Ubuntu's packaged Go is older than the version this project requires, so
+install Go 1.26 or newer using the official [steps](https://go.dev/doc/install).
 
 Install docker using the official [steps](https://docs.docker.com/engine/install/ubuntu/).
 
@@ -128,10 +132,6 @@ sudo pip3 install docker-compose
 
 Make sure your [user has permissions](https://docs.docker.com/engine/install/linux-postinstall/)
 to run docker.
-
-See [this](https://dev.luthersystemsapp.com/ubuntu20_04-sandbox-install.sh)
-script for the exact steps to install the dependencies on a fresh Ubuntu 20.04
-instance.
 
 ## Build On Your Machine
 
@@ -177,8 +177,14 @@ containers. The REST/JSON API is accessible from your localhost on port 8080
 which can be spot-tested using cURL and jq:
 
 ```bash
-curl -v http://localhost:8080/v1/health_check | jq .
+curl -v http://localhost:8080/v1/sandbox/health_check | jq .
 ```
+
+The health check returns HTTP 200 even when the phylum is `DOWN`, so check
+`reports[].status` in the response rather than the status code: every report
+should be `UP`. `make integration` waits for this automatically using
+[scripts/wait-for-oracle.sh](scripts/wait-for-oracle.sh) (see the test
+[documentation](tests/README.md)).
 
 With the containers running we can also run the end-to-end integration tests.
 Once the tests complete `make down` will cleanup all the containers.
@@ -246,8 +252,8 @@ There are 3 main types of tests in this project:
 After making some changes to the phylum's business logic, the oracle middleware,
 or the API it is a good idea to test those changes. The quickest integrity
 check to detect errors in the application is to run the phylum unit tests and
-API functional tests from the phylum and oracle directories respectively. This
-can be done easily from the application's top level with the following command:
+the oracle and API Go tests. This can be done easily from the application's top
+level with the following command:
 
 ```bash
 make test
@@ -258,8 +264,13 @@ individually with the following commands:
 
 ```bash
 make phylumtest
-make oraclegotest
+make unit-portal
 ```
+
+`make phylumtest` runs the phylum tests in the `shirotester` container, so it
+needs Docker. `make unit-portal` (alias `make oraclegotest`) runs `go test
+./...` on the host against the downloaded substrate plugin and does not need
+Docker.
 
 If these tests pass then one can move on to run the end-to-end integration tests
 against a real network of docker containers. As done in the Getting Started

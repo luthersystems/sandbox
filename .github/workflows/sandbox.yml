@@ -3,6 +3,10 @@ on:
   pull_request:
     branches:
       - main
+  # Also test main as merged; the pull_request runs only test each PR branch.
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-22.04
