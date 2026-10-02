@@ -2,8 +2,8 @@ name: configure-dockerhub
 description: >-
   Log in to Docker Hub for a release push, with Docker Hub OIDC only. It uses
   no stored credential. The calling job needs `permissions: id-token: write`,
-  and the calling step (or job/workflow) sets DOCKERHUB_OIDC_CONNECTIONID in
-  its `env:` from the repo variable of the same name. It tries up to three
+  and the Docker Home OIDC connection ID is set in this action (it is not a
+  secret; the same connection as luthersystems/substrate). It tries up to three
   times, then fails the job, because a push cannot fall back to anonymous
   access.
 
@@ -26,10 +26,6 @@ runs:
     - name: Check OIDC availability
       shell: bash
       run: |
-        if [ -z "${DOCKERHUB_OIDC_CONNECTIONID:-}" ]; then
-          echo "::error title=Docker Hub login::DOCKERHUB_OIDC_CONNECTIONID is empty; set the repository variable DOCKERHUB_OIDC_CONNECTIONID"
-          exit 1
-        fi
         if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
           echo "::error title=Docker Hub login::no id-token; give the job 'permissions: id-token: write'"
           exit 1
@@ -42,7 +38,7 @@ runs:
         # OIDC authenticates as the Docker organization, not a user.
         username: luthersystems
       env:
-        DOCKERHUB_OIDC_CONNECTIONID: ${{ env.DOCKERHUB_OIDC_CONNECTIONID }}
+        DOCKERHUB_OIDC_CONNECTIONID: c5a3b4b1-e0dc-4f63-88f4-d71cc0442085
         DOCKERHUB_OIDC_EXPIREIN: ${{ inputs.oidc-expires-in }}
     - name: Wait before OIDC retry
       if: steps.oidc1.outcome == 'failure'
@@ -56,7 +52,7 @@ runs:
       with:
         username: luthersystems
       env:
-        DOCKERHUB_OIDC_CONNECTIONID: ${{ env.DOCKERHUB_OIDC_CONNECTIONID }}
+        DOCKERHUB_OIDC_CONNECTIONID: c5a3b4b1-e0dc-4f63-88f4-d71cc0442085
         DOCKERHUB_OIDC_EXPIREIN: ${{ inputs.oidc-expires-in }}
     - name: Wait before OIDC retry
       if: steps.oidc2.outcome == 'failure'
@@ -68,5 +64,5 @@ runs:
       with:
         username: luthersystems
       env:
-        DOCKERHUB_OIDC_CONNECTIONID: ${{ env.DOCKERHUB_OIDC_CONNECTIONID }}
+        DOCKERHUB_OIDC_CONNECTIONID: c5a3b4b1-e0dc-4f63-88f4-d71cc0442085
         DOCKERHUB_OIDC_EXPIREIN: ${{ inputs.oidc-expires-in }}
