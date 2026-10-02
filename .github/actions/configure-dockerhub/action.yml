@@ -1,11 +1,68 @@
 name: configure-dockerhub
-description: Login to dockerhub
+description: >-
+  Log in to Docker Hub for a release push, with Docker Hub OIDC only. It uses
+  no stored credential. The calling job needs `permissions: id-token: write`,
+  and the Docker Home OIDC connection ID is set in this action (it is not a
+  secret; the same connection as luthersystems/substrate). It tries up to three
+  times, then fails the job, because a push cannot fall back to anonymous
+  access.
+
+  Token lifetime: docker/login-action exchanges the GitHub OIDC token for a
+  Docker Hub access token that expires after DOCKERHUB_OIDC_EXPIREIN seconds
+  (default 300, range 300-3600). There is no refresh: once it expires every
+  registry call, including pulls of public images, fails with 401. This
+  action asks for the maximum, 3600, so log in right before the docker work,
+  keep each docker step under 60 minutes, and log in again before a later
+  docker step.
+inputs:
+  oidc-expires-in:
+    description: >-
+      Lifetime in seconds (300-3600) of the OIDC-issued Docker Hub token.
+    required: false
+    default: "3600"
 runs:
   using: composite
   steps:
-    - name: Configure Docker Hub
-      run: |-
-        [ -z "$DOCKERHUB_USERNAME" ] && exit 0
-        [ -z "$DOCKERHUB_TOKEN" ] && exit 0
-        echo "${DOCKERHUB_TOKEN}" | docker login --username $DOCKERHUB_USERNAME --password-stdin
+    - name: Check OIDC availability
       shell: bash
+      run: |
+        if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+          echo "::error title=Docker Hub login::no id-token; give the job 'permissions: id-token: write'"
+          exit 1
+        fi
+    - name: Log in to Docker Hub (OIDC, attempt 1)
+      id: oidc1
+      continue-on-error: true
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+      with:
+        # OIDC authenticates as the Docker organization, not a user.
+        username: luthersystems
+      env:
+        DOCKERHUB_OIDC_CONNECTIONID: c5a3b4b1-e0dc-4f63-88f4-d71cc0442085
+        DOCKERHUB_OIDC_EXPIREIN: ${{ inputs.oidc-expires-in }}
+    - name: Wait before OIDC retry
+      if: steps.oidc1.outcome == 'failure'
+      shell: bash
+      run: sleep 5
+    - name: Log in to Docker Hub (OIDC, attempt 2)
+      id: oidc2
+      if: steps.oidc1.outcome == 'failure'
+      continue-on-error: true
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+      with:
+        username: luthersystems
+      env:
+        DOCKERHUB_OIDC_CONNECTIONID: c5a3b4b1-e0dc-4f63-88f4-d71cc0442085
+        DOCKERHUB_OIDC_EXPIREIN: ${{ inputs.oidc-expires-in }}
+    - name: Wait before OIDC retry
+      if: steps.oidc2.outcome == 'failure'
+      shell: bash
+      run: sleep 15
+    - name: Log in to Docker Hub (OIDC, attempt 3)
+      if: steps.oidc2.outcome == 'failure'
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+      with:
+        username: luthersystems
+      env:
+        DOCKERHUB_OIDC_CONNECTIONID: c5a3b4b1-e0dc-4f63-88f4-d71cc0442085
+        DOCKERHUB_OIDC_EXPIREIN: ${{ inputs.oidc-expires-in }}
