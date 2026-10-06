@@ -12,6 +12,11 @@ updates:
       # (fixed only in 1.85.0-dev). Stay on v1.83.2 until v1.84.1+/v1.85.0 ships.
       - dependency-name: "google.golang.org/grpc"
         versions: ["1.84.0"]
+      # grpc-gateway v2.31.0 requires grpc v1.84.0, so the rule above alone
+      # cannot hold grpc back (#132 bumped it through grpc-gateway). Drop both
+      # rules together once a fixed grpc release ships.
+      - dependency-name: "github.com/grpc-ecosystem/grpc-gateway/v2"
+        versions: [">= 2.31.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
