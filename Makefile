@@ -70,16 +70,6 @@ clean: portalclean
 portalclean: make-C/portal/clean
 	@
 
-docker-push: portal-push
-.PHONY: portal-push
-portal-push: make-C/portal/push
-	@
-
-docker-push-manifests: portal-push-manifests
-.PHONY: portal-push-manifests
-portal-push-manifests: make-C/portal/push-manifests
-	@
-
 .PHONY: fabric
 all: fabric
 fabric: make-C/fabric/default
@@ -238,20 +228,4 @@ init-docs:
 .PHONY: setup
 setup: init-docs download
 	@echo "Running project setup..."
-
-.PHONY: publish-docker
-publish-docker: docker-push
-	@
-
-.PHONY: publish-docker-manifests
-publish-docker-manifests: docker-push-manifests
-	@
-
-.PHONY: publish
-publish: publish-docker
-	@
-
-.PHONY:
-docker-push: all
-	@
 

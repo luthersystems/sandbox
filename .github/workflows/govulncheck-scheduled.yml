@@ -15,7 +15,8 @@ name: govulncheck (scheduled)
 #
 # This file was INVALID from #110 until this fix: it declared the `releasego`
 # step id twice (#110's move of the inline shell into
-# scripts/resolve-release-go.sh left both copies). GitHub rejects such a file
+# scripts/resolve-release-go.sh, now scripts/resolve-build-go.sh, left both
+# copies). GitHub rejects such a file
 # outright, so the cron never fired, no drift issue was ever filed, and the
 # only trace was a 0-second "workflow file issue" failure on every push. Keep
 # one copy of each step; run `actionlint` on any edit here.
@@ -56,22 +57,23 @@ jobs:
         id: scan
         run: bash scripts/govulncheck-scan.sh
 
-      # The binary pass must build with the toolchain we RELEASE with, not the
+      # The binary pass must build with the toolchain CI builds with, not the
       # one the scanner runs under. The source scan above deliberately uses
       # `stable` so the stdlib is checked at a current patch level -- but binary
       # mode checks the stdlib of whatever built the binary, so building it with
       # `stable` too would just re-check `stable` and tell us nothing about the
-      # artifact we actually ship. That was the gap in the first cut of this.
+      # toolchain the repo builds with. That was the gap in the first cut of this.
       #
-      # Derived from .github/workflows/release.yml at run time rather than hardcoded, so the two
-      # cannot silently drift apart.
-      - name: Resolve the release Go toolchain
-        id: releasego
-        run: bash scripts/resolve-release-go.sh .github/workflows/release.yml
+      # sandbox publishes no release artifact, so this reads the CI workflow.
+      # Derived from .github/workflows/sandbox.yml at run time rather than
+      # hardcoded, so the two cannot silently drift apart.
+      - name: Resolve the CI Go toolchain
+        id: buildgo
+        run: bash scripts/resolve-build-go.sh .github/workflows/sandbox.yml
 
       - uses: actions/setup-go@v7
         with:
-          go-version: ${{ steps.releasego.outputs.version }}
+          go-version: ${{ steps.buildgo.outputs.version }}
           cache: true
 
       # Second, ADDITIVE pass over the built binaries. NOT a substitute for the
