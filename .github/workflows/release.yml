@@ -1,3 +1,11 @@
+# Publishes the oracle image to Docker Hub as luthersystems/oracle:<tag>.
+#
+# Do not remove this workflow. Luther Enterprise deploys sandbox by default
+# when it brings up an environment: ui-core sets oracle_image_repo to
+# luthersystems/oracle and app_version to a sandbox tag
+# (jobs/workflows/ansible_args.go), and sandbox-infrastructure-template deploys
+# that image (ansible/vars/umbrella.yaml). To ship a new sandbox to Enterprise,
+# push a tag here, then bump defaultAppVersion in ui-core to that tag.
 name: Build, Push, and Release
 on:
   push:

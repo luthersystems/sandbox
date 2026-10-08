@@ -421,6 +421,15 @@ make explorer-up
 To wipe out the pre-existing database and recreate it empty, then re-build the
 Explorer. This will reconnect it to the current network.
 
+## Docker Image and Luther Enterprise
+
+Luther Enterprise deploys this sandbox by default when it brings up an
+environment. A tag push runs `.github/workflows/release.yml`, which publishes
+the oracle image to Docker Hub as `luthersystems/oracle:<tag>`. Enterprise
+(ui-core) pulls that image at the tag in its `defaultAppVersion`. So keep the
+release workflow, and after you tag a release, bump `defaultAppVersion` in
+ui-core to ship it.
+
 ## Platform Releases
 
 See [Latest Platform Releases](https://docs.luthersystems.com/deployment/release-notes).
