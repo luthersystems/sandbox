@@ -2,6 +2,8 @@ module github.com/luthersystems/sandbox
 
 go 1.26.0
 
+toolchain go1.26.9
+
 require (
 	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.12-20250430044901-c62151e471be.2
 	github.com/alecthomas/kong v1.16.1
@@ -50,7 +52,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.46.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260918162117-cecb64721679 // indirect
