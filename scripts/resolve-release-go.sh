@@ -22,7 +22,18 @@ if [ ! -f "$src" ]; then
   exit 1
 fi
 
-version="$(grep -oE 'go-version: *"[^"]+"' "$src" | head -1 | sed 's/.*"\(.*\)"/\1/')"
+version="$(grep -oE 'go-version: *"[^"]+"' "$src" | head -1 | sed 's/.*"\(.*\)"/\1/' || true)"
+if [ -z "$version" ]; then
+  # `go-version-file: <file>`: setup-go uses that file's `toolchain` line, else
+  # its `go` line. Resolve it the same way.
+  modfile="$(grep -oE 'go-version-file: *[^ ]+' "$src" | head -1 | sed 's/.*: *//' || true)"
+  if [ -n "$modfile" ] && [ -f "$modfile" ]; then
+    version="$(awk '$1 == "toolchain" { sub(/^go/, "", $2); print $2; exit }' "$modfile")"
+    if [ -z "$version" ]; then
+      version="$(awk '$1 == "go" { print $2; exit }' "$modfile")"
+    fi
+  fi
+fi
 if [ -z "$version" ]; then
   echo "::error::could not resolve the release Go version from ${src}"
   exit 1

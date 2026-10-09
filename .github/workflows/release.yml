@@ -40,10 +40,10 @@ jobs:
         with:
           lfs: true
           fetch-depth: 0 # include tags for VERSION detection
-      - name: Set up Go 1.26
+      - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version-file: go.mod
       # Log in last, right before the docker work: the OIDC token expires.
       - name: Configure DockerHub
         uses: ./.github/actions/configure-dockerhub
