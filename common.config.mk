@@ -27,7 +27,7 @@ SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 CONNECTORHUB_VERSION=v0.0.25
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 # https://github.com/luthersystems/fabric-network-builder
-NETWORK_BUILDER_VERSION=v0.0.4
+NETWORK_BUILDER_VERSION=v0.0.9
 MARTIN_VERSION=v1.0.0
 
 # A golang module proxy server can greatly help speed up docker builds but the
