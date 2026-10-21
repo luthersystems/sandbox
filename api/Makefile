@@ -29,10 +29,15 @@ all: ${ARTIFACTS}
 clean:
 	${RM} -f ${ARTIFACTS}
 
+# build-api >= v0.1.5 sets HOME=/home/build, which only uid 1000 can write.
+# Under -u <host uid>, buf then fails to read its config there ("permission
+# denied"). HOME=/ is what Docker sets for an unknown uid, so buf's cache lands
+# in the /.cache tmpfs.
 ${ARTIFACTS}: ${PROTO_SOURCE_FILES}
 	@echo "Building api"
 	${DOCKER_RUN} \
 		-u ${DOCKER_USER} \
+		-e HOME=/ \
 		-v ${DOCKER_PROJECT_DIR}:${BUILD_IMAGE_PROJECT_DIR} \
 		--mount type=tmpfs,destination=/.cache \
 		-e PROJECT_PATH="${PROJECT_PATH}" \
