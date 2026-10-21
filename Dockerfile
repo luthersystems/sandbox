@@ -10,6 +10,11 @@ ARG BUILD_IMAGE
 ARG SERVICE_BASE_IMAGE
 
 FROM $BUILD_IMAGE AS build
+# buildenv >= v0.1.x images default to the non-root `build` user (buildenv
+# #78), which cannot write the root-owned /src that COPY creates. This is a
+# throwaway build stage (only the compiled binary ships), so build as root; the
+# prod stage keeps service-base-alpine's non-root (nobody) runtime user.
+USER root
 
 # Copy source code into the build container
 COPY . /src
