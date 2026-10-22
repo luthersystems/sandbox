@@ -1,0 +1,50 @@
+name: Release (tag)
+
+# On-demand release cut, dispatched from main by an operator (or an agent the
+# operator directed) from the Actions UI or `gh workflow run`.
+#
+# The work happens in the org's shared workflow,
+# luthersystems/.github/.github/workflows/release-tag.yml, so every repo gets
+# the same checks and a fix lands once instead of in each copy. It refuses to
+# tag unless the run is on live main, the push run of sandbox.yml passed for that
+# commit (it waits up to 15 minutes for one in progress), the commit has no
+# release yet, and the version is vMAJOR.MINOR.PATCH without leading zeros
+# and newer than the latest tag.
+#
+# release_token: claude-app, because the tag must start release.yml (the luthersystems/oracle image build).
+# GitHub starts no workflow for a tag the default GITHUB_TOKEN creates, so
+# the official Claude App creates the release. Claude runs only the one
+# command the shared workflow builds and checks.
+#
+# Leave `version` empty to auto-bump the patch component of the latest
+# vMAJOR.MINOR.PATCH tag; pass an explicit version for a minor or major bump.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag (vMAJOR.MINOR.PATCH). Empty = auto-bump patch of the latest tag."
+        type: string
+        required: false
+        default: ""
+      dry_run:
+        description: "Print the computed version and command but do NOT cut the release"
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  release:
+    # A called workflow cannot raise its caller's token permissions, so the
+    # caller grants exactly what the shared workflow uses.
+    permissions:
+      actions: read # read the CI workflow's runs for the release commit
+      contents: read # verify the release; the Claude App token creates it
+      id-token: write # Bedrock role and the Claude App token
+    uses: luthersystems/.github/.github/workflows/release-tag.yml@v1
+    with:
+      version: ${{ inputs.version }}
+      dry_run: ${{ inputs.dry_run }}
+      ci_workflow: sandbox.yml
+      release_token: claude-app
