@@ -22,3 +22,7 @@ jobs:
           version: v2.13.2
       - name: Run CI tests
         run: script -q -e -c "make citest"
+      # Check the oracle image with the build-harden kit
+      # (scripts/harden-image-check.sh, luthersystems/buildenv#163).
+      - name: Check the oracle image with build-harden
+        run: make portal-harden-check

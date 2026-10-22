@@ -64,6 +64,14 @@ ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 		-f ${PROJECT_REL_DIR}/Dockerfile ${PROJECT_REL_DIR}
 	${TOUCH} $@
 
+# harden-check runs the build-harden image check on the built image (the
+# host platform). service-base-alpine runs the kit when buildenv builds it;
+# this check covers the layers this repo adds on top
+# (luthersystems/buildenv#163).
+.PHONY: harden-check
+harden-check: ${DOCKER_IMAGE_DUMMY}
+	${PROJECT_REL_DIR}/scripts/harden-image-check.sh ${DOCKER_IMAGE}:${VERSION}
+
 ${GO_PKG_DUMMY}:
 	${DOCKER} volume inspect ${GO_PKG_VOLUME} || ${DOCKER} volume create ${GO_PKG_VOLUME}
 	mkdir -p $(dir $@)

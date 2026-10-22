@@ -70,6 +70,10 @@ clean: portalclean
 portalclean: make-C/portal/clean
 	@
 
+.PHONY: portal-harden-check
+portal-harden-check: make-C/portal/harden-check
+	@
+
 docker-push: portal-push
 .PHONY: portal-push
 portal-push: make-C/portal/push
