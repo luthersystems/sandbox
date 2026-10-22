@@ -427,8 +427,22 @@ Luther Enterprise deploys this sandbox by default when it brings up an
 environment. A tag push runs `.github/workflows/release.yml`, which publishes
 the oracle image to Docker Hub as `luthersystems/oracle:<tag>`. Enterprise
 (ui-core) pulls that image at the tag in its `defaultAppVersion`. So keep the
-release workflow, and after you tag a release, bump `defaultAppVersion` in
-ui-core to ship it.
+release workflow.
+
+To cut a release, dispatch `.github/workflows/release-tag.yml` on `main`. Leave
+`version` empty to bump the patch of the latest tag, or pass `vX.Y.Z`. Run it
+with `dry_run=true` first to see the version it will cut. It checks that
+`main`'s tip passed CI, then creates the release and its tag, which runs
+`release.yml`. `release.yml` refuses a `vX.Y.Z` tag whose commit is not on
+`main`; a pre-release tag (`vX.Y.Z-<pre-release>`) is not checked. Then bump
+`defaultAppVersion` in ui-core to the new tag to ship it.
+
+```bash
+# Dry run: print the version and command, cut nothing.
+gh workflow run release-tag.yml -R luthersystems/sandbox -f dry_run=true
+# Real release.
+gh workflow run release-tag.yml -R luthersystems/sandbox -f dry_run=false
+```
 
 ## Platform Releases
 
