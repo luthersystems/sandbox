@@ -8,8 +8,9 @@
 # file. It rejects the file at trigger time instead, so a broken scheduled
 # workflow simply never runs, and the only trace is a 0-second "This run
 # likely failed because of a workflow file issue" entry on each push that
-# nobody reads. The triggering example: govulncheck-scheduled.yml declared the
-# step id `releasego` twice from #110 on, so the daily govulncheck scan and its
+# nobody reads. The triggering example: the old govulncheck-scheduled.yml
+# (since replaced by the shared Security workflow) declared the step id
+# `releasego` twice from #110 on, so the daily govulncheck scan and its
 # `govulncheck-drift` issue never fired once (the same bug silenced
 # luthersystems/reliable's scheduled scan).
 # actionlint flags that class of mistake (duplicate step ids, bad `needs`,
