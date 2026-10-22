@@ -5,14 +5,37 @@
 # luthersystems/oracle and app_version to a sandbox tag
 # (jobs/workflows/ansible_args.go), and sandbox-infrastructure-template deploys
 # that image (ansible/vars/umbrella.yaml). To ship a new sandbox to Enterprise,
-# push a tag here, then bump defaultAppVersion in ui-core to that tag.
+# dispatch release-tag.yml on main (it creates the tag that runs this
+# workflow), then bump defaultAppVersion in ui-core to that tag.
 name: Build, Push, and Release
 on:
   push:
     tags:
       - "*"
 jobs:
+  # release-tag.yml checks the commit before it creates a tag, but anyone with
+  # push access can still push a tag by hand. Refuse a tag whose commit is not
+  # on main, so a hand-pushed tag cannot publish an image from an unreviewed
+  # branch. Same guard as luthersystems/mars's mars-release.yml.
+  require-main:
+    permissions:
+      contents: read
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Require release tag to be on main
+        run: |
+          set -eu
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD || {
+            echo "::error::Release tag must point to a commit on main"
+            exit 1
+          }
   build-push-docker:
+    needs:
+      - require-main
     name: ${{ matrix.arch }} - docker build
     runs-on: ${{ fromJSON('{"arm64":"2vcpu-ubuntu-2204-arm","amd64":"ubuntu-22.04"}')[matrix.arch] }}
     permissions:
