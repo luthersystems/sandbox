@@ -70,8 +70,10 @@ clean: portalclean
 portalclean: make-C/portal/clean
 	@
 
-.PHONY: portal-harden-check
-portal-harden-check: make-C/portal/harden-check
+# portal-image builds only the oracle image. CI then checks it with the
+# shared build-harden action (see harden-env in common.go.mk).
+.PHONY: portal-image
+portal-image: make-C/portal/docker-build
 	@
 
 docker-push: portal-push

@@ -23,6 +23,16 @@ jobs:
       - name: Run CI tests
         run: script -q -e -c "make citest"
       # Check the oracle image with the build-harden kit
-      # (scripts/harden-image-check.sh, luthersystems/buildenv#163).
+      # (luthersystems/buildenv#163). The shared action holds the one copy of
+      # the check, so a fix reaches this repo when v1 moves. make harden-env
+      # gives the kit pin (common.config.mk) and the image ref.
+      - name: Build the oracle image
+        id: oracle
+        run: |
+          make portal-image
+          make -s --no-print-directory -C portal harden-env >> "$GITHUB_OUTPUT"
       - name: Check the oracle image with build-harden
-        run: make portal-harden-check
+        uses: luthersystems/.github/actions/harden-check@v1
+        with:
+          kit: ${{ steps.oracle.outputs.kit }}
+          images: ${{ steps.oracle.outputs.image }}

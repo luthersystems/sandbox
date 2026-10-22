@@ -64,13 +64,17 @@ ${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk 
 		-f ${PROJECT_REL_DIR}/Dockerfile ${PROJECT_REL_DIR}
 	${TOUCH} $@
 
-# harden-check runs the build-harden image check on the built image (the
-# host platform). service-base-alpine runs the kit when buildenv builds it;
-# this check covers the layers this repo adds on top
-# (luthersystems/buildenv#163).
-.PHONY: harden-check
-harden-check: ${DOCKER_IMAGE_DUMMY}
-	${PROJECT_REL_DIR}/scripts/harden-image-check.sh ${DOCKER_IMAGE}:${VERSION}
+# harden-env prints the kit pin and the image ref for the shared CI check,
+# luthersystems/.github/actions/harden-check (luthersystems/.github#6). CI
+# writes them to the step outputs, so the kit pin stays in common.config.mk
+# and the image name stays in the makefiles. The check logic lives in the
+# action, one copy for every repo, so a fix reaches this repo when v1 moves.
+# service-base-alpine runs the kit when buildenv builds it; the check covers
+# the layers this repo adds on top (luthersystems/buildenv#163).
+.PHONY: harden-env
+harden-env:
+	@echo "kit=${HARDEN_KIT}"
+	@echo "image=${DOCKER_IMAGE}:${VERSION}"
 
 ${GO_PKG_DUMMY}:
 	${DOCKER} volume inspect ${GO_PKG_VOLUME} || ${DOCKER} volume create ${GO_PKG_VOLUME}

@@ -16,8 +16,8 @@ SERVICE_DIR=portal
 # https://github.com/luthersystems/buildenv
 BUILDENV_TAG=v0.1.45
 # The build-harden kit of the same buildenv release, pinned by digest.
-# scripts/harden-image-check.sh runs its image check on the built oracle
-# image (make portal-harden-check). Bump it with BUILDENV_TAG.
+# CI checks the built oracle image with this kit's policy, through the shared
+# action luthersystems/.github/actions/harden-check. Bump it with BUILDENV_TAG.
 HARDEN_KIT=luthersystems/build-harden:v0.1.45@sha256:ed783a0cd4faf6cd791b844970f00309cec76c4ab90b1e111d641ba44d67ba46
 
 # These variables control the version numbers for parts of the Luther platform
