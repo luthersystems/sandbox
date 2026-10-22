@@ -14,22 +14,33 @@ on:
       - "*"
 jobs:
   # release-tag.yml checks the commit before it creates a tag, but anyone with
-  # push access can still push a tag by hand. Refuse a tag whose commit is not
-  # on main, so a hand-pushed tag cannot publish an image from an unreviewed
-  # branch. Same guard as luthersystems/mars's mars-release.yml.
+  # push access can still push a tag by hand. A plain vX.Y.Z tag is a release
+  # that Enterprise can deploy, so refuse one whose commit is not on main: a
+  # hand-pushed tag cannot publish a release image from an unreviewed branch.
+  # A pre-release tag (one with a '-', such as v0.2.0-SNAPSHOT.1 cut from a
+  # branch to test an image) is not checked, as in luthersystems/mars's
+  # mars-release.yml. Any other tag name is refused.
   require-main:
     permissions:
       contents: read
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # fetches origin/main too, for the ancestry check
       - name: Require release tag to be on main
         run: |
           set -eu
-          git fetch --no-tags origin main
-          git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD || {
+          if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-.+$ ]]; then
+            echo "$GITHUB_REF_NAME is a pre-release tag; not checking main"
+            exit 0
+          fi
+          [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::Release tag must be vX.Y.Z (or vX.Y.Z-<pre-release>), not $GITHUB_REF_NAME"
+            exit 1
+          }
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
             echo "::error::Release tag must point to a commit on main"
             exit 1
           }
