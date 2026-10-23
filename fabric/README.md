@@ -136,7 +136,9 @@ connectors:
 
 💡 You can add or modify connectors to suit your flow’s needs. When using
 `mock: true`, the connector will simulate the system locally for easier
-testing.
+testing. A mock still checks its config block, so set every required field
+(for example a placeholder Stripe `secret`); connectorhub does not start
+otherwise.
 
 See the Connector Hub
 [docs](../docs/platform/connectorhub.yaml) for more details.
