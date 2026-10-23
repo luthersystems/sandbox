@@ -36,7 +36,7 @@ test: shiro-test
 
 .PHONY: shiro-test
 shiro-test: build
-	${SHIRO_TEST} unit-tests --verbose .
+	${SHIRO_TEST} unit-tests --verbose --creator Org1MSP .
 
 .PHONY: repl
 repl:

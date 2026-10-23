@@ -23,7 +23,7 @@ HARDEN_KIT=luthersystems/build-harden:v0.1.45@sha256:ed783a0cd4faf6cd791b844970f
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.240.0
+SUBSTRATE_VERSION=v2.249.0
 CC_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${CC_VERSION}
 VERSION_SUBSTRATE=${CC_VERSION} # is this needed
