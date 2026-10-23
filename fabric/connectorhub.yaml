@@ -47,4 +47,6 @@ connectors:
 
   - name: STRIPE_PAYMENT
     mock: true
-    stripe: {}
+    stripe:
+      # connectorhub v0.0.28+ requires it, even for a mock.
+      secret: mock-secret
