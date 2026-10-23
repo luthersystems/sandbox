@@ -14,11 +14,11 @@ SERVICE_DIR=portal
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
 # https://github.com/luthersystems/buildenv
-BUILDENV_TAG=v0.1.45
+BUILDENV_TAG=v0.1.48
 # The build-harden kit of the same buildenv release, pinned by digest.
 # CI checks the built oracle image with this kit's policy, through the shared
 # action luthersystems/.github/actions/harden-check. Bump it with BUILDENV_TAG.
-HARDEN_KIT=luthersystems/build-harden:v0.1.45@sha256:ed783a0cd4faf6cd791b844970f00309cec76c4ab90b1e111d641ba44d67ba46
+HARDEN_KIT=luthersystems/build-harden:v0.1.48@sha256:f7bad87a42183bb34124af5eeea4779069dcd3354ecd40ddf8c1d3fb9f788b33
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
@@ -28,11 +28,11 @@ CC_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${CC_VERSION}
 VERSION_SUBSTRATE=${CC_VERSION} # is this needed
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
-CONNECTORHUB_VERSION=v0.0.25
+CONNECTORHUB_VERSION=v0.0.28
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 # https://github.com/luthersystems/fabric-network-builder
-NETWORK_BUILDER_VERSION=v0.0.9
-MARTIN_VERSION=v1.0.0
+NETWORK_BUILDER_VERSION=v0.0.10
+MARTIN_VERSION=v1.2.0
 
 # A golang module proxy server can greatly help speed up docker builds but the
 # official proxy at https://proxy.golang.org only works for public modules.
