@@ -48,7 +48,7 @@ jobs:
     needs:
       - require-main
     name: ${{ matrix.arch }} - docker build
-    runs-on: ${{ fromJSON('{"arm64":"2vcpu-ubuntu-2204-arm","amd64":"ubuntu-22.04"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"arm64":"ubuntu-22.04-arm","amd64":"ubuntu-22.04"}')[matrix.arch] }}
     permissions:
       id-token: write # Required for OIDC authentication
       contents: read # This is required for actions/checkout
