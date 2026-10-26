@@ -1,0 +1,13 @@
+# Allowlist for the shared work marker gate (luthersystems/.github,
+# actions/work-markers). Only for words that are not work: copied source,
+# data, quoted text. Deferred work names its issue on the marker instead.
+#
+# path | text | expires | issue | reason
+fabric/core.yaml | TODO: The default Hash and Security level needs refactoring to be | never | - | Hyperledger Fabric's own note in its sample core.yaml.
+compose/grafana/plugins/grafana-lokiexplore-app/386.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.
+compose/grafana/plugins/grafana-lokiexplore-app/470.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.
+compose/grafana/plugins/grafana-lokiexplore-app/677.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.
+compose/grafana/plugins/grafana-lokiexplore-app/854.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.
+compose/grafana/plugins/grafana-lokiexplore-app/944.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.
+compose/grafana/plugins/grafana-lokiexplore-app/module.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.
+compose/grafana/plugins/grafana-pyroscope-app/module.js.map | * | never | - | A vendored Grafana plugin's minified source map: identifiers and strings, not markers.

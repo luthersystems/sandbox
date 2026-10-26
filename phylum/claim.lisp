@@ -48,8 +48,8 @@
 ;; connector events. These must match the connectorhub.yaml definitions.
 (set 'sys-msp-map
   ;; map from system names to responsible connector MSP IDs
-  ;; TODO: for now it's all 1 connector, but in final version each connector
-  ;; is run by a separate org (participant).
+  ;; The sandbox runs every connector under one org. In a real network each
+  ;; connector is run by a separate org (participant).
   (sorted-map
     "CLAIMS_PORTAL_UI"   "Org1MSP"
     "EQUIFAX_ID_VERIFY"  "Org1MSP"

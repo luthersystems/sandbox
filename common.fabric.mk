@@ -232,7 +232,7 @@ connectorhub-up: ${START_CONNECTORHUBS}
 start-ch-%: parts=$(subst ., ,$*)
 start-ch-%: idx=$(word 1,${parts})
 start-ch-%: name=$(word 2,${parts})
-start-ch-%: ccname=$(word 3,${parts}) # TODO
+start-ch-%: ccname=$(word 3,${parts})
 start-ch-%: port=$$(( 9091 + ${idx} ))
 ifdef EXPOSE_CONNECTORHUB
 start-ch-%: port_fw=-p "${port}:8080"
