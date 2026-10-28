@@ -36,6 +36,11 @@ FROM $SERVICE_BASE_IMAGE AS prod
 # Copy the compiled binary into the final container
 COPY --from=build /src/app /opt/app
 
+# service-base-alpine already runs as nobody; restate it so this file, read
+# on its own, says the service does not run as root (Trivy DS-0002), and a
+# base that changed its default user could not switch the service silently.
+USER nobody
+
 # Entrypoint: run the app using tini for proper signal handling
 ENTRYPOINT ["tini", "--", "/opt/app"]
 CMD ["start"]
