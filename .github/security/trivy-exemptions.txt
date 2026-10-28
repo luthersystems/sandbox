@@ -6,5 +6,3 @@
 # without failing every PR. Each row expires; fix the finding and delete
 # its row (luthersystems/sandbox#153). A row for a finding kept on purpose
 # needs a real reason, not the Trivy title.
-DS-0002 | .devcontainer/Dockerfile | 2027-01-31 | luthersystems/sandbox#153 | HIGH: Image user should not be 'root'
-DS-0002 | Dockerfile | 2027-01-31 | luthersystems/sandbox#153 | HIGH: Image user should not be 'root'
