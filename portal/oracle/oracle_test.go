@@ -96,6 +96,17 @@ func TestHealthCheck(t *testing.T) {
 	resp, err := server.GetHealthCheck(ctx, &healthcheck.GetHealthCheckRequest{})
 	require.NoError(t, err)
 	require.Equal(t, 2, len(resp.GetReports()))
+	// The phylum defines no healthcheck endpoint. The router's endpoint
+	// reports the service name that main.lisp gives router:set-service-info.
+	var found bool
+	for _, r := range resp.GetReports() {
+		if r.GetServiceName() == "sandbox" {
+			found = true
+			assert.Equal(t, "UP", r.GetStatus())
+			assert.NotEmpty(t, r.GetServiceVersion())
+		}
+	}
+	assert.True(t, found, "no report from the sandbox phylum: %v", resp.GetReports())
 }
 
 func TestGetClaim(t *testing.T) {

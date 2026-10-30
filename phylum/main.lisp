@@ -14,11 +14,13 @@
 (set 'service-name "sandbox")
 
 ;; Set during build process to reflect current version and build ID.
-;; Used in health check endpoint for visibility.
+;; The health check reports them.
 (set 'version "LUTHER_PROJECT_VERSION")  ; overridden during build
 (set 'build-id "LUTHER_PROJECT_BUILD_ID")  ; overridden during build
-(set 'service-version (format-string "{} ({})" version build-id))
 
-;; Load all route definitions and core business logic for this phylum.
-(load-file "routes.lisp")
+;; The router's own healthcheck and init endpoints report this service
+;; name, version and build ID, so this phylum defines neither endpoint.
+(router:set-service-info service-name version build-id)
+
+;; Load the core business logic for this phylum.
 (load-file "claim.lisp")
