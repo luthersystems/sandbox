@@ -262,7 +262,7 @@
           },
           {
             "name": "requestKey",
-            "description": "A key the client chooses for this request, at most 255 bytes. A retry\nwith the same key and body returns the same claim, so a client whose\nrequest timed out can send it again without making a second claim. When\nempty, the oracle makes a random key, and a retry makes a new claim.",
+            "description": "A key the client chooses for this request, at most 255 bytes. A retry\nwith the same key and body returns the same claim, so a client whose\nrequest timed out can send it again without making a second claim. When\nempty, the oracle makes a random key, and a retry makes a new claim.\nThe sandbox has no authentication, so the oracle signs every request\nwith one identity and all clients share one key space: use a key no\nother client can choose, such as a UUID. An application with\nauthentication would scope the key to the user.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -479,7 +479,7 @@
         "CLAIM_STATE_FAILED"
       ],
       "default": "CLAIM_STATE_UNSPECIFIED",
-      "description": "Where a claim is in its process.\n\nThe claim process is a durable flow (defflow) in the phylum. The flow\nkeeps the step it waits at, so the API reports that step by name (Claim.step)\nand keeps only three states here. Before the flow, this enum listed one\nvalue per step; values 4 to 9 are reserved so an old client never reads a\nnew meaning into them (luthersystems/sandbox#162).\n\n - CLAIM_STATE_UNSPECIFIED: Default value (should not be used)\n - CLAIM_STATE_WAITING: The claim waits at Claim.step for an input or a connector reply\n - CLAIM_STATE_DONE: The claim finished every step\n - CLAIM_STATE_FAILED: The claim stopped; Claim.error says why"
+      "description": "Where a claim is in its process.\n\nThe claim process is a durable flow (defflow) in the phylum. The flow\nkeeps the step it waits at, so the API reports that step by name\n(Claim.step) and keeps only three states here. Before the flow, this enum\nlisted one value per step. Those numbers and names are reserved and the\nnew values take new numbers, so a client built on the old enum never\nreads a new meaning into an old number (luthersystems/sandbox#162).\n\n - CLAIM_STATE_UNSPECIFIED: Default value (should not be used)\n - CLAIM_STATE_WAITING: The claim waits at Claim.step for an input or a connector reply\n - CLAIM_STATE_DONE: The claim finished every step\n - CLAIM_STATE_FAILED: The claim stopped; Claim.error says why"
     },
     "v1Claimant": {
       "type": "object",

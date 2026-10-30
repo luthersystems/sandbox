@@ -137,32 +137,33 @@ func (Status) EnumDescriptor() ([]byte, []int) {
 // Where a claim is in its process.
 //
 // The claim process is a durable flow (defflow) in the phylum. The flow
-// keeps the step it waits at, so the API reports that step by name (Claim.step)
-// and keeps only three states here. Before the flow, this enum listed one
-// value per step; values 4 to 9 are reserved so an old client never reads a
-// new meaning into them (luthersystems/sandbox#162).
+// keeps the step it waits at, so the API reports that step by name
+// (Claim.step) and keeps only three states here. Before the flow, this enum
+// listed one value per step. Those numbers and names are reserved and the
+// new values take new numbers, so a client built on the old enum never
+// reads a new meaning into an old number (luthersystems/sandbox#162).
 type ClaimState int32
 
 const (
-	ClaimState_CLAIM_STATE_UNSPECIFIED ClaimState = 0 // Default value (should not be used)
-	ClaimState_CLAIM_STATE_WAITING     ClaimState = 1 // The claim waits at Claim.step for an input or a connector reply
-	ClaimState_CLAIM_STATE_DONE        ClaimState = 2 // The claim finished every step
-	ClaimState_CLAIM_STATE_FAILED      ClaimState = 3 // The claim stopped; Claim.error says why
+	ClaimState_CLAIM_STATE_UNSPECIFIED ClaimState = 0  // Default value (should not be used)
+	ClaimState_CLAIM_STATE_WAITING     ClaimState = 10 // The claim waits at Claim.step for an input or a connector reply
+	ClaimState_CLAIM_STATE_DONE        ClaimState = 11 // The claim finished every step
+	ClaimState_CLAIM_STATE_FAILED      ClaimState = 12 // The claim stopped; Claim.error says why
 )
 
 // Enum value maps for ClaimState.
 var (
 	ClaimState_name = map[int32]string{
-		0: "CLAIM_STATE_UNSPECIFIED",
-		1: "CLAIM_STATE_WAITING",
-		2: "CLAIM_STATE_DONE",
-		3: "CLAIM_STATE_FAILED",
+		0:  "CLAIM_STATE_UNSPECIFIED",
+		10: "CLAIM_STATE_WAITING",
+		11: "CLAIM_STATE_DONE",
+		12: "CLAIM_STATE_FAILED",
 	}
 	ClaimState_value = map[string]int32{
 		"CLAIM_STATE_UNSPECIFIED": 0,
-		"CLAIM_STATE_WAITING":     1,
-		"CLAIM_STATE_DONE":        2,
-		"CLAIM_STATE_FAILED":      3,
+		"CLAIM_STATE_WAITING":     10,
+		"CLAIM_STATE_DONE":        11,
+		"CLAIM_STATE_FAILED":      12,
 	}
 )
 
@@ -328,6 +329,10 @@ type CreateClaimRequest struct {
 	// with the same key and body returns the same claim, so a client whose
 	// request timed out can send it again without making a second claim. When
 	// empty, the oracle makes a random key, and a retry makes a new claim.
+	// The sandbox has no authentication, so the oracle signs every request
+	// with one identity and all clients share one key space: use a key no
+	// other client can choose, such as a UUID. An application with
+	// authentication would scope the key to the user.
 	RequestKey    string `protobuf:"bytes,4,opt,name=request_key,json=requestKey,proto3" json:"request_key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -947,13 +952,14 @@ const file_pb_v1_oracle_proto_rawDesc = "" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fSTATUS_APPROVED\x10\x01\x12\x13\n" +
 	"\x0fSTATUS_DECLINED\x10\x02\x12\x0f\n" +
-	"\vSTATUS_PAID\x10\x03*v\n" +
+	"\vSTATUS_PAID\x10\x03*\xa3\x03\n" +
 	"\n" +
 	"ClaimState\x12\x1b\n" +
 	"\x17CLAIM_STATE_UNSPECIFIED\x10\x00\x12\x17\n" +
-	"\x13CLAIM_STATE_WAITING\x10\x01\x12\x14\n" +
-	"\x10CLAIM_STATE_DONE\x10\x02\x12\x16\n" +
-	"\x12CLAIM_STATE_FAILED\x10\x03\"\x04\b\x04\x10\tBy\n" +
+	"\x13CLAIM_STATE_WAITING\x10\n" +
+	"\x12\x14\n" +
+	"\x10CLAIM_STATE_DONE\x10\v\x12\x16\n" +
+	"\x12CLAIM_STATE_FAILED\x10\f\"\x04\b\x01\x10\t*\x0fCLAIM_STATE_NEW*&CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED* CLAIM_STATE_LOECLAIM_ID_VERIFIED*\x1dCLAIM_STATE_OOECLAIM_REVIEWED*\x1eCLAIM_STATE_OOECLAIM_VALIDATED*!CLAIM_STATE_LOEFIN_INVOICE_ISSUED*#CLAIM_STATE_OOEFIN_INVOICE_REVIEWED*#CLAIM_STATE_OOEFIN_INVOICE_APPROVED*$CLAIM_STATE_OOEPAY_PAYMENT_TRIGGEREDBy\n" +
 	"\tcom.pb.v1B\vOracleProtoP\x01Z*github.com/luthersystems/sandbox/api/pb/v1\xa2\x02\x03PXX\xaa\x02\x05Pb.V1\xca\x02\x05Pb\\V1\xe2\x02\x11Pb\\V1\\GPBMetadata\xea\x02\x06Pb::V1b\x06proto3"
 
 var (

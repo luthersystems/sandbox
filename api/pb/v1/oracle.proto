@@ -44,16 +44,18 @@ enum Status {
 // Where a claim is in its process.
 //
 // The claim process is a durable flow (defflow) in the phylum. The flow
-// keeps the step it waits at, so the API reports that step by name (Claim.step)
-// and keeps only three states here. Before the flow, this enum listed one
-// value per step; values 4 to 9 are reserved so an old client never reads a
-// new meaning into them (luthersystems/sandbox#162).
+// keeps the step it waits at, so the API reports that step by name
+// (Claim.step) and keeps only three states here. Before the flow, this enum
+// listed one value per step. Those numbers and names are reserved and the
+// new values take new numbers, so a client built on the old enum never
+// reads a new meaning into an old number (luthersystems/sandbox#162).
 enum ClaimState {
-  reserved 4 to 9;
+  reserved 1 to 9;
+  reserved "CLAIM_STATE_NEW", "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED", "CLAIM_STATE_LOECLAIM_ID_VERIFIED", "CLAIM_STATE_OOECLAIM_REVIEWED", "CLAIM_STATE_OOECLAIM_VALIDATED", "CLAIM_STATE_LOEFIN_INVOICE_ISSUED", "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED", "CLAIM_STATE_OOEFIN_INVOICE_APPROVED", "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED";
   CLAIM_STATE_UNSPECIFIED = 0; // Default value (should not be used)
-  CLAIM_STATE_WAITING = 1; // The claim waits at Claim.step for an input or a connector reply
-  CLAIM_STATE_DONE = 2; // The claim finished every step
-  CLAIM_STATE_FAILED = 3; // The claim stopped; Claim.error says why
+  CLAIM_STATE_WAITING = 10; // The claim waits at Claim.step for an input or a connector reply
+  CLAIM_STATE_DONE = 11; // The claim finished every step
+  CLAIM_STATE_FAILED = 12; // The claim stopped; Claim.error says why
 }
 
 // Request to create a claim.
@@ -65,6 +67,10 @@ message CreateClaimRequest {
   // with the same key and body returns the same claim, so a client whose
   // request timed out can send it again without making a second claim. When
   // empty, the oracle makes a random key, and a retry makes a new claim.
+  // The sandbox has no authentication, so the oracle signs every request
+  // with one identity and all clients share one key space: use a key no
+  // other client can choose, such as a UUID. An application with
+  // authentication would scope the key to the user.
   string request_key = 4;
 }
 

@@ -76,12 +76,18 @@
          [again (start-test-claim "k3")])
     (assert-string= run again)))
 
-(test "a claimant without a forename is refused"
-  (let* ([run (start-test-claim "k4")]
-         [bad (assoc (mk-test-claimant) "forename" "")]
-         [gen (get (claim-view run) "gen")]
-         [refusal (flow-test:rejection 'claim "in:claimant" run bad gen)])
-    (assert-string= "schema" (get refusal "error"))
+(test "a claimant without a required field is refused"
+  (let* ([run (start-test-claim "k4")])
+    (map 'list
+         (lambda (bad)
+           (let* ([gen (get (claim-view run) "gen")]
+                  [refusal (flow-test:rejection 'claim "in:claimant" run bad gen)])
+             (assert-string= "schema" (get refusal "error"))))
+         (list (assoc (mk-test-claimant) "forename" "")
+               (dissoc (mk-test-claimant) "surname")
+               (dissoc (mk-test-claimant) "dob")
+               (dissoc (mk-test-claimant) "nationality")
+               (assoc (mk-test-claimant) "nationality" "GB")))
     ;; A refused input commits nothing: the claim still waits for it.
     (assert-string= "claimant" (get (claim-view run) "label"))))
 

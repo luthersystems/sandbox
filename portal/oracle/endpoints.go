@@ -88,7 +88,7 @@ func (p *portal) AddClaimant(ctx context.Context, req *pb.AddClaimantRequest) (*
 	if key := req.GetRequestKey(); key != "" {
 		params = append(params, key)
 	}
-	_, exc, err := p.callFlow(ctx, "add_claimant", params, p.defaultConfigs(ctx)...)
+	run, exc, err := p.callFlow(ctx, "add_claimant", params, p.defaultConfigs(ctx)...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,13 +96,18 @@ func (p *portal) AddClaimant(ctx context.Context, req *pb.AddClaimantRequest) (*
 		return &pb.AddClaimantResponse{Result: &pb.AddClaimantResponse_Exception{Exception: exc}}, nil
 	}
 	// An input answers only the run's metadata. Read the claim back so the
-	// response shows the claimant and the step the claim moved to.
+	// response shows the claim's details and the step the claim moved to.
+	// The input has already committed, so a failed read must not turn into
+	// an error: the client would retry with the old gen and be refused for
+	// an input that worked. Answer with what the input returned instead.
 	claim, exc, err := p.getClaim(ctx, req.GetClaimId())
-	if err != nil {
-		return nil, err
-	}
-	if exc != nil {
-		return &pb.AddClaimantResponse{Result: &pb.AddClaimantResponse_Exception{Exception: exc}}, nil
+	if err != nil || exc != nil {
+		if err == nil {
+			err = errors.New(exc.GetDescription())
+		}
+		p.orc.Log(ctx).WithError(err).Warn("read the claim after add_claimant")
+		claim = run.claim()
+		claim.Claimant = req.GetClaimant()
 	}
 	return &pb.AddClaimantResponse{Result: &pb.AddClaimantResponse_Claim{Claim: claim}}, nil
 }

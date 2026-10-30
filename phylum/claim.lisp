@@ -39,10 +39,19 @@
 
 ;; claimant-schema is the JSON schema of the claimant input. Substrate checks
 ;; it before the input reaches the flow and refuses a bad input with a
-;; "schema" error, so the flow body never sees a claimant without a
-;; forename. An input refused this way commits nothing.
+;; "schema" error that commits nothing. It requires every field the
+;; identity check reads (mk-equifax-req needs forename, surname and dob),
+;; so a bad claimant is refused at the API, not failed inside the flow.
 (set 'claimant-schema
-     "{\"type\":\"object\",\"required\":[\"forename\"],\"properties\":{\"forename\":{\"type\":\"string\",\"minLength\":1}}}")
+     (json:dump-string
+       (sorted-map "type" "object"
+                   "required" (vector "forename" "surname" "dob" "nationality")
+                   "properties" (sorted-map
+                                  "forename" (sorted-map "type" "string" "minLength" 1)
+                                  "surname" (sorted-map "type" "string" "minLength" 1)
+                                  "dob" (sorted-map "type" "string" "minLength" 1)
+                                  "nationality" (sorted-map "type" "string"
+                                                            "pattern" "^NATIONALITY_[A-Z]+$")))))
 
 ;; claim is the claim process. details is the body of the create_claim
 ;; request: date_of_accident, damage_amount and claim_reason.
@@ -63,7 +72,7 @@
   (let* ([claimant (await-input 'claimant :from ("Org1MSP") :schema claimant-schema)]
          ;; Equifax expects "GB", not the API's enum name "NATIONALITY_GB".
          [person (assoc claimant "nationality"
-                        (string:trim-left (get claimant "nationality") "NATIONALITY_"))])
+                        (string:trim-prefix (get claimant "nationality") "NATIONALITY_"))])
     (await-connector 'verify-identity
                      (claim-event "EQUIFAX_ID_VERIFY"
                                   (mk-equifax-req person)
@@ -91,6 +100,11 @@
                                                 "Test Email"
                                                 "Hello, this is a test email")
                                   (flow:step-key ctx)))
+    ;; A payment gets a longer deadline than the other steps. When a
+    ;; deadline passes, the outcome of the request is unknown: the charge may
+    ;; have gone through. Here the claim fails and an operator checks it. A
+    ;; production flow would add :on-error and ask the payment provider for
+    ;; the charge's status with the same step key, (flow:step-key ctx 'pay).
     (await-connector 'pay
                      (claim-event "STRIPE_PAYMENT"
                                   (mk-stripe-charge-req
@@ -99,7 +113,8 @@
                                                 "currency"    "usd"
                                                 "source_id"   "mock_source_id"
                                                 "description" "Test Stripe charge"))
-                                  (flow:step-key ctx)))
+                                  (flow:step-key ctx))
+                     :timeout "24h")
     ;; The result is the finished claim. It reads details and claimant, so
     ;; both stay saved at every wait and get_claim can show them (:expose).
     (sorted-map "details"  details
