@@ -4,8 +4,10 @@ This directory contains the business logic ("phylum") for process automation
 on the Luther Platform. It defines logic that runs on participant nodes in a
 distributed system, with consistent execution enforced by the platform.
 
-Each phylum exposes named endpoints via `routes.lisp` and defines application
-behavior through [ELPS](https://github.com/luthersystems/elps) code.
+Each phylum exposes named endpoints and defines application behavior through
+[ELPS](https://github.com/luthersystems/elps) code. This phylum defines no
+`init` or `healthcheck` endpoint: `main.lisp` calls `router:set-service-info`,
+and the router's own endpoints report the service name and version.
 
 See the [Business Logic Development Guide](https://docs.luthersystems.com/develop-business-logic/business-logic/dev-language) for more details.
 
@@ -24,7 +26,6 @@ phylum/
 ├── claim_test.lisp     # Unit tests for the claim flow (flow-test)
 ├── flows/claim.mmd     # State graph of the claim flow, drawn from the code
 ├── main.lisp           # Entrypoint for phylum execution
-├── routes.lisp         # Service endpoints: init and healthcheck
 ```
 
 ---
