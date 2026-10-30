@@ -43,18 +43,24 @@
 ;; start-test-claim starts a claim as Org1MSP and returns its run ID.
 (defun start-test-claim (request-key)
   (flow-test:as "Org1MSP")
-  (get (flow-test:start 'claim request-key (mk-test-details)) "run_id"))
+  (let ([(sorted-map "run_id" run) (flow-test:start 'claim request-key (mk-test-details))])
+    run))
 
 ;; claim-view returns the run as get_claim returns it.
 (defun claim-view (run)
   (flow-test:run 'claim run))
 
 (test "a new claim waits for the claimant"
+  ;; A binding pattern takes the view apart. A view without one of these
+  ;; keys fails the test with a match-error that names the pattern.
   (let* ([run (start-test-claim "k1")]
-         [view (claim-view run)])
-    (assert-string= "waiting" (get view "state"))
-    (assert-string= "claimant" (get view "label"))
-    (assert-equal (mk-test-details) (get (get view "vars") "details"))))
+         [(sorted-map "state" state
+                      "label" label
+                      "vars" (sorted-map "details" details))
+          (claim-view run)])
+    (assert-string= "waiting" state)
+    (assert-string= "claimant" label)
+    (assert-equal (mk-test-details) details)))
 
 (test "a claim runs every step to done"
   (let* ([run (start-test-claim "k2")])
@@ -64,12 +70,15 @@
            (assert-string= step (get (claim-view run) "label"))
            (flow-test:reply 'claim run (sorted-map)))
          claim-steps)
-    (let* ([view (claim-view run)]
-           [result (get view "result")])
-      (assert-string= "done" (get view "state"))
-      (assert-string= "STATUS_PAID" (get result "status"))
-      (assert-equal (mk-test-claimant) (get result "claimant"))
-      (assert-equal (mk-test-details) (get result "details")))))
+    (let* ([(sorted-map "state" state
+                        "result" (sorted-map "status" status
+                                             "claimant" claimant
+                                             "details" details))
+            (claim-view run)])
+      (assert-string= "done" state)
+      (assert-string= "STATUS_PAID" status)
+      (assert-equal (mk-test-claimant) claimant)
+      (assert-equal (mk-test-details) details))))
 
 (test "a start is idempotent per request key"
   (let* ([run (start-test-claim "k3")]
@@ -95,6 +104,7 @@
   (let* ([run (start-test-claim "k5")])
     (flow-test:input 'claim 'claimant run (mk-test-claimant))
     (flow-test:reply-error 'claim run "equifax unavailable")
-    (let* ([view (claim-view run)])
-      (assert-string= "failed" (get view "state"))
-      (assert-string= "verify-identity" (get (get view "error") "label")))))
+    (let* ([(sorted-map "state" state "error" (sorted-map "label" label))
+            (claim-view run)])
+      (assert-string= "failed" state)
+      (assert-string= "verify-identity" label))))
