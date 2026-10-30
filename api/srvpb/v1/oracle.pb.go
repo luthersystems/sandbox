@@ -32,12 +32,12 @@ var File_srvpb_v1_oracle_proto protoreflect.FileDescriptor
 
 const file_srvpb_v1_oracle_proto_rawDesc = "" +
 	"\n" +
-	"\x15srvpb/v1/oracle.proto\x12\bsrvpb.v1\x1a\x1cgoogle/api/annotations.proto\x1a healthcheck/v1/healthcheck.proto\x1a\x12pb/v1/oracle.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\x82\x04\n" +
+	"\x15srvpb/v1/oracle.proto\x12\bsrvpb.v1\x1a\x1cgoogle/api/annotations.proto\x1a healthcheck/v1/healthcheck.proto\x1a\x12pb/v1/oracle.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\x85\x04\n" +
 	"\x0eSandboxService\x12\x8d\x01\n" +
 	"\x0eGetHealthCheck\x12%.healthcheck.v1.GetHealthCheckRequest\x1a&.healthcheck.v1.GetHealthCheckResponse\",\x92A\t\n" +
-	"\aService\x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/sandbox/health_check\x12l\n" +
-	"\vCreateClaim\x12\x19.pb.v1.CreateClaimRequest\x1a\x1a.pb.v1.CreateClaimResponse\"&\x92A\t\n" +
-	"\aService\x82\xd3\xe4\x93\x02\x14\"\x12/v1/sandbox/claims\x12\x82\x01\n" +
+	"\aService\x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/sandbox/health_check\x12o\n" +
+	"\vCreateClaim\x12\x19.pb.v1.CreateClaimRequest\x1a\x1a.pb.v1.CreateClaimResponse\")\x92A\t\n" +
+	"\aService\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/v1/sandbox/claims\x12\x82\x01\n" +
 	"\vAddClaimant\x12\x19.pb.v1.AddClaimantRequest\x1a\x1a.pb.v1.AddClaimantResponse\"<\x92A\t\n" +
 	"\aService\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/sandbox/claim/{claim_id}/claimant\x12m\n" +
 	"\bGetClaim\x12\x16.pb.v1.GetClaimRequest\x1a\x17.pb.v1.GetClaimResponse\"0\x92A\t\n" +
