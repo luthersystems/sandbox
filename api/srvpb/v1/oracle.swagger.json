@@ -259,6 +259,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "requestKey",
+            "description": "A key the client chooses for this request, at most 255 bytes. A retry\nwith the same key and body returns the same claim, so a client whose\nrequest timed out can send it again without making a second claim. When\nempty, the oracle makes a random key, and a retry makes a new claim.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -348,7 +355,16 @@
       "properties": {
         "claimant": {
           "$ref": "#/definitions/v1Claimant",
-          "title": "The claim details with updates"
+          "title": "The claimant; forename is required"
+        },
+        "gen": {
+          "type": "string",
+          "format": "int64",
+          "title": "The claim's gen, from CreateClaim or GetClaim"
+        },
+        "requestKey": {
+          "type": "string",
+          "description": "Optional. A retry with the same key, claimant and gen succeeds and\nchanges nothing, even after the claim has moved on."
         }
       },
       "description": "Request to update an existing claim."
@@ -415,11 +431,11 @@
         },
         "state": {
           "$ref": "#/definitions/v1ClaimState",
-          "title": "The current internal processing state of the claim"
+          "title": "Whether the claim waits, is done or failed"
         },
         "claimant": {
           "$ref": "#/definitions/v1Claimant",
-          "title": "Claimant details"
+          "title": "Claimant details, once AddClaimant has sent them"
         },
         "dateOfAccident": {
           "type": "string",
@@ -437,6 +453,19 @@
         "status": {
           "$ref": "#/definitions/pbv1Status",
           "title": "The final outcome of the claim"
+        },
+        "step": {
+          "type": "string",
+          "description": "The step the claim waits at, while state is CLAIM_STATE_WAITING:\n\"claimant\" (waits for AddClaimant), then \"verify-identity\",\n\"collect-policy\", \"verify-policy\", \"issue-invoice\", \"approve-invoice\",\n\"email-invoice\" and \"pay\" (each waits for a connector reply). These are\nthe labels of the awaits in phylum/claim.lisp."
+        },
+        "gen": {
+          "type": "string",
+          "format": "int64",
+          "description": "The claim's wait generation. It goes up by one each time the claim\nenters a step. AddClaimant must send the generation it read, so an\ninput meant for an earlier wait is refused, not applied to a later one."
+        },
+        "error": {
+          "type": "string",
+          "title": "Why the claim failed, while state is CLAIM_STATE_FAILED"
         }
       },
       "description": "Represents an insurance claim, storing its lifecycle, status, and related claimant details."
@@ -445,18 +474,12 @@
       "type": "string",
       "enum": [
         "CLAIM_STATE_UNSPECIFIED",
-        "CLAIM_STATE_NEW",
-        "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED",
-        "CLAIM_STATE_LOECLAIM_ID_VERIFIED",
-        "CLAIM_STATE_OOECLAIM_REVIEWED",
-        "CLAIM_STATE_OOECLAIM_VALIDATED",
-        "CLAIM_STATE_LOEFIN_INVOICE_ISSUED",
-        "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED",
-        "CLAIM_STATE_OOEFIN_INVOICE_APPROVED",
-        "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED"
+        "CLAIM_STATE_WAITING",
+        "CLAIM_STATE_DONE",
+        "CLAIM_STATE_FAILED"
       ],
       "default": "CLAIM_STATE_UNSPECIFIED",
-      "description": "Represents the processing state of the claim (process progress).\n\n - CLAIM_STATE_UNSPECIFIED: Default value (should not be used)\n - CLAIM_STATE_NEW: Claim was created\n - CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED: Claimant details submitted\n - CLAIM_STATE_LOECLAIM_ID_VERIFIED: Identity verified\n - CLAIM_STATE_OOECLAIM_REVIEWED: Claim reviewed\n - CLAIM_STATE_OOECLAIM_VALIDATED: Claim validated\n - CLAIM_STATE_LOEFIN_INVOICE_ISSUED: Invoice issued\n - CLAIM_STATE_OOEFIN_INVOICE_REVIEWED: Invoice reviewed\n - CLAIM_STATE_OOEFIN_INVOICE_APPROVED: Invoice approved\n - CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED: Payment triggered"
+      "description": "Where a claim is in its process.\n\nThe claim process is a durable flow (defflow) in the phylum. The flow\nkeeps the step it waits at, so the API reports that step by name (Claim.step)\nand keeps only three states here. Before the flow, this enum listed one\nvalue per step; values 4 to 9 are reserved so an old client never reads a\nnew meaning into them (luthersystems/sandbox#162).\n\n - CLAIM_STATE_UNSPECIFIED: Default value (should not be used)\n - CLAIM_STATE_WAITING: The claim waits at Claim.step for an input or a connector reply\n - CLAIM_STATE_DONE: The claim finished every step\n - CLAIM_STATE_FAILED: The claim stopped; Claim.error says why"
     },
     "v1Claimant": {
       "type": "object",
