@@ -6,8 +6,10 @@ package oracle
 
 import (
 	"context"
+	"strings"
 	"testing"
 
+	common "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/common/v1"
 	healthcheck "buf.build/gen/go/luthersystems/protos/protocolbuffers/go/healthcheck/v1"
 	pb "github.com/luthersystems/sandbox/api/pb/v1"
 	"github.com/luthersystems/svc/oracle"
@@ -56,6 +58,28 @@ func createClaim(t *testing.T, server *portal, id *string) bool {
 	return assert.Nil(t, err) && assert.NotNil(t, resp)
 }
 
+func testDetails() *pb.CreateClaimRequest {
+	return &pb.CreateClaimRequest{
+		DateOfAccident: "2024-01-15",
+		DamageAmount:   500000,
+		ClaimReason:    "Car accident due to adverse weather conditions.",
+	}
+}
+
+func testClaimant() *pb.Claimant {
+	return &pb.Claimant{
+		Dob:             "1945-11-01",
+		Surname:         "Smith",
+		Forename:        "Raymond",
+		FullAddress:     "3 High Street",
+		AddressNumber:   "3",
+		AddressStreet1:  "High Street",
+		AddressPostcode: "BA13 3BN",
+		AddressPostTown: "Westbury",
+		Nationality:     pb.Nationality_NATIONALITY_GB,
+	}
+}
+
 func getClaim(t *testing.T, server *portal, id string, dst **pb.Claim) bool {
 	t.Helper()
 	resp, err := server.GetClaim(context.Background(), &pb.GetClaimRequest{
@@ -92,4 +116,100 @@ func TestGetClaim(t *testing.T) {
 			}
 		}
 	}
+}
+
+// TestClaimFlow drives the claim flow through the oracle: a new claim waits
+// for its claimant, keeps the details it was created with, and moves to the
+// first connector step when the claimant arrives.
+func TestClaimFlow(t *testing.T) {
+	server, stop := makeTestServer(t)
+	t.Cleanup(stop)
+	ctx := context.Background()
+
+	created, err := server.CreateClaim(ctx, testDetails())
+	require.NoError(t, err)
+	require.Nil(t, created.GetException())
+	claim := created.GetClaim()
+	require.NotEmpty(t, claim.GetClaimId())
+	assert.Equal(t, pb.ClaimState_CLAIM_STATE_WAITING, claim.GetState())
+	assert.Equal(t, "claimant", claim.GetStep())
+	assert.Equal(t, testDetails().GetClaimReason(), claim.GetClaimReason())
+
+	got, err := server.GetClaim(ctx, &pb.GetClaimRequest{ClaimId: claim.GetClaimId()})
+	require.NoError(t, err)
+	require.Nil(t, got.GetException())
+	assert.Equal(t, "claimant", got.GetClaim().GetStep())
+	assert.Equal(t, claim.GetGen(), got.GetClaim().GetGen())
+	assert.Equal(t, testDetails().GetDamageAmount(), got.GetClaim().GetDamageAmount())
+	assert.Equal(t, testDetails().GetDateOfAccident(), got.GetClaim().GetDateOfAccident())
+
+	added, err := server.AddClaimant(ctx, &pb.AddClaimantRequest{
+		ClaimId:  claim.GetClaimId(),
+		Claimant: testClaimant(),
+		Gen:      claim.GetGen(),
+	})
+	require.NoError(t, err)
+	require.Nil(t, added.GetException())
+	after := added.GetClaim()
+	assert.Equal(t, pb.ClaimState_CLAIM_STATE_WAITING, after.GetState())
+	assert.Equal(t, "verify-identity", after.GetStep())
+	assert.Greater(t, after.GetGen(), claim.GetGen())
+	assert.Equal(t, "Raymond", after.GetClaimant().GetForename())
+	assert.Equal(t, pb.Nationality_NATIONALITY_GB, after.GetClaimant().GetNationality())
+	assert.Equal(t, testDetails().GetClaimReason(), after.GetClaimReason())
+}
+
+// TestCreateClaimRequestKey checks that a retried create with the same
+// request key returns the first claim, not a second one.
+func TestCreateClaimRequestKey(t *testing.T) {
+	server, stop := makeTestServer(t)
+	t.Cleanup(stop)
+	ctx := context.Background()
+	req := testDetails()
+	req.RequestKey = "create-1"
+	first, err := server.CreateClaim(ctx, req)
+	require.NoError(t, err)
+	require.Nil(t, first.GetException())
+	again, err := server.CreateClaim(ctx, req)
+	require.NoError(t, err)
+	require.Nil(t, again.GetException())
+	assert.Equal(t, first.GetClaim().GetClaimId(), again.GetClaim().GetClaimId())
+}
+
+// TestAddClaimantRefusals checks that the flow's refusals reach the client
+// as exceptions and change nothing.
+func TestAddClaimantRefusals(t *testing.T) {
+	server, stop := makeTestServer(t)
+	t.Cleanup(stop)
+	ctx := context.Background()
+	created, err := server.CreateClaim(ctx, testDetails())
+	require.NoError(t, err)
+	claim := created.GetClaim()
+
+	noName := testClaimant()
+	noName.Forename = ""
+	// code is the flow's refusal code, which the exception text starts with.
+	tests := []struct {
+		name string
+		req  *pb.AddClaimantRequest
+		code string
+	}{
+		{"missing forename", &pb.AddClaimantRequest{ClaimId: claim.GetClaimId(), Claimant: noName, Gen: claim.GetGen()}, "schema"},
+		{"stale gen", &pb.AddClaimantRequest{ClaimId: claim.GetClaimId(), Claimant: testClaimant(), Gen: claim.GetGen() + 1}, "stale-generation"},
+		{"unknown claim", &pb.AddClaimantRequest{ClaimId: "xyz", Claimant: testClaimant(), Gen: claim.GetGen()}, "not-found"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := server.AddClaimant(ctx, tc.req)
+			require.NoError(t, err)
+			require.NotNil(t, resp.GetException())
+			assert.Equal(t, common.Exception_BUSINESS, resp.GetException().GetType())
+			assert.True(t, strings.HasPrefix(resp.GetException().GetDescription(), tc.code+":"),
+				"exception %q should start with %q", resp.GetException().GetDescription(), tc.code)
+		})
+	}
+	got, err := server.GetClaim(ctx, &pb.GetClaimRequest{ClaimId: claim.GetClaimId()})
+	require.NoError(t, err)
+	assert.Equal(t, "claimant", got.GetClaim().GetStep())
+	assert.Equal(t, claim.GetGen(), got.GetClaim().GetGen())
 }

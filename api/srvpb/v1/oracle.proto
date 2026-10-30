@@ -105,7 +105,12 @@ service SandboxService {
   }
   // Create claim initiates the creation of the claim.
   rpc CreateClaim(pb.v1.CreateClaimRequest) returns (pb.v1.CreateClaimResponse) {
-    option (google.api.http) = {post: "/v1/sandbox/claims"};
+    // body: "*" maps the JSON body to CreateClaimRequest. Without it the
+    // gateway dropped the body, so a claim never got its details.
+    option (google.api.http) = {
+      post: "/v1/sandbox/claims"
+      body: "*"
+    };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
   // Add claimant updates claim details.

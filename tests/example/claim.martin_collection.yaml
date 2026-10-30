@@ -20,7 +20,12 @@ tests:
           pm.expect(data).to.not.have.property("exception");
           pm.expect(data).to.have.property("claim");
           pm.expect(data.claim).to.have.property("claim_id");
+          // A new claim waits for its claimant. gen is the claim's wait
+          // generation: Add claimant must send it back.
+          pm.expect(data.claim.state).to.eql("CLAIM_STATE_WAITING");
+          pm.expect(data.claim.step).to.eql("claimant");
           pm.environment.set("CLAIM_ID", data.claim.claim_id);
+          pm.environment.set("CLAIM_GEN", data.claim.gen);
       });
   - name: "Get claim"
     method: GET
@@ -32,7 +37,9 @@ tests:
           pm.response.to.have.status(200);
           pm.expect(data).to.not.have.property("exception");
           pm.expect(data).to.have.property("claim");
-          pm.expect(data.claim).to.have.property("state");
+          pm.expect(data.claim.state).to.eql("CLAIM_STATE_WAITING");
+          pm.expect(data.claim.step).to.eql("claimant");
+          pm.expect(data.claim.claim_reason).to.eql("Car accident due to adverse weather conditions.");
       });
   - name: "Add claimant"
     method: POST
@@ -40,6 +47,7 @@ tests:
     body: |
       {
         "claim_id": "{{CLAIM_ID}}",
+        "gen": "{{CLAIM_GEN}}",
         "claimant": {
           "account_number": "",
           "account_sort_code": "",
@@ -61,5 +69,9 @@ tests:
           pm.response.to.have.status(200);
           pm.expect(data).to.not.have.property("exception");
           pm.expect(data).to.have.property("claim");
-          pm.expect(data.claim).to.have.property("state");
+          // The claim has left the claimant step. Where it is now depends on
+          // how fast the Connector Hub answers, so the test does not name
+          // the step.
+          pm.expect(data.claim.step).to.not.eql("claimant");
+          pm.expect(data.claim.claimant.forename).to.eql("Raymond");
       });

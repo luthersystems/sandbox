@@ -7,6 +7,7 @@ toolchain go1.26.10
 require (
 	buf.build/gen/go/luthersystems/protos/protocolbuffers/go v1.36.12-20250430044901-c62151e471be.2
 	github.com/alecthomas/kong v1.16.1
+	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0
 	github.com/luthersystems/shiroclient-sdk-go v0.18.0
 	github.com/luthersystems/svc v0.19.2
@@ -26,7 +27,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect

@@ -6,6 +6,13 @@ peer-name: peer0
 peer-endpoint: "peer0.org1.luther.systems:7051"
 channel-name: luther
 chaincode-id: sandbox
+# The scheduler expires the claim flow's connector deadlines
+# (:connector-timeout in phylum/claim.lisp). Without it a request whose reply
+# never comes leaves the claim waiting for ever. The hub signs as Org1MSP,
+# which the flow lists in :admin-from, and the interval is well under the
+# flow's shortest deadline (1h).
+scheduler:
+  interval: 30s
 connectors:
   - name: EMAIL
     mock: true

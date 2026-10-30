@@ -156,6 +156,27 @@ serves a [JSON API](api/srvpb/v1/oracle.swagger.json) that provides endpoints to
 2. add a claimant to the claim
 3. retrieve claim details
 
+The claim process is a durable flow, written with substrate's `defflow`
+([phylum/claim.lisp](phylum/claim.lisp)). A new claim waits for its
+claimant. Then it calls seven systems in order through the Connector Hub:
+identity check, policy lookup, invoice, payment and so on. Each call runs in
+its own transaction, so the claim can wait as long as a system takes to
+answer. The flow's state graph is in
+[phylum/flows/claim.mmd](phylum/flows/claim.mmd).
+
+A claim from the API has:
+
+| Field | Meaning |
+|---|---|
+| `state` | `CLAIM_STATE_WAITING`, `CLAIM_STATE_DONE` or `CLAIM_STATE_FAILED` |
+| `step` | The step the claim waits at, while it waits: `claimant`, then one step per system (`verify-identity` ... `pay`) |
+| `gen` | The claim's wait generation. Send it back with "add claimant", so an input meant for an earlier step is refused |
+| `error` | Why the claim failed |
+
+"Create claim" takes an optional `request_key`. A retry with the same key
+returns the first claim, so a client whose request timed out can send it
+again safely.
+
 > To simplify the sandbox, we have omitted authentication which we handle
 > using [lutherauth](https://docs.luthersystems.com/luther/application/modules/lutherauth).
 > Authorization is implemented at the application layer over tokens issued by

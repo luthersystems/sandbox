@@ -1,0 +1,30 @@
+%% defflow claim
+flowchart TD
+  start((start))
+  a_claimant["input claimant"]
+  a_verify_identity["connector verify-identity<br/>deadline"]
+  a_collect_policy["connector collect-policy<br/>deadline"]
+  a_verify_policy["connector verify-policy<br/>deadline"]
+  a_issue_invoice["connector issue-invoice<br/>deadline"]
+  a_approve_invoice["connector approve-invoice<br/>deadline"]
+  a_email_invoice["connector email-invoice<br/>deadline"]
+  a_pay["connector pay<br/>deadline"]
+  done((done))
+  failed((failed))
+  start --> a_claimant
+  a_claimant --> a_verify_identity
+  a_claimant -. flow error .-> failed
+  a_verify_identity --> a_collect_policy
+  a_verify_identity -. flow error .-> failed
+  a_collect_policy --> a_verify_policy
+  a_collect_policy -. flow error .-> failed
+  a_verify_policy --> a_issue_invoice
+  a_verify_policy -. flow error .-> failed
+  a_issue_invoice --> a_approve_invoice
+  a_issue_invoice -. flow error .-> failed
+  a_approve_invoice --> a_email_invoice
+  a_approve_invoice -. flow error .-> failed
+  a_email_invoice --> a_pay
+  a_email_invoice -. flow error .-> failed
+  a_pay --> done
+  a_pay -. flow error .-> failed

@@ -41,18 +41,21 @@ enum Status {
   STATUS_PAID = 3; // Claim has been paid out
 }
 
-// Represents the processing state of the claim (process progress).
+// Where a claim is in its process.
+//
+// The claim process is a durable flow (defflow) in the phylum. The flow
+// keeps the step it waits at, so the API reports that step by name
+// (Claim.step) and keeps only three states here. Before the flow, this enum
+// listed one value per step. Those numbers and names are reserved and the
+// new values take new numbers, so a client built on the old enum never
+// reads a new meaning into an old number (luthersystems/sandbox#162).
 enum ClaimState {
+  reserved 1 to 9;
+  reserved "CLAIM_STATE_NEW", "CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED", "CLAIM_STATE_LOECLAIM_ID_VERIFIED", "CLAIM_STATE_OOECLAIM_REVIEWED", "CLAIM_STATE_OOECLAIM_VALIDATED", "CLAIM_STATE_LOEFIN_INVOICE_ISSUED", "CLAIM_STATE_OOEFIN_INVOICE_REVIEWED", "CLAIM_STATE_OOEFIN_INVOICE_APPROVED", "CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED";
   CLAIM_STATE_UNSPECIFIED = 0; // Default value (should not be used)
-  CLAIM_STATE_NEW = 1; // Claim was created
-  CLAIM_STATE_LOECLAIM_DETAILS_COLLECTED = 2; // Claimant details submitted
-  CLAIM_STATE_LOECLAIM_ID_VERIFIED = 3; // Identity verified
-  CLAIM_STATE_OOECLAIM_REVIEWED = 4; // Claim reviewed
-  CLAIM_STATE_OOECLAIM_VALIDATED = 5; // Claim validated
-  CLAIM_STATE_LOEFIN_INVOICE_ISSUED = 6; // Invoice issued
-  CLAIM_STATE_OOEFIN_INVOICE_REVIEWED = 7; // Invoice reviewed
-  CLAIM_STATE_OOEFIN_INVOICE_APPROVED = 8; // Invoice approved
-  CLAIM_STATE_OOEPAY_PAYMENT_TRIGGERED = 9; // Payment triggered
+  CLAIM_STATE_WAITING = 10; // The claim waits at Claim.step for an input or a connector reply
+  CLAIM_STATE_DONE = 11; // The claim finished every step
+  CLAIM_STATE_FAILED = 12; // The claim stopped; Claim.error says why
 }
 
 // Request to create a claim.
@@ -60,17 +63,37 @@ message CreateClaimRequest {
   string date_of_accident = 1; // Date when the accident occurred (YYYY-MM-DD)
   int64 damage_amount = 2; // Damage amount (stored in cents to avoid floating point issues)
   string claim_reason = 3; // Brief description of the reason for the claim
+  // A key the client chooses for this request, at most 255 bytes. A retry
+  // with the same key and body returns the same claim, so a client whose
+  // request timed out can send it again without making a second claim. When
+  // empty, the oracle makes a random key, and a retry makes a new claim.
+  // The sandbox has no authentication, so the oracle signs every request
+  // with one identity and all clients share one key space: use a key no
+  // other client can choose, such as a UUID. An application with
+  // authentication would scope the key to the user.
+  string request_key = 4;
 }
 
 // Represents an insurance claim, storing its lifecycle, status, and related claimant details.
 message Claim {
   string claim_id = 1; // Unique ID assigned by the backend (immutable)
-  ClaimState state = 2; // The current internal processing state of the claim
-  Claimant claimant = 3; // Claimant details
+  ClaimState state = 2; // Whether the claim waits, is done or failed
+  Claimant claimant = 3; // Claimant details, once AddClaimant has sent them
   string date_of_accident = 4; // Date when the accident occurred (YYYY-MM-DD)
   int64 damage_amount = 5; // Damage amount (stored in cents to prevent floating point issues)
   string claim_reason = 6; // Description of why the claim was filed
   Status status = 7; // The final outcome of the claim
+  // The step the claim waits at, while state is CLAIM_STATE_WAITING:
+  // "claimant" (waits for AddClaimant), then "verify-identity",
+  // "collect-policy", "verify-policy", "issue-invoice", "approve-invoice",
+  // "email-invoice" and "pay" (each waits for a connector reply). These are
+  // the labels of the awaits in phylum/claim.lisp.
+  string step = 8;
+  // The claim's wait generation. It goes up by one each time the claim
+  // enters a step. AddClaimant must send the generation it read, so an
+  // input meant for an earlier wait is refused, not applied to a later one.
+  int64 gen = 9;
+  string error = 10; // Why the claim failed, while state is CLAIM_STATE_FAILED
 }
 
 // Response for creating a claim.
@@ -84,7 +107,11 @@ message CreateClaimResponse {
 // Request to update an existing claim.
 message AddClaimantRequest {
   string claim_id = 1;
-  Claimant claimant = 2; // The claim details with updates
+  Claimant claimant = 2; // The claimant; forename is required
+  int64 gen = 3; // The claim's gen, from CreateClaim or GetClaim
+  // Optional. A retry with the same key, claimant and gen succeeds and
+  // changes nothing, even after the claim has moved on.
+  string request_key = 4;
 }
 
 // Response for updating a claim.
