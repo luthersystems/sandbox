@@ -14,18 +14,19 @@
 
 ;; init endpoint: called during a successful over-the-air update.
 ;; Stores the current phylum version and logs upgrade/init info.
+;; match picks the log line: () is the first install, and any other value
+;; is the version this update replaces.
 (defendpoint "init" ()
-  (let* ([prev-version (statedb:get app-version-key)])
-    (if (nil? prev-version)
-      (cc:infof (sorted-map "phylum_version" version
-                            "build_id" build-id)
-                "Phylum initialized")
-      (cc:infof (sorted-map "phylum_version" version
-                            "phylum_version_old" prev-version
-                            "build_id" build-id)
-                "Phylum upgraded"))
-    (statedb:put app-version-key version)
-    (route-success ())))
+  (match (statedb:get app-version-key)
+    (() (cc:infof (sorted-map "phylum_version" version
+                              "build_id" build-id)
+                  "Phylum initialized"))
+    (prev-version (cc:infof (sorted-map "phylum_version" version
+                                        "phylum_version_old" prev-version
+                                        "build_id" build-id)
+                            "Phylum upgraded")))
+  (statedb:put app-version-key version)
+  (route-success ()))
 
 ;; healthcheck endpoint: returns static service metadata and timestamp.
 ;; cc:force-no-commit-tx makes the transaction read-only: a health check
