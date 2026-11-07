@@ -178,7 +178,7 @@ couchdb-up: DBMODE = couchdb
 couchdb-up: fnb-up gateway-up
 
 .PHONY: up
-up: generate-chaincodes .env fnb-up gateway-up connectorhub-up
+up: generate-chaincodes fnb-up gateway-up connectorhub-up
 
 .PHONY: fnb-up
 fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
@@ -518,8 +518,3 @@ compile-phylum-%: $$(shell find -L phylum_$$* -name "*.lisp" -not -path "*/build
 
 chaincodes/:
 	mkdir -p chaincodes/
-
-CHAINCODE_ID_FILES := $(wildcard ./chaincodes/*.id)
-
-.env: $(CHAINCODE_ID_FILES)
-	@./scripts/env.sh
