@@ -115,7 +115,7 @@ up: all service-down storage-down storage-up service-up
 	@
 
 .PHONY: down
-down: explorer-down service-down storage-down
+down: service-down storage-down
 	@
 
 .PHONY: init
@@ -131,7 +131,7 @@ mem-up: all mem-down
 	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py mem up -d
 
 .PHONY: mem-down
-mem-down: explorer-down
+mem-down:
 	-./network_compose.py mem down
 
 # citest runs all tests within containers, as in CI.
@@ -160,7 +160,6 @@ unit: unit-portal unit-other
 .PHONY: unit-other
 unit-other: phylumtest
 	@echo "phylum tests passed"
-
 
 # NOTE:  The `citest` target manages creating/destroying a compose network.  To
 # run tests repeatedly execute the `integration` target directly.
@@ -198,30 +197,6 @@ ${STATIC_PLUGINS_DUMMY}:
 	touch $@
 
 ${SUBSTRATE_PLUGIN}: ${STATIC_PLUGINS_DUMMY}
-	@
-
-.PHONY: explorer
-explorer: explorer-up-clean
-	@
-
-.PHONY: explorer-up
-explorer-up: make-C/explorer/up
-	@
-
-.PHONY: explorer-up-clean
-explorer-up-clean: make-C/explorer/up-clean
-	@
-
-.PHONY: explorer-down
-explorer-down: make-C/explorer/down
-	@
-
-.PHONY: explorer-clean
-explorer-clean: make-C/explorer/down-clean
-	@
-
-.PHONY: explorer-watch
-explorer-watch: make-C/explorer/watch
 	@
 
 .PHONY: observability-up observability-down
