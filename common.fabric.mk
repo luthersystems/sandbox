@@ -19,10 +19,18 @@ PHYLUM_VERSION_FILE=./build/phylum_version
 DOCKER_CHOWN_USER ?= $(shell id -u ${USER}):$(shell id -g ${USER})
 
 # NETWORK_BUILDER is the entrypoint into the NETWORK_BUILDER_IMAGE for all
-# commands.
+# commands. Every recipe passes it last, after its own docker run options.
 NETWORK_BUILDER_IMAGE ?= luthersystems/fabric-network-builder
 NETWORK_BUILDER_TARGET ?= docker-pull/${NETWORK_BUILDER_IMAGE}\:${NETWORK_BUILDER_VERSION}
-NETWORK_BUILDER=${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION} --chown "${DOCKER_CHOWN_USER}"
+NETWORK_BUILDER_FQN=${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
+# The builder (v0.1.0 on) runs as nobody, not root. Run it as your own user,
+# so the files it writes are yours, and add the group of the docker socket
+# as the container sees it (on Docker Desktop it is not the group of the
+# host's socket file). The image's own stat reads that group when the recipe
+# runs.
+NETWORK_BUILDER_USER=-u "${DOCKER_CHOWN_USER}" \
+	--group-add "$$(${DOCKER_RUN} ${DOCKER_IN_DOCKER_MOUNT} --entrypoint stat ${NETWORK_BUILDER_FQN} -c %g /var/run/docker.sock)"
+NETWORK_BUILDER=${NETWORK_BUILDER_USER} ${NETWORK_BUILDER_FQN}
 
 SHIROCLIENT_IMAGE ?= luthersystems/shiroclient
 CONNECTORHUB_IMAGE ?= luthersystems/connectorhub
@@ -61,6 +69,10 @@ FABRIC_IMAGE_TARGETS=$(addprefix docker-pull/,${FABRIC_IMAGES})
 
 FABRIC_DOCKER_NETWORK=byfn
 
+# The gateway and connectorhub images run as nobody. They read the private
+# keys in crypto-config/, which the builder writes as your user with mode
+# 0600, so they run as your user too.
+FABRIC_CLIENT_USER=-u "${DOCKER_CHOWN_USER}"
 DOCKER_FABRIC_OPTS ?= -e SHIROCLIENT_CLIENT_DEMO_MODE=true
 
 .PHONY: default
@@ -192,8 +204,9 @@ fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 		-e CHANNEL=${CHANNEL} \
 		-e FABRIC_DOMAIN=${FABRIC_DOMAIN} \
 		-e FABRIC_DBMODE="${DBMODE}" \
-		--entrypoint bash \
-		${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
+		${NETWORK_BUILDER_USER} \
+		--entrypoint sh \
+		${NETWORK_BUILDER_FQN}
 
 .PHONY: gateway-up
 gateway-up: ${START_GATEWAYS}
@@ -214,6 +227,7 @@ start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
@@ -245,6 +259,7 @@ start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
 	${DOCKER} run $(filter-out --rm --rm=true --rm=1,${DOCKER_RUN_OPTS}) -d --name ${name} \
 		-v "${CURDIR}:/tmp/fabric:ro" \
 		-v "$(abspath build/volume/checkpoint):/tmp/checkpoint:rw" \
+		${FABRIC_CLIENT_USER} \
 		-w "/tmp/fabric" \
 		${port_fw} \
 		--network ${FABRIC_DOCKER_NETWORK} \
@@ -264,6 +279,7 @@ notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp bu
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_${ccname}/phylum.zip):/tmp/phylum.zip:ro" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-w "/tmp/fabric" \
 		-e ORG="${FABRIC_ORG}" \
@@ -371,6 +387,7 @@ shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp bui
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "$(abspath build/phylum_$*/phylum.zip):/tmp/phylum.zip:ro" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -386,6 +403,7 @@ call_cmd-%:
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -405,6 +423,7 @@ enable_logging-%:
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -422,6 +441,7 @@ disable_logging-%:
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -438,6 +458,7 @@ metadump_cmd-%:
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
@@ -454,6 +475,7 @@ get_phyla-%:
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
 		-v "${CURDIR}:/tmp/fabric:ro" \
+		${FABRIC_CLIENT_USER} \
 		${DOCKER_FABRIC_OPTS} \
 		-e ORG="${FABRIC_ORG}" \
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
