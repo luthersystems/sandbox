@@ -99,10 +99,13 @@ clean-generated:
 	rm -rf \
 		base \
 		channel-artifacts \
+		collections.json \
 		configtx.yaml \
+		core.yaml \
 		couchdb \
 		crypto-config \
 		crypto-config.yaml \
+		docker-compose-ccaas.yaml \
 		docker-compose-cli.yaml \
 		docker-compose-couch.yaml \
 		docker-compose-e2e-template.yaml \
@@ -113,6 +116,12 @@ clean-generated:
 		shiroclient.yaml \
 		shiroclient_fast.yaml \
 		scripts
+
+# crypto-config stands for every file the builder generates (clean-generated
+# lists them). They are not kept in git: the first target that needs the
+# network generates them, sized by GENERATE_OPTS.
+crypto-config:
+	$(MAKE) --no-print-directory generate
 
 .PHONY: go-test
 go-test:
@@ -172,7 +181,7 @@ couchdb-up: fnb-up gateway-up
 up: generate-chaincodes .env fnb-up gateway-up connectorhub-up
 
 .PHONY: fnb-up
-fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \
@@ -185,7 +194,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 			--cc-version "${CC_VERSION}"
 
 .PHONY: fnb-extend
-fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \
@@ -195,7 +204,7 @@ fnb-extend: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
 			--domain-name=${FABRIC_DOMAIN}
 
 .PHONY: fnb-shell
-fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS}
+fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 	${DOCKER_RUN} -t \
 		${DOCKER_IN_DOCKER_MOUNT} \
 		-v "${CURDIR}:${CURDIR}" \
