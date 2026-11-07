@@ -34,3 +34,14 @@ jobs:
         with:
           kit: ${{ steps.oracle.outputs.kit }}
           images: ${{ steps.oracle.outputs.image }}
+
+  # Start and stop the local Fabric network (fabric/Makefile fnb-smoke) with
+  # the builder as the runner's user, not root, as `make up` does. The
+  # runner image has Docker.
+  fabric-network:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start and stop the local Fabric network
+        run: make -C fabric fnb-smoke
