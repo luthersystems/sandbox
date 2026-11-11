@@ -81,7 +81,12 @@ FABRIC_DOCKER_NETWORK=byfn
 # The gateway and connectorhub images run as nobody. They read the private
 # keys in crypto-config/, which the builder writes as your user with mode
 # 0600, so they run as your user too.
-FABRIC_CLIENT_USER=-u "${DOCKER_CHOWN_USER}"
+#
+# Your uid is not in the image's /etc/passwd, so Go's user.Current fails in
+# these static binaries unless USER is set. With an OTLP endpoint (TRACING=1)
+# the gateway's tracer reads the process owner at start and exits on that
+# error, so USER is set for them.
+FABRIC_CLIENT_USER=-u "${DOCKER_CHOWN_USER}" -e USER=sandbox
 # The gateway and the shiroclient commands need a Luther licence or demo
 # mode. Demo mode needs no file, but stops the network after 1,500 blocks or
 # 7 days, so long-lived or heavily tested networks want a real licence. Put
