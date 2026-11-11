@@ -251,7 +251,7 @@ start-gw-%: port=$$(( 8081 + ${idx} ))
 start-gw-%: metrics_port=$$(( 9601 + ${idx} ))
 start-gw-%: filter_args=$(if ${filter},-f ${filter})
 ifdef EXPOSE_GATEWAY
-start-gw-%: port_fw=-p "${port}:${port}"
+start-gw-%: port_fw=-p "127.0.0.1:${port}:${port}"
 endif
 start-gw-%: ${SHIROCLIENT_TARGET} license-check build/volume/msp build/volume/enroll_user
 	${DOCKER_RUN} -d --name ${name} \
@@ -280,7 +280,7 @@ start-ch-%: name=$(word 2,${parts})
 start-ch-%: ccname=$(word 3,${parts})
 start-ch-%: port=$$(( 9091 + ${idx} ))
 ifdef EXPOSE_CONNECTORHUB
-start-ch-%: port_fw=-p "${port}:8080"
+start-ch-%: port_fw=-p "127.0.0.1:${port}:8080"
 endif
 # No --rm: `docker run -d` succeeds as soon as the container starts, so a
 # connectorhub that crashes on startup would be deleted along with its logs.
