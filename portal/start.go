@@ -25,6 +25,7 @@ func (r *startCmd) Run() error {
 	cfg.Version = version.Version
 	cfg.PhylumPath = r.PhylumPath
 	cfg.SetOTLPEndpoint(r.OTLPEndpoint)
+	oracle.ConfigureProfileSampling(cfg)
 	cfg.SetSwaggerHandler(api.SwaggerHandlerOrPanic("v1/oracle"))
 	cfg.ListenAddress = r.ListenAddress
 	cfg.GatewayEndpoint = r.GatewayEndpoint
