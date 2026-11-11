@@ -14,11 +14,11 @@ SERVICE_DIR=portal
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
 # https://github.com/luthersystems/buildenv
-BUILDENV_TAG=v0.1.58
+BUILDENV_TAG=v0.1.59
 # The build-harden kit of the same buildenv release, pinned by digest.
 # CI checks the built oracle image with this kit's policy, through the shared
 # action luthersystems/.github/actions/harden-check. Bump it with BUILDENV_TAG.
-HARDEN_KIT=luthersystems/build-harden:v0.1.58@sha256:e5bd12cc7cc93e0cdd58ea644f02c6aff9c65e5db53c83048e46d8404c4653a4
+HARDEN_KIT=luthersystems/build-harden:v0.1.59@sha256:3721ba34c0e66a4a36c01dd83d0fde0d48c26cec2155fa0cb4d11b944e799ed9
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
