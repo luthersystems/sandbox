@@ -14,25 +14,28 @@ SERVICE_DIR=portal
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
 # https://github.com/luthersystems/buildenv
-BUILDENV_TAG=v0.1.48
+BUILDENV_TAG=v0.1.58
 # The build-harden kit of the same buildenv release, pinned by digest.
 # CI checks the built oracle image with this kit's policy, through the shared
 # action luthersystems/.github/actions/harden-check. Bump it with BUILDENV_TAG.
-HARDEN_KIT=luthersystems/build-harden:v0.1.48@sha256:f7bad87a42183bb34124af5eeea4779069dcd3354ecd40ddf8c1d3fb9f788b33
+HARDEN_KIT=luthersystems/build-harden:v0.1.58@sha256:e5bd12cc7cc93e0cdd58ea644f02c6aff9c65e5db53c83048e46d8404c4653a4
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.253.0
+# Substrate stays on the latest v2 release: v3 changes the phylum API, so
+# moving to it is a planned upgrade, not a version bump.
+SUBSTRATE_VERSION=v2.257.0
 CC_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${CC_VERSION}
 VERSION_SUBSTRATE=${CC_VERSION} # is this needed
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
-CONNECTORHUB_VERSION=v0.0.28
+CONNECTORHUB_VERSION=v0.0.29
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 # https://github.com/luthersystems/fabric-network-builder
 NETWORK_BUILDER_VERSION=v0.1.1
-MARTIN_VERSION=v1.2.0
+# https://hub.docker.com/r/luthersystems/martin (the e2e test runner)
+MARTIN_VERSION=v1.3.0
 
 # A golang module proxy server can greatly help speed up docker builds but the
 # official proxy at https://proxy.golang.org only works for public modules.
