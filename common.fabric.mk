@@ -30,7 +30,16 @@ NETWORK_BUILDER_FQN=${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
 # runs.
 NETWORK_BUILDER_USER=-u "${DOCKER_CHOWN_USER}" \
 	--group-add "$$(${DOCKER_RUN} ${DOCKER_IN_DOCKER_MOUNT} --entrypoint stat ${NETWORK_BUILDER_FQN} -c %g /var/run/docker.sock)"
-NETWORK_BUILDER=${NETWORK_BUILDER_USER} ${NETWORK_BUILDER_FQN}
+# NETWORK_BUILDER_ENV gives the builder (v0.1.1 on) the Fabric image
+# namespace and tags from this project's config, so make pulls and the
+# network runs the same images. Set FABRIC_IMAGE_NS to pull through a mirror,
+# for example an ECR pull-through cache of Docker Hub:
+#   make up FABRIC_IMAGE_NS=123456789012.dkr.ecr.us-east-1.amazonaws.com/docker-hub/hyperledger
+NETWORK_BUILDER_ENV=-e FNB_IMAGENS="${FABRIC_IMAGE_NS}" \
+	-e FNB_IMAGETAG="${FABRIC_IMAGE_TAG}" \
+	-e FNB_CAIMAGETAG="${FABRIC_CA_IMAGE_TAG}" \
+	-e FNB_BASEIMAGETAG="${BASE_IMAGE_TAG}"
+NETWORK_BUILDER=${NETWORK_BUILDER_USER} ${NETWORK_BUILDER_ENV} ${NETWORK_BUILDER_FQN}
 
 SHIROCLIENT_IMAGE ?= luthersystems/shiroclient
 CONNECTORHUB_IMAGE ?= luthersystems/connectorhub
@@ -58,7 +67,7 @@ FABRIC_ORG ?= org1
 FABRIC_DOMAIN ?= luther.systems
 
 FABRIC_IMAGE_NAMES=peer orderer ccenv
-FABRIC_IMAGE_NS=hyperledger
+FABRIC_IMAGE_NS ?= hyperledger
 FABRIC_IMAGE_FQNS=$(patsubst %,${FABRIC_IMAGE_NS}/fabric-%,${FABRIC_IMAGE_NAMES})
 FABRIC_CA_IMAGE_FQN=${FABRIC_IMAGE_NS}/fabric-ca
 DBMODE ?= goleveldb
@@ -85,7 +94,7 @@ images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 
 .PHONY: clean-chaincodes
 clean-chaincodes:
-	rm -rf chaincodes/*.{tar.gz,id} .env
+	rm -rf chaincodes/*.{tar.gz,id}
 
 .PHONY: clean
 clean: clean-chaincodes
@@ -214,6 +223,7 @@ fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 		-e FABRIC_DOMAIN=${FABRIC_DOMAIN} \
 		-e FABRIC_DBMODE="${DBMODE}" \
 		${NETWORK_BUILDER_USER} \
+		${NETWORK_BUILDER_ENV} \
 		--entrypoint sh \
 		${NETWORK_BUILDER_FQN}
 

@@ -31,7 +31,7 @@ SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 CONNECTORHUB_VERSION=v0.0.28
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 # https://github.com/luthersystems/fabric-network-builder
-NETWORK_BUILDER_VERSION=v0.1.0
+NETWORK_BUILDER_VERSION=v0.1.1
 MARTIN_VERSION=v1.2.0
 
 # A golang module proxy server can greatly help speed up docker builds but the
@@ -50,7 +50,10 @@ GONOPROXY ?= ${GOPRIVATE}
 GONOSUMDB ?= ${GOPRIVATE}
 
 # These variables configure the Hyperledger Fabric image versions for running
-# the full test network.
-FABRIC_IMAGE_TAG=2.5.13
-FABRIC_CA_IMAGE_TAG=1.5.12
+# the full test network. They match the defaults of NETWORK_BUILDER_VERSION
+# (its internal/cli/images.go). The Makefiles pass them to the builder as
+# FNB_IMAGETAG, FNB_CAIMAGETAG and FNB_BASEIMAGETAG, so the images that make
+# pulls are the ones the network runs, even when the two drift apart.
+FABRIC_IMAGE_TAG=2.5.16
+FABRIC_CA_IMAGE_TAG=1.5.21
 BASE_IMAGE_TAG=0.4.22
