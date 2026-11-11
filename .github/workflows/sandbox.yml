@@ -45,3 +45,30 @@ jobs:
       - uses: actions/checkout@v7
       - name: Start and stop the local Fabric network
         run: make -C fabric fnb-smoke
+
+  # Run the e2e tests with the tracing stack (make up TRACING=1) and check
+  # that the oracle, gateway and chaincode each sent spans, to the span file
+  # and to Tempo (scripts/check-traces.sh). Tracing can break without any
+  # test failing, so this job is what notices. The build job runs the same
+  # tests without tracing, as a network without a collector runs.
+  tracing:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Start the network with tracing
+        run: script -q -e -c "make up TRACING=1"
+      - name: Run the e2e tests
+        run: script -q -e -c "make integration"
+      - name: Check the traces
+        run: scripts/check-traces.sh
+      - name: Show the tracing stack logs
+        if: failure()
+        run: docker logs otelcol; docker logs tempo
+      - name: Stop the network
+        if: always()
+        run: make down
