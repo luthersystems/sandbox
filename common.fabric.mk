@@ -82,7 +82,19 @@ FABRIC_DOCKER_NETWORK=byfn
 # keys in crypto-config/, which the builder writes as your user with mode
 # 0600, so they run as your user too.
 FABRIC_CLIENT_USER=-u "${DOCKER_CHOWN_USER}"
-DOCKER_FABRIC_OPTS ?= -e SHIROCLIENT_CLIENT_DEMO_MODE=true
+# The gateway and the shiroclient commands need a Luther licence or demo
+# mode. Demo mode needs no file, but stops the network after 1,500 blocks or
+# 7 days, so long-lived or heavily tested networks want a real licence. Put
+# yours at .luther-license.yaml in the repository root (git ignores it), or
+# set LICENSE_FILE to its absolute path. With the file there, it is mounted at
+# /tmp/license.yaml (not shiroclient's default /tmp/fabric/license.yaml,
+# because /tmp/fabric is a read-only mount); without it, demo mode is used,
+# so a fresh clone and CI run with no licence. license-check stops a run
+# where LICENSE_FILE was set by hand and names no file, rather than fall back
+# to demo mode without saying so.
+LICENSE_FILE ?= ${PROJECT_ABS_DIR}/.luther-license.yaml
+LICENSE_OPTS=$(if $(wildcard ${LICENSE_FILE}),-v "$(abspath ${LICENSE_FILE}):/tmp/license.yaml:ro" -e SHIROCLIENT_CLIENT_LICENSE_FILE=/tmp/license.yaml,-e SHIROCLIENT_CLIENT_DEMO_MODE=true)
+DOCKER_FABRIC_OPTS ?= ${LICENSE_OPTS}
 
 .PHONY: default
 default: images
@@ -241,7 +253,7 @@ start-gw-%: filter_args=$(if ${filter},-f ${filter})
 ifdef EXPOSE_GATEWAY
 start-gw-%: port_fw=-p "${port}:${port}"
 endif
-start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
+start-gw-%: ${SHIROCLIENT_TARGET} license-check build/volume/msp build/volume/enroll_user
 	${DOCKER_RUN} -d --name ${name} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
@@ -292,7 +304,7 @@ start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
 notify-gw-%: parts=$(subst ., ,$*)
 notify-gw-%: name=$(word 2,${parts})
 notify-gw-%: ccname=$(word 3,${parts})
-notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
+notify-gw-%: ${SHIROCLIENT_TARGET} license-check compile-phylum-$$(ccname) build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} --rm -t \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
@@ -397,10 +409,16 @@ ${PHYLUM_VERSION_FILE}:
 ${PHYLUM_VERSION_FILE}_exists:
 	@test -f ${PHYLUM_VERSION_FILE}
 
+.PHONY: license-check
+license-check:
+	@$(if $(filter file,$(origin LICENSE_FILE)),true,test -f "${LICENSE_FILE}") || \
+		{ echo "LICENSE_FILE=${LICENSE_FILE}: no such file. Unset LICENSE_FILE to use demo mode." >&2; exit 1; }
+	@echo "Luther licence: $(if $(wildcard ${LICENSE_FILE}),${LICENSE_FILE},none, using demo mode)"
+
 .PHONY: init
 init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
 
-shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
+shiro-init-phylum-%: ${SHIROCLIENT_TARGET} license-check compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} -t \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
