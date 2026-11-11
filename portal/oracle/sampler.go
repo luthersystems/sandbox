@@ -25,11 +25,16 @@ const ProfileRequestHeader = "x-profile-request"
 // ProfileSampler samples a new trace when its request carries
 // ProfileRequestHeader with the value "1", and otherwise drops it. A span
 // with a parent follows the parent's decision, so every span of a profiled
-// request is kept and a caller that already traces the request keeps
-// control of it.
+// request is kept. (The oracle's gateway does not forward a caller's
+// traceparent header, so each request starts a new trace here.)
 //
 // The oracle forwards the header from HTTP to gRPC metadata only when it is
 // in Config.ForwardedHeaders; see ConfigureProfileSampling.
+//
+// Any client can send the header. That is what a local network wants. An
+// oracle that untrusted clients can reach, with an OTLP endpoint, should
+// have its ingress remove the header, or the clients choose how much it
+// traces.
 func ProfileSampler() sdktrace.Sampler {
 	return sdktrace.ParentBased(profileRootSampler{})
 }
@@ -65,6 +70,8 @@ func profileRequested(ctx context.Context) bool {
 // reads it, and sets ProfileSampler as the tracer's sampler. Without a
 // sampler the oracle would trace every request once an OTLP endpoint is
 // set, including the health probes that run every few seconds.
+// SANDBOX_ORACLE_TRACE_ALL=true (portal/start.go) skips it, for a collector
+// that should get every request.
 func ConfigureProfileSampling(cfg *oracle.Config) {
 	cfg.ForwardedHeaders = append(cfg.ForwardedHeaders, ProfileRequestHeader)
 	cfg.TraceOpts = append(cfg.TraceOpts, opttrace.WithSampler(ProfileSampler()))

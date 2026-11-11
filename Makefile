@@ -123,9 +123,12 @@ service-down:
 #
 # An endpoint you export yourself (for example SANDBOX_ORACLE_OTLP_ENDPOINT
 # to a collector of your own) wins over TRACING's default.
+#
+# Only 1, true, yes or on turn it on, so TRACING=0 or TRACING=false is off.
 TRACING ?=
+TRACING_ON=$(filter 1 true yes on,${TRACING})
 TRACING_OTLP_ENDPOINT ?= http://otelcol:4317
-ifneq (${TRACING},)
+ifneq (${TRACING_ON},)
 SANDBOX_ORACLE_OTLP_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
 SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
 CHAINCODE_OTLP_TRACER_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
@@ -141,9 +144,13 @@ TRACING_COMPOSE=DOCKER_UID=$$(id -u) DOCKER_GID=$$(id -g) \
 TRACING_SPAN_FILE=build/otlp/traces.jsonl
 
 .PHONY: tracing-up
-# Each start of the stack begins a new span file, as Tempo begins empty, so
-# the file holds only the spans of this network.
-tracing-up:
+# tracing-up joins the byfn network, so it stops with a clear message when
+# no network is running. It stops a running stack first and starts a new
+# span file, so a running otelcol never keeps writing to a deleted file, and
+# the file, like Tempo, holds only the spans of the new stack.
+tracing-up: tracing-down
+	@docker network inspect byfn >/dev/null 2>&1 || \
+		{ echo "tracing-up: no byfn network. Run make up or make mem-up first, or use TRACING=1 with them." >&2; exit 1; }
 	mkdir -p $(dir ${TRACING_SPAN_FILE})
 	rm -f $(dir ${TRACING_SPAN_FILE})traces*.jsonl
 	${TRACING_COMPOSE} up -d
@@ -154,7 +161,7 @@ tracing-down:
 	-${TRACING_COMPOSE} down --volumes
 
 .PHONY: up
-up: all service-down tracing-down storage-down storage-up $(if ${TRACING},tracing-up) service-up
+up: all service-down tracing-down storage-down storage-up $(if ${TRACING_ON},tracing-up) service-up
 	@
 
 .PHONY: down
@@ -181,7 +188,7 @@ upgrade: all service-down init service-up
 .PHONY: mem-up
 mem-up: all mem-down
 	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py mem up -d
-	$(if ${TRACING},$(MAKE) tracing-up)
+	$(if ${TRACING_ON},$(MAKE) tracing-up)
 
 .PHONY: mem-down
 mem-down: tracing-down

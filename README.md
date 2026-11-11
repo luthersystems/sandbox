@@ -431,7 +431,8 @@ The oracle traces a request only when it has the header
 `x-profile-request: 1` ([portal/oracle/sampler.go](portal/oracle/sampler.go)).
 The gateway and the chaincode follow the oracle's decision, so a traced
 request is traced end to end, and other traffic, such as the health checks
-that run every few seconds, is not. The Martin tests in [tests/](tests/) send
+that run every few seconds, is not. Set `SANDBOX_ORACLE_TRACE_ALL=true` to
+trace every request instead. The Martin tests in [tests/](tests/) send
 the header on every request, so with `TRACING=1` each test request makes a
 trace. To trace a request by hand:
 

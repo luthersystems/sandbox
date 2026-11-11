@@ -105,8 +105,11 @@ images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
 .PHONY: clean-chaincodes
+# .env is no longer written (v0.1.x puts the CCaaS package IDs in the
+# compose file), but the builder still reads one, so a .env left by an
+# older builder is removed too.
 clean-chaincodes:
-	rm -rf chaincodes/*.{tar.gz,id}
+	rm -rf chaincodes/*.{tar.gz,id} .env
 
 .PHONY: clean
 clean: clean-chaincodes

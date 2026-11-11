@@ -31,12 +31,18 @@ SPAN_FILE="${SPAN_FILE:-build/otlp/traces.jsonl}"
 TEMPO_URL="${TEMPO_URL:-http://localhost:3200}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-60}"
 
+# batches prints each complete OTLP batch of the span file. otelcol may be
+# writing its last line, so a line that is not yet JSON is skipped.
+batches() {
+    [ -s "$SPAN_FILE" ] || return 0
+    jq -c -R 'fromjson? // empty' "$SPAN_FILE"
+}
+
 # services_in_file prints the service.name of every resource in the file.
 services_in_file() {
-    [ -s "$SPAN_FILE" ] || return 0
-    jq -r '.resourceSpans[]?.resource.attributes[]?
-           | select(.key == "service.name") | .value.stringValue' \
-        "$SPAN_FILE" | sort -u
+    batches | jq -r '.resourceSpans[]?.resource.attributes[]?
+                     | select(.key == "service.name") | .value.stringValue' |
+        sort -u
 }
 
 missing_in_file() {
@@ -79,7 +85,7 @@ while :; do
 done
 
 echo "check-traces: spans in $SPAN_FILE and Tempo from: $EXPECT_SERVICES"
-jq -r '.resourceSpans[]? as $r
+batches | jq -r '.resourceSpans[]? as $r
        | ($r.resource.attributes[]? | select(.key == "service.name") | .value.stringValue) as $s
-       | $r.scopeSpans[]?.spans[]? | $s' "$SPAN_FILE" | sort | uniq -c |
+       | $r.scopeSpans[]?.spans[]? | $s' | sort | uniq -c |
     awk '{printf "  %-12s %s spans\n", $2, $1}'
