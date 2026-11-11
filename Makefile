@@ -110,13 +110,65 @@ service-up: api portal
 service-down:
 	-./network_compose.py local down
 
+# Tracing is opt in. With TRACING=1, up and mem-up also start the tracing
+# stack (compose/tracing.yaml: otelcol, Tempo, Grafana) and point the oracle,
+# gateway and chaincode at it. Without it, no service gets an OTLP endpoint,
+# so none of them makes or queues spans for a collector that is not there
+# (a CI run without a collector must not hold spans in memory).
+#
+# The stack starts after the network that it joins (byfn): the services
+# start first and their exporters retry until otelcol is up, a few seconds
+# later. down and mem-down always stop it, with or without TRACING, so a
+# stack left running never keeps byfn from being removed.
+#
+# An endpoint you export yourself (for example SANDBOX_ORACLE_OTLP_ENDPOINT
+# to a collector of your own) wins over TRACING's default.
+TRACING ?=
+TRACING_OTLP_ENDPOINT ?= http://otelcol:4317
+ifneq (${TRACING},)
+SANDBOX_ORACLE_OTLP_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
+SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
+CHAINCODE_OTLP_TRACER_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
+SUBSTRATE_OTLP_ENDPOINT ?= ${TRACING_OTLP_ENDPOINT}
+export SANDBOX_ORACLE_OTLP_ENDPOINT SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT \
+	CHAINCODE_OTLP_TRACER_ENDPOINT SUBSTRATE_OTLP_ENDPOINT
+endif
+
+# The stack has its own compose project, so the network's own compose down
+# (project fnb) neither removes it nor reports it as orphans.
+TRACING_COMPOSE=DOCKER_UID=$$(id -u) DOCKER_GID=$$(id -g) \
+	docker compose -p sandbox-tracing -f compose/tracing.yaml
+TRACING_SPAN_FILE=build/otlp/traces.jsonl
+
+.PHONY: tracing-up
+# Each start of the stack begins a new span file, as Tempo begins empty, so
+# the file holds only the spans of this network.
+tracing-up:
+	mkdir -p $(dir ${TRACING_SPAN_FILE})
+	rm -f $(dir ${TRACING_SPAN_FILE})traces*.jsonl
+	${TRACING_COMPOSE} up -d
+	@echo "Tracing: Grafana http://localhost:3000, spans in ${TRACING_SPAN_FILE}"
+
+.PHONY: tracing-down
+tracing-down:
+	-${TRACING_COMPOSE} down --volumes
+
 .PHONY: up
-up: all service-down storage-down storage-up service-up
+up: all service-down tracing-down storage-down storage-up $(if ${TRACING},tracing-up) service-up
 	@
 
 .PHONY: down
-down: service-down storage-down
+down: service-down tracing-down storage-down
 	@
+
+# up-tracing and mem-up-tracing are short for up and mem-up with TRACING=1.
+.PHONY: up-tracing
+up-tracing:
+	$(MAKE) up TRACING=1
+
+.PHONY: mem-up-tracing
+mem-up-tracing:
+	$(MAKE) mem-up TRACING=1
 
 .PHONY: init
 init:
@@ -129,9 +181,10 @@ upgrade: all service-down init service-up
 .PHONY: mem-up
 mem-up: all mem-down
 	SUBSTRATE_VERSION=${SUBSTRATE_VERSION} ./network_compose.py mem up -d
+	$(if ${TRACING},$(MAKE) tracing-up)
 
 .PHONY: mem-down
-mem-down:
+mem-down: tracing-down
 	-./network_compose.py mem down
 
 # citest runs all tests within containers, as in CI.
@@ -199,18 +252,11 @@ ${STATIC_PLUGINS_DUMMY}:
 ${SUBSTRATE_PLUGIN}: ${STATIC_PLUGINS_DUMMY}
 	@
 
+# observability-up and observability-down are the old names of tracing-up
+# and tracing-down.
 .PHONY: observability-up observability-down
-
-.PHONY: observability-network observability-up observability-down
-
-observability-network:
-	docker network inspect byfn >/dev/null 2>&1 || docker network create byfn
-
-observability-up: observability-network
-	docker compose -f compose/tempo.yaml -f compose/grafana.yaml up -d --build
-
-observability-down:
-	docker compose -f compose/tempo.yaml -f compose/grafana.yaml down --volumes --remove-orphans
+observability-up: tracing-up
+observability-down: tracing-down
 
 .PHONY: init-docs
 init-docs:

@@ -1,0 +1,72 @@
+# The local tracing stack: an OpenTelemetry collector (otelcol) in front of
+# Tempo (trace storage) and Grafana (the UI).
+#
+# Why a collector, not Tempo alone: the collector is the one OTLP address
+# that the oracle, gateway and chaincode send to, and it writes every span to
+# build/otlp/traces.jsonl as well as to Tempo. A script or a coding agent can
+# read that file directly, without a Grafana query. It also lets you add or
+# swap a backend in compose/tracing/otelcol.yaml without touching the
+# services.
+#
+# Start it with `make up TRACING=1` (or `make mem-up TRACING=1`), not by
+# hand: TRACING=1 also points the services at otelcol. `make down` always
+# stops it, so the byfn network can be removed. The stack joins byfn, which
+# `make up` (Fabric) or `make mem-up` (the oracle) creates first.
+#
+# Every port binds to 127.0.0.1 only: Grafana runs with an anonymous admin.
+# Every image is multi-arch, so nothing runs emulated on Apple Silicon. The
+# tags are pinned so that a run today and a run next month use the same
+# configuration format.
+services:
+  otelcol:
+    # contrib, not the core distribution: only contrib has the file exporter.
+    image: otel/opentelemetry-collector-contrib:0.165.0
+    container_name: otelcol
+    # Run as your user, so you own build/otlp/traces.jsonl.
+    user: "${DOCKER_UID}:${DOCKER_GID}"
+    command: ["--config", "/etc/otelcol/config.yaml"]
+    volumes:
+      - ./tracing/otelcol.yaml:/etc/otelcol/config.yaml:ro
+      - ../build/otlp:/export
+    ports:
+      # OTLP from tests or tools that run on this machine, outside Docker.
+      - "127.0.0.1:4317:4317" # gRPC
+      - "127.0.0.1:4318:4318" # HTTP
+    depends_on:
+      - tempo
+    networks:
+      - byfn
+  tempo:
+    image: grafana/tempo:2.10.10
+    container_name: tempo
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./tracing/tempo.yaml:/etc/tempo/tempo.yaml:ro
+    ports:
+      - "127.0.0.1:3200:3200" # Tempo's HTTP query API
+    networks:
+      - byfn
+  grafana:
+    image: grafana/grafana:13.3.1
+    container_name: grafana
+    # Browse without logging in (as an anonymous admin), or log in at
+    # http://localhost:3000/login as admin/admin. Grafana keeps its database
+    # inside the container, so `make down` resets it.
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./tracing/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - tempo
+    networks:
+      - byfn
+
+networks:
+  byfn:
+    name: byfn
+    external: true

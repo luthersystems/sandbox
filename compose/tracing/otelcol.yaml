@@ -1,0 +1,38 @@
+# OpenTelemetry collector for the local tracing stack (compose/tracing.yaml).
+#
+# The oracle, the gateway and the chaincode send traces here over OTLP. The
+# collector sends each span to Tempo, for Grafana, and to
+# build/otlp/traces.jsonl, one OTLP JSON batch per line, for scripts and
+# coding agents that read raw spans. Substrate and the oracle export only
+# traces over OTLP, so this collector has no metrics or logs pipeline.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  file/traces:
+    path: /export/traces.jsonl
+    # Flush often, so a test can read its spans a moment after it runs.
+    flush_interval: 200ms
+    # Cap the disk a long-running network can use.
+    rotation:
+      max_megabytes: 512
+      max_backups: 2
+  otlp_grpc/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file/traces, otlp_grpc/tempo]
