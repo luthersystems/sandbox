@@ -421,6 +421,11 @@ gateway spans.
    `CHAINCODE_OTLP_TRACER_ENDPOINT` and, in mem mode,
    `SUBSTRATE_OTLP_ENDPOINT`). An endpoint you export yourself wins.
 
+In full mode, each `CHAINCODE_*`, `SUBSTRATE_*` and `OTEL_*` variable you
+export also reaches the chaincode containers, through the network builder.
+For example, `OTEL_BSP_SCHEDULE_DELAY=300 make up TRACING=1` makes the
+chaincode send its span batches every 300 ms.
+
 Without `TRACING`, no service has an endpoint, so no service makes spans or
 holds them in memory for a collector that is not there. That is why CI runs
 without it.

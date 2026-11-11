@@ -33,7 +33,7 @@ SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
 CONNECTORHUB_VERSION=v0.0.29
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 # https://github.com/luthersystems/fabric-network-builder
-NETWORK_BUILDER_VERSION=v0.1.1
+NETWORK_BUILDER_VERSION=v0.1.2
 # https://hub.docker.com/r/luthersystems/martin (the e2e test runner)
 MARTIN_VERSION=v1.3.0
 

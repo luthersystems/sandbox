@@ -206,6 +206,15 @@ channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
 couchdb-up: DBMODE = couchdb
 couchdb-up: fnb-up gateway-up
 
+# CHAINCODE_ENV passes to the builder each CHAINCODE_*, SUBSTRATE_* and
+# OTEL_* variable of make's environment: yours, and what the top Makefile
+# exports (TRACING=1 exports CHAINCODE_OTLP_TRACER_ENDPOINT). The builder
+# (v0.1.2 on) forwards them to the chaincode containers, so for example
+# OTEL_BSP_SCHEDULE_DELAY reaches the chaincode's span batches. Variables
+# that only these Makefiles set (SUBSTRATE_VERSION and the like) stay out.
+# They go by name, so values never show on the command line.
+CHAINCODE_ENV=$(foreach v,$(sort $(filter CHAINCODE_% SUBSTRATE_% OTEL_%,${.VARIABLES})),$(if $(filter environment%,$(origin $v)),-e $v))
+
 .PHONY: up
 up: generate-chaincodes fnb-up gateway-up connectorhub-up
 
@@ -216,8 +225,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 		-v "${CURDIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
-		-e CHAINCODE_LOG_LEVEL \
-		-e CHAINCODE_OTLP_TRACER_ENDPOINT \
+		${CHAINCODE_ENV} \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up \
 			--log-spec debug \
 			--cc-version "${CC_VERSION}"
