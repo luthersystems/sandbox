@@ -217,6 +217,34 @@ make down
 
 Running `docker ps` again will show all the containers have been removed.
 
+The ports the network publishes (8080 for the API, 9600 for the oracle's
+metrics) bind to `127.0.0.1` only. The local network has no real
+authentication, so other machines on your network cannot reach it.
+
+#### Luther licence
+
+Without a licence the gateway runs in demo mode, which stops the network
+after 1,500 blocks or 7 days. That is enough for `make up` and the tests. For
+a network you keep for longer, copy your licence to `.luther-license.yaml` in
+the repository root (git ignores it), or set `LICENSE_FILE` to its absolute
+path. `make up` uses the file when it is there and demo mode when it is not,
+and prints which one it uses.
+
+#### Using a registry mirror for the Fabric images
+
+The Fabric images come from Docker Hub's `hyperledger` namespace. To pull
+them through a mirror, such as an ECR pull-through cache of Docker Hub, set
+`FABRIC_IMAGE_NS`:
+
+```bash
+make up FABRIC_IMAGE_NS=123456789012.dkr.ecr.us-east-1.amazonaws.com/docker-hub/hyperledger
+```
+
+The Makefiles pass it, and the Fabric tags in `common.config.mk`, to
+fabric-network-builder (`FNB_IMAGENS`, `FNB_IMAGETAG`, `FNB_CAIMAGETAG`,
+`FNB_BASEIMAGETAG`), so the images `make` pulls are the images the network
+runs.
+
 ### Directory Structure
 
 Overview of the directory structure:
@@ -371,31 +399,85 @@ more advanced features.
 
 ### Application tracing (OpenTelemetry)
 
-There is support for tracing of the application and the Luther platform using
-the OpenTelemetry protocol. Each can optionally be configured by setting an
-environment variable to point at an OTLP endpoint (e.g. a Grafana agent). When
-configured, trace spans will be created at key layers of the stack and delivered
-to the configured endpoint.
-
-You can test tracing locally by setting the following env variables:
+The oracle, the gateway and the chaincode can send trace spans over OTLP.
+Tracing is off by default. Turn it on with `TRACING=1`:
 
 ```bash
-export SANDBOX_ORACLE_OTLP_ENDPOINT=http://tempo:4317
-export SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT=http://tempo:4317
-export CHAINCODE_OTLP_TRACER_ENDPOINT=http://tempo:4317
+make up TRACING=1      # or: make up-tracing
+make integration
+make down              # also stops the tracing stack
 ```
 
-And bringing up observability:
+`make mem-up TRACING=1` (or `make mem-up-tracing`) does the same for the
+in-memory mode, where the traces have oracle and substrate spans but no
+gateway spans.
 
+`TRACING=1` does two things:
+
+1. It starts the tracing stack in [compose/tracing.yaml](compose/tracing.yaml):
+   an OpenTelemetry collector (otelcol), Tempo and Grafana.
+2. It sets the OTLP endpoint of each service to the collector
+   (`SANDBOX_ORACLE_OTLP_ENDPOINT`, `SHIROCLIENT_GATEWAY_OTLP_TRACER_ENDPOINT`,
+   `CHAINCODE_OTLP_TRACER_ENDPOINT` and, in mem mode,
+   `SUBSTRATE_OTLP_ENDPOINT`). An endpoint you export yourself wins.
+
+In full mode, each `CHAINCODE_*`, `SUBSTRATE_*` and `OTEL_*` variable you
+export also reaches the chaincode containers, through the network builder.
+For example, `OTEL_BSP_SCHEDULE_DELAY=300 make up TRACING=1` makes the
+chaincode send its span batches every 300 ms.
+
+Without `TRACING`, no service has an endpoint, so no service makes spans or
+holds them in memory for a collector that is not there. That is why CI runs
+without it.
+
+#### Which requests are traced
+
+The oracle traces a request only when it has the header
+`x-profile-request: 1` ([portal/oracle/sampler.go](portal/oracle/sampler.go)).
+The gateway and the chaincode follow the oracle's decision, so a traced
+request is traced end to end, and other traffic, such as the health checks
+that run every few seconds, is not. Set `SANDBOX_ORACLE_TRACE_ALL=true` to
+trace every request instead. The Martin tests in [tests/](tests/) send
+the header on every request, so with `TRACING=1` each test request makes a
+trace. To trace a request by hand:
+
+```bash
+curl -H 'x-profile-request: 1' http://localhost:8080/v1/sandbox/health_check
 ```
-make observability-up
-```
 
-Login to the local [grafana](http://localhost:3000/) with username: admin,
-password: admin.
+#### Reading traces
 
-Click "Explore" and select "Tempo" as the data source. Query `{}` to list
-all traces.
+- **Grafana:** open <http://localhost:3000> (anonymous admin, or log in as
+  admin/admin). Go to **Explore**, choose **Tempo** and search, for example
+  with TraceQL `{resource.service.name="oracle"}`.
+- **The span file:** the collector also writes every span to
+  `build/otlp/traces.jsonl`, one OTLP JSON batch per line. A script or a
+  coding agent can read it directly, without Grafana:
+
+  ```bash
+  jq -r '.resourceSpans[] | .resource.attributes[]
+         | select(.key == "service.name") | .value.stringValue' \
+    build/otlp/traces.jsonl | sort | uniq -c
+  ```
+
+- **Tempo's API:** <http://localhost:3200>, for example
+  `curl 'http://localhost:3200/api/search?q=%7B%7D'`.
+
+[scripts/check-traces.sh](scripts/check-traces.sh) checks that each layer
+sent spans; the CI job `tracing` runs it after the tests.
+
+`make tracing-up` and `make tracing-down` start and stop only the stack, next
+to a running network. Start the stack before you need traces: the services
+connect to the collector when they send their first spans, and retry until
+it is there.
+
+| Service | Address on this machine | Used for |
+|---|---|---|
+| Grafana | <http://localhost:3000> | Browsing traces |
+| otelcol | `localhost:4317` (gRPC), `localhost:4318` (HTTP) | OTLP from tools that run outside Docker |
+| Tempo | <http://localhost:3200> | Trace query API |
+
+All three bind to `127.0.0.1` only.
 
 #### ELPS trace spans
 

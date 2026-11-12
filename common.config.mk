@@ -14,25 +14,28 @@ SERVICE_DIR=portal
 # The makefiles use docker images to build artifacts in this project.  These
 # variables configure the images used for builds.
 # https://github.com/luthersystems/buildenv
-BUILDENV_TAG=v0.1.48
+BUILDENV_TAG=v0.1.59
 # The build-harden kit of the same buildenv release, pinned by digest.
 # CI checks the built oracle image with this kit's policy, through the shared
 # action luthersystems/.github/actions/harden-check. Bump it with BUILDENV_TAG.
-HARDEN_KIT=luthersystems/build-harden:v0.1.48@sha256:f7bad87a42183bb34124af5eeea4779069dcd3354ecd40ddf8c1d3fb9f788b33
+HARDEN_KIT=luthersystems/build-harden:v0.1.59@sha256:3721ba34c0e66a4a36c01dd83d0fde0d48c26cec2155fa0cb4d11b944e799ed9
 
 # These variables control the version numbers for parts of the Luther platform
 # and should be kept up-to-date to leverage the latest platform features.
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
-SUBSTRATE_VERSION=v2.253.0
+# Substrate stays on the latest v2 release: v3 changes the phylum API, so
+# moving to it is a planned upgrade, not a version bump.
+SUBSTRATE_VERSION=v2.257.0
 CC_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${CC_VERSION}
 VERSION_SUBSTRATE=${CC_VERSION} # is this needed
 SHIROCLIENT_VERSION=${SUBSTRATE_VERSION}
-CONNECTORHUB_VERSION=v0.0.28
+CONNECTORHUB_VERSION=v0.0.29
 SHIROTESTER_VERSION=${SUBSTRATE_VERSION}
 # https://github.com/luthersystems/fabric-network-builder
-NETWORK_BUILDER_VERSION=v0.1.0
-MARTIN_VERSION=v1.2.0
+NETWORK_BUILDER_VERSION=v0.1.2
+# https://hub.docker.com/r/luthersystems/martin (the e2e test runner)
+MARTIN_VERSION=v1.3.0
 
 # A golang module proxy server can greatly help speed up docker builds but the
 # official proxy at https://proxy.golang.org only works for public modules.
@@ -50,7 +53,10 @@ GONOPROXY ?= ${GOPRIVATE}
 GONOSUMDB ?= ${GOPRIVATE}
 
 # These variables configure the Hyperledger Fabric image versions for running
-# the full test network.
-FABRIC_IMAGE_TAG=2.5.13
-FABRIC_CA_IMAGE_TAG=1.5.12
+# the full test network. They match the defaults of NETWORK_BUILDER_VERSION
+# (its internal/cli/images.go). The Makefiles pass them to the builder as
+# FNB_IMAGETAG, FNB_CAIMAGETAG and FNB_BASEIMAGETAG, so the images that make
+# pulls are the ones the network runs, even when the two drift apart.
+FABRIC_IMAGE_TAG=2.5.16
+FABRIC_CA_IMAGE_TAG=1.5.21
 BASE_IMAGE_TAG=0.4.22

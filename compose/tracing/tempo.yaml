@@ -1,0 +1,46 @@
+# Tempo for the local tracing stack (compose/tracing.yaml): one binary,
+# local disk inside the container. otelcol sends spans here over OTLP gRPC;
+# Grafana and scripts query it on port 3200.
+#
+# The limits are raised far above Tempo's defaults (5 MB per trace, 15 MB/s
+# of ingestion). One large phylum call can make tens of thousands of spans,
+# and the defaults drop the rest of such a trace without an error.
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+  grpc_server_max_recv_msg_size: 536870912
+  grpc_server_max_send_msg_size: 536870912
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+          max_recv_msg_size_mib: 512
+
+ingester:
+  max_block_bytes: 1073741824
+
+querier:
+  frontend_worker:
+    grpc_client_config:
+      max_recv_msg_size: 536870912
+      max_send_msg_size: 536870912
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+overrides:
+  defaults:
+    ingestion:
+      rate_limit_bytes: 1073741824
+      burst_size_bytes: 1073741824
+      max_traces_per_user: 0
+    global:
+      max_bytes_per_trace: 1073741824

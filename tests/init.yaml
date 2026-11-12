@@ -1,6 +1,12 @@
 # collection to execute before each test run
 name: "initialization"
 headers:
+  # Ask the oracle to trace each request (portal/oracle/sampler.go). It has
+  # an effect only with tracing on (make up TRACING=1); otherwise the oracle
+  # has no OTLP endpoint and records nothing. Martin collections cannot add
+  # a header in a script, so each collection lists it.
+  - key: x-profile-request
+    value: "1"
   - key: Content-Type
     value: application/json
 tests:

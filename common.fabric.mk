@@ -30,7 +30,16 @@ NETWORK_BUILDER_FQN=${NETWORK_BUILDER_IMAGE}:${NETWORK_BUILDER_VERSION}
 # runs.
 NETWORK_BUILDER_USER=-u "${DOCKER_CHOWN_USER}" \
 	--group-add "$$(${DOCKER_RUN} ${DOCKER_IN_DOCKER_MOUNT} --entrypoint stat ${NETWORK_BUILDER_FQN} -c %g /var/run/docker.sock)"
-NETWORK_BUILDER=${NETWORK_BUILDER_USER} ${NETWORK_BUILDER_FQN}
+# NETWORK_BUILDER_ENV gives the builder (v0.1.1 on) the Fabric image
+# namespace and tags from this project's config, so make pulls and the
+# network runs the same images. Set FABRIC_IMAGE_NS to pull through a mirror,
+# for example an ECR pull-through cache of Docker Hub:
+#   make up FABRIC_IMAGE_NS=123456789012.dkr.ecr.us-east-1.amazonaws.com/docker-hub/hyperledger
+NETWORK_BUILDER_ENV=-e FNB_IMAGENS="${FABRIC_IMAGE_NS}" \
+	-e FNB_IMAGETAG="${FABRIC_IMAGE_TAG}" \
+	-e FNB_CAIMAGETAG="${FABRIC_CA_IMAGE_TAG}" \
+	-e FNB_BASEIMAGETAG="${BASE_IMAGE_TAG}"
+NETWORK_BUILDER=${NETWORK_BUILDER_USER} ${NETWORK_BUILDER_ENV} ${NETWORK_BUILDER_FQN}
 
 SHIROCLIENT_IMAGE ?= luthersystems/shiroclient
 CONNECTORHUB_IMAGE ?= luthersystems/connectorhub
@@ -58,7 +67,7 @@ FABRIC_ORG ?= org1
 FABRIC_DOMAIN ?= luther.systems
 
 FABRIC_IMAGE_NAMES=peer orderer ccenv
-FABRIC_IMAGE_NS=hyperledger
+FABRIC_IMAGE_NS ?= hyperledger
 FABRIC_IMAGE_FQNS=$(patsubst %,${FABRIC_IMAGE_NS}/fabric-%,${FABRIC_IMAGE_NAMES})
 FABRIC_CA_IMAGE_FQN=${FABRIC_IMAGE_NS}/fabric-ca
 DBMODE ?= goleveldb
@@ -72,8 +81,25 @@ FABRIC_DOCKER_NETWORK=byfn
 # The gateway and connectorhub images run as nobody. They read the private
 # keys in crypto-config/, which the builder writes as your user with mode
 # 0600, so they run as your user too.
-FABRIC_CLIENT_USER=-u "${DOCKER_CHOWN_USER}"
-DOCKER_FABRIC_OPTS ?= -e SHIROCLIENT_CLIENT_DEMO_MODE=true
+#
+# Your uid is not in the image's /etc/passwd, so Go's user.Current fails in
+# these static binaries unless USER is set. With an OTLP endpoint (TRACING=1)
+# the gateway's tracer reads the process owner at start and exits on that
+# error, so USER is set for them.
+FABRIC_CLIENT_USER=-u "${DOCKER_CHOWN_USER}" -e USER=sandbox
+# The gateway and the shiroclient commands need a Luther licence or demo
+# mode. Demo mode needs no file, but stops the network after 1,500 blocks or
+# 7 days, so long-lived or heavily tested networks want a real licence. Put
+# yours at .luther-license.yaml in the repository root (git ignores it), or
+# set LICENSE_FILE to its absolute path. With the file there, it is mounted at
+# /tmp/license.yaml (not shiroclient's default /tmp/fabric/license.yaml,
+# because /tmp/fabric is a read-only mount); without it, demo mode is used,
+# so a fresh clone and CI run with no licence. license-check stops a run
+# where LICENSE_FILE was set by hand and names no file, rather than fall back
+# to demo mode without saying so.
+LICENSE_FILE ?= ${PROJECT_ABS_DIR}/.luther-license.yaml
+LICENSE_OPTS=$(if $(wildcard ${LICENSE_FILE}),-v "$(abspath ${LICENSE_FILE}):/tmp/license.yaml:ro" -e SHIROCLIENT_CLIENT_LICENSE_FILE=/tmp/license.yaml,-e SHIROCLIENT_CLIENT_DEMO_MODE=true)
+DOCKER_FABRIC_OPTS ?= ${LICENSE_OPTS}
 
 .PHONY: default
 default: images
@@ -84,6 +110,9 @@ images: ${FABRIC_IMAGE_TARGETS} ${SHIROCLIENT_TARGET} ${NETWORK_BUILDER_TARGET}
 	@
 
 .PHONY: clean-chaincodes
+# .env is no longer written (v0.1.x puts the CCaaS package IDs in the
+# compose file), but the builder still reads one, so a .env left by an
+# older builder is removed too.
 clean-chaincodes:
 	rm -rf chaincodes/*.{tar.gz,id} .env
 
@@ -177,6 +206,15 @@ channel-artifacts/genesis.block: ${NETWORK_BUILDER_TARGET}
 couchdb-up: DBMODE = couchdb
 couchdb-up: fnb-up gateway-up
 
+# CHAINCODE_ENV passes to the builder each CHAINCODE_*, SUBSTRATE_* and
+# OTEL_* variable of make's environment: yours, and what the top Makefile
+# exports (TRACING=1 exports CHAINCODE_OTLP_TRACER_ENDPOINT). The builder
+# (v0.1.2 on) forwards them to the chaincode containers, so for example
+# OTEL_BSP_SCHEDULE_DELAY reaches the chaincode's span batches. Variables
+# that only these Makefiles set (SUBSTRATE_VERSION and the like) stay out.
+# They go by name, so values never show on the command line.
+CHAINCODE_ENV=$(foreach v,$(sort $(filter CHAINCODE_% SUBSTRATE_% OTEL_%,${.VARIABLES})),$(if $(filter environment%,$(origin $v)),-e $v))
+
 .PHONY: up
 up: generate-chaincodes fnb-up gateway-up connectorhub-up
 
@@ -187,8 +225,7 @@ fnb-up: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 		-v "${CURDIR}:${CURDIR}" \
 		-w "${CURDIR}" \
 		-e FABRIC_LOGGING_SPEC \
-		-e CHAINCODE_LOG_LEVEL \
-		-e CHAINCODE_OTLP_TRACER_ENDPOINT \
+		${CHAINCODE_ENV} \
 		${NETWORK_BUILDER} --channel ${CHANNEL} --force -s "${DBMODE}" up \
 			--log-spec debug \
 			--cc-version "${CC_VERSION}"
@@ -214,6 +251,7 @@ fnb-shell: ${NETWORK_BUILDER_TARGET} ${FABRIC_IMAGE_TARGETS} crypto-config
 		-e FABRIC_DOMAIN=${FABRIC_DOMAIN} \
 		-e FABRIC_DBMODE="${DBMODE}" \
 		${NETWORK_BUILDER_USER} \
+		${NETWORK_BUILDER_ENV} \
 		--entrypoint sh \
 		${NETWORK_BUILDER_FQN}
 
@@ -229,9 +267,9 @@ start-gw-%: port=$$(( 8081 + ${idx} ))
 start-gw-%: metrics_port=$$(( 9601 + ${idx} ))
 start-gw-%: filter_args=$(if ${filter},-f ${filter})
 ifdef EXPOSE_GATEWAY
-start-gw-%: port_fw=-p "${port}:${port}"
+start-gw-%: port_fw=-p "127.0.0.1:${port}:${port}"
 endif
-start-gw-%: ${SHIROCLIENT_TARGET} build/volume/msp build/volume/enroll_user
+start-gw-%: ${SHIROCLIENT_TARGET} license-check build/volume/msp build/volume/enroll_user
 	${DOCKER_RUN} -d --name ${name} \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
@@ -258,7 +296,7 @@ start-ch-%: name=$(word 2,${parts})
 start-ch-%: ccname=$(word 3,${parts})
 start-ch-%: port=$$(( 9091 + ${idx} ))
 ifdef EXPOSE_CONNECTORHUB
-start-ch-%: port_fw=-p "${port}:8080"
+start-ch-%: port_fw=-p "127.0.0.1:${port}:8080"
 endif
 # No --rm: `docker run -d` succeeds as soon as the container starts, so a
 # connectorhub that crashes on startup would be deleted along with its logs.
@@ -282,7 +320,7 @@ start-ch-%: ${CONNECTORHUB_TARGET} build/volume/checkpoint
 notify-gw-%: parts=$(subst ., ,$*)
 notify-gw-%: name=$(word 2,${parts})
 notify-gw-%: ccname=$(word 3,${parts})
-notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
+notify-gw-%: ${SHIROCLIENT_TARGET} license-check compile-phylum-$$(ccname) build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} --rm -t \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \
@@ -387,10 +425,16 @@ ${PHYLUM_VERSION_FILE}:
 ${PHYLUM_VERSION_FILE}_exists:
 	@test -f ${PHYLUM_VERSION_FILE}
 
+.PHONY: license-check
+license-check:
+	@$(if $(filter file,$(origin LICENSE_FILE)),true,test -f "${LICENSE_FILE}") || \
+		{ echo "LICENSE_FILE=${LICENSE_FILE}: no such file. Unset LICENSE_FILE to use demo mode." >&2; exit 1; }
+	@echo "Luther licence: $(if $(wildcard ${LICENSE_FILE}),${LICENSE_FILE},none, using demo mode)"
+
 .PHONY: init
 init: ${SHIRO_INIT_PHYLA} ${NOTIFY_GATEWAYS}
 
-shiro-init-phylum-%: ${SHIROCLIENT_TARGET} compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
+shiro-init-phylum-%: ${SHIROCLIENT_TARGET} license-check compile-phylum-% build/volume/msp build/volume/enroll_user ${PHYLUM_VERSION_FILE}
 	${DOCKER_RUN} -t \
 		-v "$(abspath build/volume/msp):/tmp/msp:rw" \
 		-v "$(abspath build/volume/enroll_user):/tmp/state-store:rw" \

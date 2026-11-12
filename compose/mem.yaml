@@ -5,9 +5,13 @@ services:
     extends:
       file: common.yaml
       service: sandbox_oracle
+    # Ports bind to 127.0.0.1 only. The local network has no real
+    # authentication, so it must not be reachable from other machines on
+    # your network. Containers on byfn (Martin, for example) reach the
+    # oracle by name, not through these ports.
     ports:
-    - "8080:8080" # expose this for testing purposes
-    - "9600:9600" # expose this for testing purposes
+    - "127.0.0.1:8080:8080" # the oracle API, for tests and curl on this machine only
+    - "127.0.0.1:9600:9600" # the oracle metrics, on this machine only
     environment:
     - SANDBOX_ORACLE_EMULATE_CC=true
     - TMPDIR=/tmp
