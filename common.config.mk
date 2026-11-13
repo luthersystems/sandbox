@@ -25,7 +25,7 @@ HARDEN_KIT=luthersystems/build-harden:v0.1.59@sha256:3721ba34c0e66a4a36c01dd83d0
 # See release notes: https://docs.luthersystems.com/luther/platform/release-notes
 # Substrate stays on the latest v2 release: v3 changes the phylum API, so
 # moving to it is a planned upgrade, not a version bump.
-SUBSTRATE_VERSION=v2.258.0
+SUBSTRATE_VERSION=v2.259.0
 CC_VERSION=${SUBSTRATE_VERSION}
 CHAINCODE_VERSION=${CC_VERSION}
 VERSION_SUBSTRATE=${CC_VERSION} # is this needed

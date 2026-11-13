@@ -9,7 +9,7 @@ require (
 	github.com/alecthomas/kong v1.17.0
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0
-	github.com/luthersystems/shiroclient-sdk-go v0.19.0
+	github.com/luthersystems/shiroclient-sdk-go v0.20.0
 	github.com/luthersystems/svc v0.21.1
 	github.com/sirupsen/logrus v1.10.2
 	github.com/stretchr/testify v1.12.1
